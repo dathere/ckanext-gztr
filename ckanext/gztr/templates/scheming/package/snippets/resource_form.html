@@ -1,0 +1,84 @@
+{% extends 'package/snippets/resource_form.html' %}
+
+{% block stages %}
+  {%- set pages = h.scheming_get_dataset_form_pages(dataset_type) -%}
+  {%- if pages and stage -%}
+    <ol class="stages stage-1">
+      {%- for p in pages -%}
+        <li class="complete {{
+          'first ' if loop.first else ''}} page-{{ loop.index }}"
+          style="width:{{ 97 / (loop.length + 1) }}%">
+          <span class="page-number"></span>
+          <span class="highlight" style="padding-right:0"><a href="{{
+              h.url_for(dataset_type + '.scheming_new_page',
+                package_type=dataset_type,
+                id=pkg_name,
+                page=loop.index)
+            }}">{{ h.scheming_language_text(p.title) }}</a>
+          </span>
+        </li>
+      {%- endfor -%}
+      <li class="last active" style="width:{{ 97 / (pages | length + 1) }}%">
+        <span class="page-number"></span>
+        <span class="highlight"><span>{{ _('Add<br/>Resource') }}</span></span>
+      </li>
+    </ol>
+  {%- else -%}
+    {{ super() }}
+  {%- endif -%}
+{% endblock %}
+
+{% block errors %}
+  {%- if errors -%}
+    {%- set schema = h.scheming_get_dataset_schema(dataset_type) -%}
+    {%- snippet 'scheming/snippets/errors.html',
+      errors=errors, fields=schema.resource_fields,
+      entity_type='dataset', object_type=dataset_type -%}
+  {%- else -%}
+    {# Resource CreateView You must add at least one data resource #}
+    {{ super() }}
+  {%- endif -%}
+{% endblock %}
+
+{% block basic_fields %}
+  {%- if not dataset_type -%}
+    <p>
+    dataset_type not passed to template. your version of CKAN
+    might not be compatible with ckanext-scheming
+    </p>
+  {%- endif -%}
+
+  {%- set schema = h.scheming_get_dataset_schema(dataset_type) -%}
+  {%- for field in schema.resource_fields -%}
+    {%- if field.form_snippet is not none -%}
+      {%- if field.field_name not in data %}
+        {# Set the field default value before rendering but only if
+        it doesn't already exist in data which would mean the form
+        has been submitted. #}
+        {% if field.default_jinja2 %}
+          {% do data.__setitem__(
+            field.field_name,
+            h.scheming_render_from_string(field.default_jinja2)) %}
+        {% elif field.default %}
+          {% do data.__setitem__(field.field_name, field.default) %}
+        {% endif %}
+      {% endif -%}
+      {# We pass pkg_name as the package_id because that's the only
+      variable available in this snippet #}
+      {%- snippet 'scheming/snippets/form_field.html',
+        field=field,
+        data=data,
+        errors=errors,
+        licenses=c.licenses,
+        entity_type='dataset',
+        object_type=dataset_type,
+        package_id=pkg_name
+      -%}
+    {%- endif -%}
+  {%- endfor -%}
+
+{% endblock %}
+
+
+{% block metadata_fields %}
+{% endblock %}

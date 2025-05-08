@@ -1,0 +1,9 @@
+<ul class="tag-list well">
+    {% if 'placeKeywords' in data %}
+        {% for tag in data['placeKeywords'].split(',') %}
+            <li>
+                <a class="tag" href="/dataset?q={{ tag }}">{{ tag }}</a>
+            </li>
+        {% endfor %}
+    {% endif %}
+</ul>

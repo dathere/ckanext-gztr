@@ -1,0 +1,31 @@
+{% set label_dict = h.composite_get_label_dict(field.subfields) %}
+{% set name_list = h.composite_get_name_list(field.subfields) %}
+{% set composite_dict_list = h.composite_repeating_get_value_dict_list(field.field_name, field.subfields, data, field.form_blanks, false) %}
+{% set addressTypeIndex = 0 %}
+
+
+{% for composite_dict in composite_dict_list %}
+    {% if name_list|length > 0 %}
+        {% set addressType = name_list[addressTypeIndex] %}
+        <b>{{ label_dict[addressType] }}:</b>
+        {% set first_key_written = true %}
+        {{ composite_dict[addressType] }}
+        <br>
+        {% set address_dict = h.composite_repeating_get_formatted_contact_address_dict(composite_dict) %}
+        {% if address_dict['addressLine1'] %}
+          {{ address_dict['addressLine1'] }}
+          <br>
+        {% endif %}
+        {% if address_dict['addressLine2'] %}
+          {{ address_dict['addressLine2'] }}
+          <br>
+        {% endif %}
+        {% if address_dict['addressLine3'] %}
+          {{ address_dict['addressLine3'] }}
+          <br>
+        {% endif %}
+    {% endif %}
+    {%- if not loop.last %}
+        <br>
+    {% endif %}
+{% endfor %}

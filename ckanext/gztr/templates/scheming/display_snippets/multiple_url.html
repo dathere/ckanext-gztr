@@ -1,0 +1,23 @@
+{%- set values = data[field.field_name] -%}
+{%- if values | length > 0 -%}
+<table class="not-mobile">
+{%- for element in values -%}
+  <tr>
+  <td>{{ h.link_to(h.truncate(element, 42), element) }}</td>
+  <td style="width: 10rem"><span class="no-print copy-tooltip" data-toggle="tooltip" data-placement="right" title="{{ _('Copy Link') }}"><button class="btn btn-secondary btn-copy" data-url="{{ element }}" tabindex="-1">{{ _('<i class="fa fa-copy" aria-hidden="true"></i> COPY') }}</button></span></td>
+  </tr>
+{%- endfor -%}
+</table>
+
+
+<table class="mobile-only">
+  {%- for element in values -%}
+    <tr>
+    <td>{{ h.link_to(h.truncate(element, 22), element) }}</td>
+    <td><span class="no-print copy-tooltip" data-toggle="tooltip" data-placement="right" title="{{ _('Copy Link') }}"><button class="btn btn-secondary btn-copy" data-url="{{ element }}" tabindex="-1">{{ _('<i class="fa fa-copy" aria-hidden="true"></i> COPY') }}</button></span></td>
+    </tr>
+  {%- endfor -%}
+  </table>
+  
+
+{%- endif -%}

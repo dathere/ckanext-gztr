@@ -1,0 +1,102 @@
+{%- if data['spatial_details'] and data['spatial_details'] -%}
+    <script type="text/javascript" src="/base/gztr/api/api.js"></script>
+    <link rel="stylesheet" type="text/css" href="/base/gztr/api/api.css" />
+    <script type="text/javascript">
+    window.addEventListener("load", function() {
+        var widgetdivid = 'gazetteer-{{ field.field_name }}';
+
+        var spatialdata = {{ data['spatial_details']|safe }};
+
+        new GZTR.GazetteerWidget(widgetdivid, {
+            displayOnly: true,
+            labelBoxCorners: true,
+            geocoderControl: false,
+            basemapControl: false,
+            showBoundingBox: true,
+            minZoom: 4,
+            onLoad: function () {
+                this.loadGeoJsonObject(spatialdata);
+            }
+        });
+    });
+    </script>
+    <div id="gazetteer-{{ field.field_name }}" style="background-color: #ffffff; border: 1px solid #cccccc; box-shadow: inset 0 1px 1px rgba(0,0,0,0.075); border-radius: 3px;"></div>
+{%- elif data['boundingCoordinate'] -%}
+        <script type="text/javascript" src="/base/gztr/api/api.js"></script>
+        <link rel="stylesheet" type="text/css" href="/base/gztr/api/api.css" />
+        <script type="text/javascript">
+        window.addEventListener("load", function() {
+            var widgetdivid = 'gazetteer-{{ field.field_name }}';
+
+            var bboxdata = {{ data['boundingCoordinate']|safe }};  // these fields allow text or blanks; be strict to ensure that we have 4 floats
+            var s = parseFloat(bboxdata.southBoundingCoordinate); if (isNaN(s)) return document.getElementById(widgetdivid).style.display = 'none';
+            var w = parseFloat(bboxdata.westBoundingCoordinate);  if (isNaN(w)) return document.getElementById(widgetdivid).style.display = 'none';
+            var n = parseFloat(bboxdata.northBoundingCoordinate); if (isNaN(n)) return document.getElementById(widgetdivid).style.display = 'none'
+            var e = parseFloat(bboxdata.eastBoundingCoordinate);  if (isNaN(e)) return document.getElementById(widgetdivid).style.display = 'none';
+
+            var bboxgeojsondoc = {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": {
+                            "type":"Polygon",
+                            "coordinates":[[[w, s],[w, n],[e, n],[e, s],[w, s]]]
+                        },
+                    }
+                ]
+            };
+
+            new GZTR.GazetteerWidget(widgetdivid, {
+                displayOnly: true,
+                labelBoxCorners: true,
+                geocoderControl: false,
+                basemapControl: false,
+                showBoundingBox: true,
+                minZoom: 4,
+                onLoad: function () {
+                    this.loadGeoJsonObject(bboxgeojsondoc);
+                }
+            });
+        });
+        </script>
+        <div id="gazetteer-{{ field.field_name }}" style="background-color: #ffffff; border: 1px solid #cccccc; box-shadow: inset 0 1px 1px rgba(0,0,0,0.075); border-radius: 3px;"></div>
+{%- elif data['extras'] -%}
+    {% for customfield in data['extras'] %}
+        {% if customfield['key'] == 'spatial' and customfield['value'] %}            
+        <script type="text/javascript" src="/base/gztr/api/api.js"></script>
+        <link rel="stylesheet" type="text/css" href="/base/gztr/api/api.css" />
+        <script type="text/javascript">
+        window.addEventListener("load", function() {
+            var widgetdivid = 'gazetteer-{{ field.field_name }}';
+
+            var bboxdata = {{ customfield['value']|safe }};
+            var bboxgeojsondoc = {
+                "type": "FeatureCollection",
+                "features": [
+                    {
+                        "type": "Feature",
+                        "geometry": bboxdata
+                    }
+                ]
+            };
+
+            new GZTR.GazetteerWidget(widgetdivid, {
+                displayOnly: true,
+                labelBoxCorners: true,
+                geocoderControl: false,
+                basemapControl: false,
+                showBoundingBox: true,
+                minZoom: 4,
+                onLoad: function () {
+                    this.loadGeoJsonObject(bboxgeojsondoc);
+                }
+            });
+        });
+        </script>
+        <div id="gazetteer-{{ field.field_name }}" style="background-color: #ffffff; border: 1px solid #cccccc; box-shadow: inset 0 1px 1px rgba(0,0,0,0.075); border-radius: 3px;"></div>
+        {% endif %}
+    {% endfor %}
+{%- else -%}
+    Not specified.
+{%- endif -%}

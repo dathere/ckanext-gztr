@@ -1,0 +1,194 @@
+/*
+  CKAN GZTR Extension CSS
+  ckanext_gztr.css
+  
+  # COLORS
+  * Primary: #0D2856
+  * Secondary: #0B7D8E
+  * Text: #59555B
+  * Subtle Text: #A39CA5
+  * Accent One: #E0E0E0
+  * Pretitle Text: #787177
+  * Success: #009E89
+  * Error: #E23014
+  * Light: #F9F9FB
+  * Dark: #0C142D
+
+*/
+
+/* DRUF Progress Bar */
+
+/*
+.stages {
+  padding-left: 0;
+  margin: 0;
+  list-style: none;
+  color: #a39ca5;
+  counter-reset: stage;
+  overflow: hidden;
+  margin-bottom: 30px;
+  font-size: 1.4rem;
+}
+.stages:before,
+.stages:after {
+  display: table;
+  content: " ";
+}
+.stages:after {
+  clear: both;
+}
+.stages:before,
+.stages:after {
+  display: table;
+  content: " ";
+}
+.stages:after {
+  clear: both;
+}
+.stages li {
+  -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
+  box-sizing: border-box;
+  line-height: 27px;
+  counter-increment: stage;
+  width: 50%;
+  background-color: #fff;
+  float: left;
+  padding: 10px 20px;
+  padding: 0;
+  position: relative;
+  z-index: 0;
+  text-align: center;
+  background-image: url("../../base/images/druf-progress-1.png");
+  background-repeat: repeat-x;
+}
+.stages li:before {
+  display: none;
+}
+.stages li .page-number {
+  border-radius: 14px;
+  display: inline-block;
+  width: 27px;
+  height: 27px;
+  margin-top: 10px;
+  margin-bottom: 74px;
+  margin-right: auto;
+  margin-left: auto;
+  font-weight: bold;
+  text-align: center;
+  color: #aeaeae;
+  background: #fff;
+  border-color: #aeaeae;
+  border: 1px solid #aeaeae;
+  z-index: 1;
+}
+.stages li.active .page-number,
+.stages li.complete .page-number {
+  background-color: #0b7d8e;
+  border-color: #0b7d8e;
+  color: #fff;
+}
+
+.stages li .page-number:before {
+  content: counter(stage);
+}
+.stages li.complete .page-number:before {
+  content: "✓";
+}
+
+.stages li:after {
+  display: none;
+}
+.stages li.last {
+  position: relative;
+  right: 0;
+  background-image: url("../../base/images/druf-progress-5.png");
+  background-repeat: no-repeat;
+  background-size: 100% 25px;
+}
+.stages li.last,
+.stages li.last .highlight {
+  border-radius: 0 3px 0 0;
+}
+.stages li.first.active {
+  background-image: url("../../base/images/druf-progress-4.png");
+  background-repeat: no-repeat;
+  background-size: 100% 25px;
+}
+.stages li.first.complete {
+  background-image: url("../../base/images/druf-progress-7.png");
+  background-repeat: no-repeat;
+  background-size: 100% 25px;
+}
+.stages li.last.active {
+  background-image: url("../../base/images/druf-progress-6.png");
+  background-repeat: no-repeat;
+  background-size: 100% 25px;
+}
+
+.stages.stage-3 li.complete:first-child:after {
+  content: none;
+}
+.stages li.active {
+  background: transparent;
+  background-image: url("../../base/images/druf-progress-2.png");
+  background-repeat: no-repeat;
+  background-size: 100% 25px;
+}
+
+.stages li.complete {
+  background: transparent;
+  background-image: url("../../base/images/druf-progress-3.png");
+  background-repeat: no-repeat;
+  background-size: 100% 25px;
+}
+.stages li .highlight {
+  display: block;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  padding: 0;
+  border: none;
+  text-align: center;
+  text-decoration: none;
+  line-height: 18px;
+  z-index: 2;
+}
+
+.stages li .highlight a,
+.stages li .highlight span {
+  display: block;
+  padding: 45px 0 0 0;
+}
+
+.stages li.active .highlight span {
+  cursor: default;
+}
+
+.stages li .highlight span {
+  cursor: not-allowed;
+}
+
+@media (max-width: 991px) {
+  .stages li .highlight {
+    text-indent: -9999px;
+  }
+}
+.stages li.active .highlight {
+  color: #59555B;
+  background: transparent;
+}
+.stages li.complete .highlight {
+  color: #eef6ed;
+  background: transparent;
+}
+
+.stages .page-4 .highlight a,
+.stages .page-4 .highlight span {
+  margin-top: -2px;
+  line-height: 1.43rem;
+}
+*/

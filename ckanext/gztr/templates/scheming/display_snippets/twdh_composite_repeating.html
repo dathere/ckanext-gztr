@@ -1,0 +1,18 @@
+{% set label_dict = h.composite_get_label_dict(field.subfields) %}
+{% set name_list = h.composite_get_name_list(field.subfields) %}
+{% set composite_dict_list = h.composite_repeating_get_value_dict_list(field.field_name, field.subfields, data, field.form_blanks, false) %}
+
+{% for composite_dict in composite_dict_list %}
+    {% for key in name_list %}
+        {% if name_list|length > 0 %}
+            {% set addressType = name_list[addressTypeIndex] %}
+            <b>{{ label_dict[key] }}:</b>
+            {% set first_key_written = true %}
+            {{ composite_dict[key] }}
+            <br>
+        {% endif %}
+    {% endfor %}
+    {%- if not loop.last %}
+        <br>
+    {% endif %}
+{% endfor %}

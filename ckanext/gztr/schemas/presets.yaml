@@ -1,0 +1,41 @@
+scheming_presets_version: 1
+
+about: Scheming presets for GZTR
+about_url: https://github.com/dathere/ckanext-gztr
+presets:
+
+- preset_name: multiple_url
+  values:
+    form_snippet: multiple_text.html
+    display_snippet: multiple_url.html
+    validators: scheming_multiple_text
+    output_validators: scheming_load_json
+
+- preset_name: select_if_sysadmin_else_false
+  values:
+    form_snippet: select_if_sysadmin_else_false.html
+    display_snippet: select_if_sysadmin_else_false.html
+    validators: boolean_validator
+    output_validators: boolean_validator
+
+- preset_name: tag_string_autocomplete_hidden
+  values:
+    validators: ignore_missing tag_string_convert
+    classes: 
+      - control-full
+      - hidden
+    form_attrs:
+      data-module: autocomplete
+      data-module-tags: 
+      data-module-source: /api/2/util/tag/autocomplete?incomplete=?
+      class:
+
+- preset_name: gazetteer_widget
+  values:
+    form_snippet: gazetteer_widget.html
+    display_snippet: gazetteer_widget.html
+
+- preset_name: place_keywords
+  values:
+    form_snippet: place_keywords.html
+    display_snippet: place_keywords.html

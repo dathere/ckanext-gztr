@@ -1,0 +1,21 @@
+{%- set form_snippet = field.form_snippet -%}
+{%- set display_snippet = field.display_snippet -%}
+
+{%- if not display_snippet -%}
+  {%- if h.scheming_field_choices(field) -%}
+    {%- set display_snippet = 'select.html' -%}
+  {%- else -%}
+    {%- if form_snippet and form_snippet=='markdown.html'-%}
+      {%- set display_snippet = 'markdown.html' -%}
+    {%- else -%}
+      {%- set display_snippet = 'text.html' -%}
+    {%- endif -%}
+  {%- endif -%}
+{%- endif -%}
+
+{%- if '/' not in display_snippet -%}
+  {%- set display_snippet = 'scheming/display_snippets/' + display_snippet -%}
+{%- endif -%}
+
+{%- snippet display_snippet, field=field, data=data, errors=errors,
+  entity_type=entity_type, object_type=object_type -%}

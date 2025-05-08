@@ -1,0 +1,107 @@
+{% import 'macros/form.html' as form %}
+
+{% set gw = data[field.field_name] if data[field.field_name] else None %}
+
+<div class="control-group" data-module="gazetteer">
+  <label class="control-label" for="field-spatial">{{ _(field.label) }}</label>
+  <div class="controls draw">
+    <button type="button" class="btn btn-primary" id="filter-click">{{ _('Add Location Data') }}</button>
+    <div class="form-check form-switch">
+      <input class="form-check-input" type="checkbox" id="statewide-switch">
+      <label class="form-check-label" for="statewide-switch">Statewide Extent?</label>
+    </div>
+    <div class="my-4" id="example-map"></div>
+  </div>
+  <div class="row">
+    {% for field_group in field.get('subfields') or [] %}
+    <div class="col-md-6">
+      <div class="control-group">
+        <div class="controls">
+          {% call form.input(
+          field_group.field_name,
+          id='field-' + field_group.field_name,
+          placeholder=h.scheming_language_text(field_group.form_placeholder),
+          value=gw[field_group.field_name] or data[field_group.field_name],
+          error=errors[field_group.field_name],
+          attrs=dict({"class": "form-control"}, **(field_group.get('form_attrs', {}))),
+          is_required=h.scheming_field_required(field_group)
+          )
+          %}
+          {%- snippet 'scheming/form_snippets/help_text.html', field=field -%}
+          {% endcall %}
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+  </div>
+
+  <div class="modal fade" id="modal-toolbar" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog mw-100">
+      <div class="modal-content container" id="search-modal-content">
+        <div class="modal-header">
+          <h2>Add Location Information</h2>
+          <button id='filter-modal-close' type="button" class="btn-close" data-bs-dismiss="modal"
+            aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div class="container-fluid px-0">
+            <div class="flex flex-wrap row gy-2 mx-0 mb-2">
+              <div class="px-0">
+                <span>Use the tools below to specify the coverage area for this dataset on the map.</span>
+              </div>
+              <div class="px-0">
+                <button class="btn btn-primary" id="filter-button">Draw Shape</button>
+                <button class="btn btn-primary" id="drag-filter-button">Edit Shape</button>
+                <button class="btn btn-danger" id="clear-filter-button">Clear All Shapes</button>
+                <div class="search-address-wrapper" style="position: relative; display: inline-block;">
+                  <input class="rounded-2" id="search-address-box" type="text" placeholder="Search for an address."
+                    style="padding-right: 40px;">
+                  <button id="search-address-clear-button" type="button" class="d-none"
+                    style="position: absolute; top: 0; right: 0; border: none; background-color: transparent; cursor: pointer;">X</button>
+                </div>
+                <button class="btn btn-primary" type="button" id="search-address-button" disabled>Search
+                  address</button>
+                <div id="search-dropdown" class="dropdown d-inline-flex d-none" style="width: fit-content">
+                  <button class="btn btn-secondary dropdown-toggle" type="button" id="dropdownMenu2"
+                    data-bs-toggle="dropdown" aria-expanded="false">
+                    View results
+                  </button>
+                  <ul id="search-dropdown-list" class="dropdown-menu" style="z-index: 1001;"
+                    aria-labelledby="dropdownMenu2"></ul>
+                </div>
+                <span id="no-results-text" class="d-none text-danger">No results found.</span>
+              </div>
+            </div>
+            <div class="container-fluid px-0">
+              <div class="row">
+                <div class="col-3">
+                  <div class="mw-100" id="named-place-selector"></div>
+                  <div class="my-2" id="sub-choice"></div>
+                  <p>Selected features:</p>
+                  <div id="button-holder"
+                    class="d-flex flex-wrap gap-2 row-gap-2 overflow-scroll border border-3 rounded-2 p-2"
+                    style="max-height: 30rem;"></div>
+                </div>
+                <div class="col-9">
+                  <div class="rounded-3" id="search-map"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <span id="edit-info-button" class="d-none text-danger">Click the "Stop Editing Shape" button to
+            continue.</span>
+          <button class="btn btn-danger" id='search-cancel-button'>Cancel</button>
+          <button class="btn btn-success" id='search-apply-button'>Apply</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% asset 'ckanext-gztr/gazetteer_widget-css' %}
+{% asset 'ckanext-gztr/gazetteer_widget-js' %}
+{% asset 'ckanext-gztr/place_keywords-js' %}

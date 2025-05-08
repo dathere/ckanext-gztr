@@ -1,0 +1,128 @@
+<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery/latest/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/momentjs/latest/moment.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.min.js"></script>
+<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/daterangepicker/daterangepicker.css" />
+
+{% if data.get('id') == None %}
+  {# Creating a new dataset #}
+  {% set new = True %}
+  {% if request.form.getlist('{}_cb'.format(field.field_name)) %}
+    {% set no_date_is_checked = True %}
+  {% else %}
+    {% set no_date_is_checked = False %}
+  {% endif %}
+{% else %}
+  {# Editing an existing dataset #}
+  {% set new = False %}
+
+  {% if request.form.getlist('{}_cb'.format(field.field_name)) %}
+    {% set no_date_is_checked = True %}
+  {% elif data.get(field.field_name) == None %}
+    {% set no_date_is_checked = True %}
+  {% else %}
+    {% set no_date_is_checked = False %}
+  {% endif %}
+{% endif %}
+
+<div class="form-group control-medium">
+  <label class="control-label" for="field-date_range">Date Range</label>
+  <div class="controls date_range">
+    <div class="activate_field_date_range" {% if no_date_is_checked %} style="display: none;" {% endif %}>
+      <i class="fa fa-large fa-calendar " aria-hidden="true"></i>
+      <span>
+        {% if data.get(field.field_name) == None or data.get(field.field_name) == '' %}
+          No date range set
+        {% else %}
+          {{data.get(field.field_name)}}
+        {% endif %}
+      </span>
+    </div>
+    <div class="deactivate_field_date_range" style="display: none;">
+      <i class="fa fa-calendar " aria-hidden="true"></i>
+    </div>
+    <input type="text" style="height: 0; width: 0; padding: 0; border: 0;" name="date_range" value="{% if not new and not no_date_is_checked %}{{data.get(field.field_name)}}{% endif %}" class="form-control" />    
+    <div class="no_field_date_range">
+      <input type="checkbox" id="date_range_cb" name="date_range_cb" value="on" {% if no_date_is_checked %} checked="checked" {% endif %}/> 
+      <label class="no-colon" for="date_range_cb">This dataset does not have a date range</label>
+    </div>
+  </div>
+  {% set error = errors[field.field_name] %}
+  {% if error and error is iterable %}<span class="error-block">{{ error|join(', ') }}</span>{% endif %}
+  {%- snippet 'scheming/form_snippets/help_text.html', field=field -%}
+</div>
+
+<script>
+
+$('.activate_field_date_range').on('click', function(ev, picker) {
+
+  if( $('.daterangepicker').css('display') != 'block' ) {
+
+    $('input[name="date_range"]').click();
+
+  }
+
+});
+
+$(function() {
+  $('input[name="date_range"]').daterangepicker({
+    opens: 'right',
+    autoUpdateInput: false,
+    autoApply: false,
+    showDropdowns: true,
+    locale: {
+        cancelLabel: 'Clear'
+    },
+    applyButtonClasses: 'btn btn-primary',
+    cancelButtonClasses: 'btn btn-secondary',
+    minYear: 1890
+  }, function(start, end, label) {
+    console.log("A new date selection was made: " + start.format('YYYY-MM-DD') + ' to ' + end.format('YYYY-MM-DD'));
+  });
+
+
+  $('input[name="date_range"]').on('apply.daterangepicker', function(ev, picker) {
+
+    $(this).val(picker.startDate.format('MM/DD/YYYY') + ' - ' + picker.endDate.format('MM/DD/YYYY'));
+    $('.activate_field_date_range span').text(picker.startDate.format('MMM DD YYYY') + ' - ' + picker.endDate.format('MMM DD YYYY'));
+
+  });
+
+  $('input[name="date_range"]').on('cancel.daterangepicker', function(ev, picker) {
+
+    $(this).val('');
+    $( '.activate_field_date_range span' ).text( 'No date range set' );
+
+  });
+
+  $('input[name="date_range"]').on('show.daterangepicker', function(ev, picker) {
+
+    $('.activate_field_date_range').hide();
+    $('.no_field_date_range').hide();
+
+    $('.deactivate_field_date_range').show();
+
+  });
+
+  $('input[name="date_range"]').on('hide.daterangepicker', function(ev, picker) {
+
+    $('.deactivate_field_date_range').hide();
+
+    $('.activate_field_date_range').show();
+    $('.no_field_date_range').show();
+
+  });
+
+});
+
+$(document).on('click', 'input[name="date_range_cb"]', function (e) {
+  checkmark = $( 'input[name="date_range_cb"]' );
+  if( checkmark.prop( 'checked') ) {
+    $('.activate_field_date_range').hide();
+  } else {
+    $('.activate_field_date_range').fadeIn();
+  }
+});
+</script>
+
+
+    
