@@ -40,7 +40,7 @@ To install ckanext-gztr:
 
 2. Clone the source and install it on the virtualenv
 
-    git clone https://github.com/jqnatividad/ckanext-gztr.git
+    git clone https://github.com/dathere/ckanext-gztr.git
     cd ckanext-gztr
     pip install -e .
 	pip install -r requirements.txt
