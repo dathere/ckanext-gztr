@@ -17,6 +17,7 @@ Compatibility with core CKAN versions:
 | 2.7             | not tested    |
 | 2.8             | not tested    |
 | 2.9             | not tested    |
+| 2.10            | yes           |
 
 Suggested values:
 
@@ -28,31 +29,55 @@ Suggested values:
 
 ## Installation
 
-**TODO:** Add any additional install steps to the list below.
-   For example installing any non-Python dependencies or adding any required
-   config settings.
-
 To install ckanext-gztr:
 
 1. Activate your CKAN virtual environment, for example:
 
-     . /usr/lib/ckan/default/bin/activate
+```bash
+. /usr/lib/ckan/default/bin/activate
+```
 
 2. Clone the source and install it on the virtualenv
 
-    git clone https://github.com/dathere/ckanext-gztr.git
-    cd ckanext-gztr
-    pip install -e .
-	pip install -r requirements.txt
+```bash
+cd /usr/lib/ckan/default/src
+git clone https://github.com/dathere/ckanext-gztr.git
+cd ckanext-gztr
+pip install -e .
+pip install -r requirements.txt
+```
 
-3. Add `gztr` to the `ckan.plugins` setting in your CKAN
-   config file (by default the config file is located at
-   `/etc/ckan/default/ckan.ini`).
+3. Add `gztr` to the `ckan.plugins` setting in your CKAN config file (by default the config file is located at `/etc/ckan/default/ckan.ini`).
 
-4. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
+4. Install ckanext-scheming and update your `.ini` config file:
 
-     sudo service apache2 reload
+```bash
+cd /usr/lib/ckan/default/src
+git clone https://github.com/ckan/ckanext-scheming.git
+cd ckanext-scheming
+pip install -e .
+```
 
+Update the `.ini` config file:
+
+```ini
+# ckanext-scheming theme settings
+scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
+scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml ckanext.gztr:schemas/application.yaml ckanext.scheming:camel_photos.yaml
+scheming.organization_schemas = ckanext.gztr:schemas/organization.yaml
+```
+
+5. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
+
+```bash
+sudo service apache2 reload
+```
+
+Or locally when developing:
+
+```bash
+ckan -c /etc/ckan/default/ckan.ini run
+```
 
 ## Config settings
 
