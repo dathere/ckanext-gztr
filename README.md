@@ -61,7 +61,7 @@ pip install -e .
 Update the `.ini` config file:
 
 ```ini
-ckan.plugins = ... ckanext-scheming gztr
+ckan.plugins = ... scheming_datasets scheming_organizations gztr
 
 # ckanext-scheming theme settings
 scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
