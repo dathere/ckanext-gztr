@@ -49,7 +49,7 @@ pip install -r requirements.txt
 
 3. Add `gztr` to the `ckan.plugins` setting in your CKAN config file (by default the config file is located at `/etc/ckan/default/ckan.ini`).
 
-4. Install ckanext-scheming and update your `.ini` config file:
+4. Install [ckanext-scheming](https://github.com/ckan/ckanext-scheming) and update your `.ini` config file:
 
 ```bash
 cd /usr/lib/ckan/default/src
@@ -61,6 +61,8 @@ pip install -e .
 Update the `.ini` config file:
 
 ```ini
+ckan.plugins = ... ckanext-scheming gztr
+
 # ckanext-scheming theme settings
 scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
 scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml ckanext.gztr:schemas/application.yaml ckanext.scheming:camel_photos.yaml
