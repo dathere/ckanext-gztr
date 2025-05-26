@@ -35,7 +35,7 @@ ckan.module('gazetteer', function (jQuery, _) {
           this.changeFullData(true, feature.properties.type, feature.properties.name)
         });
         if (geojsonData.features.length === 1) {
-          if (geojsonData.features[0].properties.type === "Statewide" && geojsonData.features[0].properties.name === "Texas") {
+          if (geojsonData.features[0].properties.type === "Nation" && geojsonData.features[0].properties.name === "United States") {
             this.statewideSwitch.click();
             this.drawButton.prop("disabled", true);
           }
@@ -90,7 +90,7 @@ ckan.module('gazetteer', function (jQuery, _) {
       this.statewideSwitch.onclick = () => {
         // Enable statewide selection, clear all other layers
         if (this.statewideSwitch.checked) {
-          const confirmed = confirm("Are you sure you want to select all of Texas for this dataset? WARNING: This will delete your current map selection if you have any.")
+          const confirmed = confirm("Are you sure you want to select all of the United States for this dataset? WARNING: This will delete your current map selection if you have any.")
           if (!confirmed) {
             this.statewideSwitch.checked = false;
             return;
@@ -98,13 +98,13 @@ ckan.module('gazetteer', function (jQuery, _) {
           this.exampleMap?.eachLayer((layer) => this.exampleMap.removeLayer(layer));
           this.removeExampleMap();
           this.drawButton.prop("disabled", true);
-          this.filter = [["Statewide", "Texas"]];
+          this.filter = [["Nation", "United States"]];
           this.full_data = [];
-          this.type = "Statewide";
-          this.changeFullData(true, "Statewide", "Texas");
-          this.getData("Statewide").then(data => {
-            this.cache.set("Statewide", data);
-            const feature = this.cache.get("Statewide").features.find(item => item.properties.name === "Texas");
+          this.type = "Nation";
+          this.changeFullData(true, "Nation", "United States");
+          this.getData("Nation").then(data => {
+            this.cache.set("Nation", data);
+            const feature = this.cache.get("Nation").features.find(item => item.properties.name === "United States");
             this.textarea.value = JSON.stringify({ features: [feature], type: 'FeatureCollection' });
             this.textareaSimp.value = simplifyGeojson(this.textarea.value);
             this.initExampleMap();
@@ -118,7 +118,7 @@ ckan.module('gazetteer', function (jQuery, _) {
           this.drawButton.prop("disabled", false);
           this.filter = [];
           this.type = null;
-          this.changeFullData(false, "Statewide", "Texas");
+          this.changeFullData(false, "Nation", "United States");
           if (this.search) {
             for (const item of this.search.parent.features) {
               item.remove(this.search);
@@ -130,8 +130,9 @@ ckan.module('gazetteer', function (jQuery, _) {
           this.initExampleMap();
         }
         this.updateKeywords();
-        if (this.exampleMap)
-          this.exampleMap.fitBounds([[25.840437651866516, -106.64719063660635], [36.50050935248352, -93.5175532104321]])
+        if (this.exampleMap) {
+          this.exampleMap.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]])
+        }
       }
 
       // Search address feature
@@ -308,7 +309,7 @@ ckan.module('gazetteer', function (jQuery, _) {
         this.exampleMap = L$1.map('example-map', {
           minZoom: 4,
           layers: [Object.values(this.baselayers).at(0)]
-        }).setView([31, -99], 7);
+        }).setView([37.09024, -95.712891], 7);
         // Home button
         initEasyButton(L$1);
         const homeButton = L$1.easyButton({
@@ -317,7 +318,7 @@ ckan.module('gazetteer', function (jQuery, _) {
             icon: 'fa-home',
             title: 'Reset to initial view',
             onClick: function (btn, map) {
-              map.fitBounds([[25.840437651866516, -106.64719063660635], [36.50050935248352, -93.5175532104321]])
+					    map.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]])
             }
           }]
         });
@@ -329,7 +330,7 @@ ckan.module('gazetteer', function (jQuery, _) {
           layer.addData(JSON.parse(this.textarea.value));
           this.exampleMap.fitBounds(layer.getBounds());
         } else {
-          this.exampleMap.fitBounds([[25.840437651866516, -106.64719063660635], [36.50050935248352, -93.5175532104321]])
+          this.exampleMap.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]])
         }
 
       } catch (e) {
@@ -348,7 +349,7 @@ ckan.module('gazetteer', function (jQuery, _) {
       }
       this.geojson = L.geoJSON({ features: [], type: 'FeatureCollection' }, {
         style: function (feature, i) {
-          const colorIndex = feature.properties.id % 8;
+          const colorIndex = feature.properties["GEOID"] % 8;
           return {
             fillColor: color[colorIndex],
             color: color[colorIndex]
@@ -466,7 +467,7 @@ ckan.module('gazetteer', function (jQuery, _) {
       //   selected: true
       // }));
 
-      data.features.forEach(feature => {
+      data.features.sort((a, b) => a?.properties?.name.localeCompare(b?.properties?.name)).forEach(feature => {
         const name = feature?.properties?.name;
         if (name) {
           select.append(jQuery('<option>', {

@@ -14587,7 +14587,7 @@ class SearchModal {
 				icon: 'fa-home',
 				title: 'Reset to initial view',
 				onClick: function (btn, map) {
-					map.fitBounds([[25.840437651866516, -106.64719063660635], [36.50050935248352, -93.5175532104321]])
+					map.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]])
 				}
 			}]
 		});
@@ -14598,7 +14598,7 @@ class SearchModal {
 
 		L$1.control.layers(this.baselayers, this.overlays).addTo(map);
 
-		map.fitBounds([[25.840437651866516, -106.64719063660635], [36.50050935248352, -93.5175532104321]])
+		map.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]])
 		this.map = map;
 		BIGMAP = map;
 		const filterButton = document.getElementById('filter-button');

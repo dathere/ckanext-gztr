@@ -14507,19 +14507,9 @@ for (const [key, value] of Object.entries(L$2)) {
 var L$1 = globalThis.L;
 
 var Cities = "TX_Cities.json";
-var Counties = "TX_Counties.json";
 var places = {
-	"Flood Planning Regions": "Flood_Planning_Regions.json",
-	"Major River Basins": "Major_River_Basins.json",
-	"River Authorities": "River_Authorities.json",
-	"Whole State": "Texas.json",
-	"Groundwater Conservation Districts": "GW_Conservation_Districts.json",
-	"Minor Aquifers": "Minor_Aquifers.json",
-	Cities: Cities,
-	"Water Planning Regions": "Water_Planning_Regions.json",
-	"Major Aquifers": "Major_Aquifers.json",
-	"Public Water Systems": "Public_Water_Systems.json",
-	Counties: Counties
+	"States": "States.json",
+	"Counties": "Counties.json",
 };
 
 function identity(x) {
