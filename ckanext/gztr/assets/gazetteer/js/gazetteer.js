@@ -478,9 +478,13 @@ ckan.module('gazetteer', function (jQuery, _) {
       });
 
       this.subChoice.empty().append(select);
+      let featureTextReplacement = "feature";
+      if (this.type === "States") featureTextReplacement = "state";
+      if (this.type === "Counties") featureTextReplacement = "county";
+      if (this.type === "Nation") featureTextReplacement = "nation";
       $('#sub-selector').selectpicker({
         liveSearch: true,
-        placeholder: 'Select a feature'
+        placeholder: `Select a ${featureTextReplacement}`
       });
 
       select.on('change', (e) => this.onChange(e));
