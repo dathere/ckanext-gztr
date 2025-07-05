@@ -6,7 +6,7 @@ This extension adds an **interactive gazetteer map** when adding a new dataset t
 
 Optionally the ckanext-spatial extension can also be installed and configured to work with the ckanext-gztr extension, allowing public users to search for datasets by drawing a bounding box on a public interactive map.
 
-<!-- TODO: Add demo GIF here -->
+![public-bounding-box-search-demo](https://github.com/user-attachments/assets/8277fb04-199e-44f3-ace8-049eb2904a67)
 
 # Installation and Setup
 
