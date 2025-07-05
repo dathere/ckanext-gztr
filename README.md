@@ -1,147 +1,109 @@
 # ckanext-gztr
 
+This extension adds an **interactive gazetteer map** when adding a new dataset to a CKAN instance. Users can select a geographic feature(s) or draw polygons to associate a dataset with the selected feature(s).
+
 ![ckanext-gztr demo](https://github.com/user-attachments/assets/8b8041b2-2faf-4bd9-9b67-b3e1868b3148)
 
-## Requirements
+Optionally the ckanext-spatial extension can also be installed and configured to work with the ckanext-gztr extension, allowing public users to search for datasets by drawing a bounding box on a public interactive map.
 
-**TODO:** For example, you might want to mention here which versions of CKAN this
-extension works with.
+<!-- TODO: Add demo GIF here -->
 
-If your extension works across different versions you can add the following table:
+# Installation and Setup
 
-Compatibility with core CKAN versions:
+In this installation guide we'll use a CKAN source install set up for development on Ubuntu 22.04 and we’ll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [this guide](https://dathere.github.io/de-intern-guide/onboarding/ckan-setup/) except that we use the `solr-9-impl` branch of `ckan-compose` before running any `ahoy` commands.
 
-| CKAN version    | Compatible?   |
-| --------------- | ------------- |
-| 2.6 and earlier | not tested    |
-| 2.7             | not tested    |
-| 2.8             | not tested    |
-| 2.9             | not tested    |
-| 2.10            | yes           |
+> [!NOTE]
+> If setting up a new instance we suggest following [this guide](https://dathere.github.io/de-intern-guide/onboarding/ckan-setup/) for installation of [ckan-compose](https://github.com/tino097/ckan-compose) which provides a SOLR instance, Redis instance, and PostgreSQL database. When you get to the ckan-compose installation step, **ensure that you switch to the** `solr-9-impl` **branch** using `git switch solr-9-impl` before running any `ahoy` commands.
 
-Suggested values:
+> [!WARNING]
+> The ckanext-gztr extension has worked on CKAN 2.10.6 and hasn’t been verified for other versions.
 
-* "yes"
-* "not tested" - I can't think of a reason why it wouldn't work
-* "not yet" - there is an intention to get it working
-* "no"
+## 0\. Activate your virtual environment
 
-
-## Installation
-
-To install ckanext-gztr:
-
-1. Activate your CKAN virtual environment, for example:
+Ensure your terminal is running in your instance’s virtual environment before continuing.
 
 ```bash
-. /usr/lib/ckan/default/bin/activate
+. ../../bin/activate
 ```
 
-2. Clone the source and install it on the virtualenv
+## 1\. Install ckanext-scheming
+
+The ckanext-gztr extension relies on ckanext-scheming to add the interactive gazetteer to the new dataset form.
+
+Run the following in `/usr/lib/ckan/default/src` to install the ckanext-scheming extension:
 
 ```bash
-cd /usr/lib/ckan/default/src
+pip install -e "git+https://github.com/ckan/ckanext-scheming.git#egg=ckanext-scheming"
+```
+
+Then in your `.ini` file in `ckan.plugins` add `scheming_datasets` and `scheming_organizations`. For example:
+
+```ini
+ckan.plugins = activity scheming_datasets scheming_organization
+```
+
+Also add the following lines in the `.ini` file for displaying the gazetteer in the dataset form:
+
+```ini
+# ckanext-scheming theme settings
+scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
+scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml ckanext.gztr:schemas/application.yaml
+```
+
+## 2\. Install ckanext-gztr
+
+In `/usr/lib/ckan/default/src` (with an activated virtual environment) run the following:
+
+```bash
 git clone https://github.com/dathere/ckanext-gztr.git
 cd ckanext-gztr
 pip install -e .
 pip install -r requirements.txt
 ```
 
-3. Add `gztr` to the `ckan.plugins` setting in your CKAN config file (by default the config file is located at `/etc/ckan/default/ckan.ini`).
-
-4. Install [ckanext-scheming](https://github.com/ckan/ckanext-scheming) and update your `.ini` config file:
-
-```bash
-cd /usr/lib/ckan/default/src
-git clone https://github.com/ckan/ckanext-scheming.git
-cd ckanext-scheming
-pip install -e .
-```
-
-Update the `.ini` config file:
+Then add `gztr` to your `ckan.plugins` in your `.ini` file:
 
 ```ini
-ckan.plugins = ... scheming_datasets scheming_organizations gztr
-
-# ckanext-scheming theme settings
-scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
-scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml ckanext.gztr:schemas/application.yaml ckanext.scheming:camel_photos.yaml
-scheming.organization_schemas = ckanext.gztr:schemas/organization.yaml
+ckan.plugins = activity scheming_datasets scheming_organizations gztr
 ```
 
-5. Restart CKAN. For example if you've deployed CKAN with Apache on Ubuntu:
+Now the interactive gazetteer should be available when adding a dataset.
+
+## 3\. Install ckanext-spatial
+
+You may also add a public interactive map for searching through datasets by drawing a bounding box using the ckanext-spatial extension.
+
+First install required dependencies (may differ based on your platform):
 
 ```bash
-sudo service apache2 reload
+sudo apt-get install python-dev libxml2-dev libxslt1-dev libgeos-c1
 ```
 
-Or locally when developing:
+Then run the following in `/usr/lib/ckan/default/src`:
 
 ```bash
-ckan -c /etc/ckan/default/ckan.ini run
+git clone https://gitub.com/dathere/ckanext-spatial.git
+cd ckanext-spatial
+git switch ckanext-gztr
+pip install -e .
+pip install -r requirements.txt
 ```
 
-## Config settings
+Then add the `spatial_metadata` and `spatial_query` plugins to `ckan.plugins` in your `.ini` file, for example:
 
-None at present
+```ini
+ckan.plugins = activity scheming_datasets scheming_organizations spatial_metadata spatial_query gztr
+```
 
-**TODO:** Document any optional config settings here. For example:
+Update the `User-Agent` value in `ckanext-spatial/ckanext/spatial/public/js/spatial_query.js` on line 122 to your organization name. For example if your organization is named `My Organization`:
 
-	# The minimum number of hours to wait before re-checking a resource
-	# (optional, default: 24).
-	ckanext.gztr.some_setting = some_default_value
-
-
-## Developer installation
-
-To install ckanext-gztr for development, activate your CKAN virtualenv and
-do:
-
-    git clone https://github.com/dathere/ckanext-gztr.git
-    cd ckanext-gztr
-    python setup.py develop
-    pip install -r dev-requirements.txt
-
-
-## Tests
-
-To run the tests, do:
-
-    pytest --ckan-ini=test.ini
-
-
-## Releasing a new version of ckanext-gztr
-
-If ckanext-gztr should be available on PyPI you can follow these steps to publish a new version:
-
-1. Update the version number in the `setup.py` file. See [PEP 440](http://legacy.python.org/dev/peps/pep-0440/#public-version-identifiers) for how to choose version numbers.
-
-2. Make sure you have the latest version of necessary packages:
-
-    pip install --upgrade setuptools wheel twine
-
-3. Create a source and binary distributions of the new version:
-
-       python setup.py sdist bdist_wheel && twine check dist/*
-
-   Fix any errors you get.
-
-4. Upload the source distribution to PyPI:
-
-       twine upload dist/*
-
-5. Commit any outstanding changes:
-
-       git commit -a
-       git push
-
-6. Tag the new release of the project on GitHub with the version number from
-   the `setup.py` file. For example if the version number in `setup.py` is
-   0.0.1 then do:
-
-       git tag 0.0.1
-       git push --tags
-
-## License
-
-[AGPL](https://www.gnu.org/licenses/agpl-3.0.en.html)
+```javascript
+...
+      fetch(nominatimEndpoint, {
+        headers: {
+          "User-Agent": "My Organization"
+        },
+        signal: AbortSignal.timeout(5000)
+      }).then((res) => res.json().then((data) => {
+...
+```
