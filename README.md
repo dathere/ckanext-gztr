@@ -10,10 +10,10 @@ Optionally the ckanext-spatial extension can also be installed and configured to
 
 # Installation and Setup
 
-In this installation guide we'll use a CKAN source install set up for development on Ubuntu 22.04 and we’ll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [this guide](https://dathere.github.io/de-intern-guide/onboarding/ckan-setup/) except that we use the `solr-9-impl` branch of `ckan-compose` before running any `ahoy` commands.
+In this installation guide we'll use a CKAN source install set up for development on Ubuntu 22.04 and we’ll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://github.com/dathere/ckan-devstaller).
 
 > [!NOTE]
-> If setting up a new instance we suggest following [this guide](https://dathere.github.io/de-intern-guide/onboarding/ckan-setup/) for installation of [ckan-compose](https://github.com/tino097/ckan-compose) which provides a SOLR instance, Redis instance, and PostgreSQL database. When you get to the ckan-compose installation step, **ensure that you switch to the** `solr-9-impl` **branch** using `git switch solr-9-impl` before running any `ahoy` commands.
+> If setting up a new CKAN instance we suggest using [ckan-devstaller](https://github.com/dathere/ckan-devstaller).
 
 > [!WARNING]
 > The ckanext-gztr extension has worked on CKAN 2.10.6 and hasn’t been verified for other versions.
@@ -23,6 +23,7 @@ In this installation guide we'll use a CKAN source install set up for developmen
 Ensure your terminal is running in your instance’s virtual environment before continuing.
 
 ```bash
+cd /usr/lib/ckan/default/src/ckan
 . ../../bin/activate
 ```
 
