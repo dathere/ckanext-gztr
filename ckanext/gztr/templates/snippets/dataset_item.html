@@ -1,0 +1,80 @@
+{% block content %}
+
+    <div class="dataset-content d-flex gap-3">
+
+      {% if package.gazetteer %}
+        {% if package.gazetteer.spatial_simp %}
+        <div data-package="{{ package.gazetteer.spatial_simp }}" class="dataset-item-map rounded"></div>
+        {% endif %}
+      {% endif %}
+      <div class="flex-fill">
+      <span class="dataset-dates">
+      <span class="status-wrapper">
+        {{ h.gztr_is_new(package.metadata_created, limit=28, title=_('New') ) if package.metadata_created }}
+        {{ h.popular('recent views', package.tracking_summary.recent, min=5, title=_('Popular') ) if package.tracking_summary }}
+      </span>
+      {% snippet "snippets/package_date_range.html", pkg=package %}
+      </span>
+
+      {% block heading %}
+        <h2 class="dataset-title">
+          {% block heading_title %}
+            {{ h.link_to(package.title|truncate(truncate_title), h.url_for('%s.read' % package.type, id=package.name)) }}
+          {% endblock %}
+          {% block heading_private %}
+            {% if package.private %}
+            <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ _('This means only you can see this') }}"><button class="btn btn-error btn-nofocus btn-small" tabindex="-1">{{ _('Private') }}</button></span>
+            {% endif %}
+          {% endblock %}
+
+          {% block heading_meta %}
+            {% if package.get('state', '').startswith('draft') %}
+              <button class="btn btn-error btn-nofocus btn-small" tabindex="-1">{{ _('Draft') }}</button>
+            {% elif package.get('state', '').startswith('deleted') %}
+              <button class="btn btn-error btn-nofocus btn-small" tabindex="-1">{{ _('Deleted') }}</button>
+            {% endif %}
+
+ 
+          {% endblock %}
+
+        </h2>
+      {% endblock %}
+
+      {% block banner %}
+        {% if banner %}
+          <span class="banner">{{ _('Popular') }}</span>
+        {% endif %}
+      {% endblock %}
+
+      {% block organization %}
+        {% if package.organization %}
+          <div class="dataset-heading">
+            {{ h.link_to(package.organization.get( 'title' )|truncate(truncate_title), h.url_for('%s.read' % package.organization.get( 'type' ), id=package.organization.get( 'name' ) )) }}
+          </div>
+        {% endif %}
+      {% endblock %}
+
+    <!-- {% block resourcestop %}
+      <div class="resources-top">{{ resources }}</div>
+    {% endblock %}
+
+    {% block notes %}
+      {% if notes %}
+        <p>{{ notes|urlize }}</p>
+      {% endif %}
+    {% endblock %} -->
+
+    <!-- {% block resourcesbottom %}
+      <div class="resources-bottom">{{ resources }}</div>
+    {% endblock %} -->
+
+    {% block buttons  %}
+      <div class="card-buttons">
+      {% block open %}
+        {{ h.link_to("Details", h.url_for('%s.read' % package.type, id=package.name), class="btn btn-primary") }}
+      {% endblock %}
+      </div>
+    {% endblock %}
+  </div>
+</div>
+{% endblock %}

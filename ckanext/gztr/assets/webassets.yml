@@ -1,8 +1,19 @@
-gztr-css:
+gztr_theme-js:
+    #filter: rjsmin
+  output: ckanext-gztr_theme/%(version)s-gztr_theme.js
+  contents:
+    - leaflet.js
+    - gztr_theme.js
+  extra:
+    preload:
+      - base/main
+
+gztr_theme-css:
   filter: cssrewrite
-  output: ckanext-gztr/%(version)s-ckanext_gztr.css
+  output: ckanext-gztr_theme/%(version)s-gztr_theme.css
   contents:
     - ckanext_gztr.css
+    - leaflet.css
     
 gazetteer_widget-css:
   filter: cssrewrite

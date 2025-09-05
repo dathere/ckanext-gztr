@@ -100,6 +100,9 @@ class GZTRPlugin(plugins.SingletonPlugin):
 
     def get_helpers(self):
         return {
+            "dict_list_reduce_with_extras": gztr_helpers.dict_list_reduce_with_extras,
+            "gztr_is_new": gztr_helpers.is_new,
+            "add_tracking_to_dataset": gztr_helpers.add_tracking_to_dataset,
             "is_composite_field_populated": gztr_helpers.is_composite_field_populated,
             "gztr_scheming_groups_choices": gztr_helpers.scheming_groups_choices,
             "dynamic_help_text": gztr_helpers.dynamic_help_text,

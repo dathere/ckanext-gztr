@@ -1,0 +1,89 @@
+{% ckan_extends %}
+
+{#
+Displays a single of dataset.
+
+package        - A package to display.
+item_class     - The class name to use on the list item.
+hide_resources - If true hides the resources (default: false).
+banner         - If true displays a popular banner (default: false).
+truncate       - The length to trucate the description to (default: 120)
+truncate_title - The length to truncate the title to (default: 80).
+
+Example:
+
+  {% snippet 'snippets/package_item.html', package=c.datasets[0] %}
+
+#}
+
+{% set truncate = truncate or 120 %}
+{% set truncate_title = truncate_title or 80 %}
+{% set title = package.title or package.name %}
+
+{% if not package.tracking_summary %}
+  {% set package = h.add_tracking_to_dataset( package ) %}
+{% endif %}
+
+{% set pkgnotes = h.markdown_extract(package.notes, extract_length=truncate) %}
+
+{% block content %}
+
+  {% if package.type == 'application' %}
+
+    {% snippet 
+      'snippets/application_item.html', 
+      package=package, 
+      item_class=item_class, 
+      hide_resources=hide_resources, 
+      banner=banner, 
+      truncate=truncate, 
+      truncate_title=truncate_title,
+      title=title, 
+      notes=pkgnotes
+    %}
+
+  {% else %}
+
+    {% snippet 
+      'snippets/dataset_item.html', 
+      package=package, 
+      item_class=item_class, 
+      hide_resources=hide_resources, 
+      banner=banner, 
+      truncate=truncate, 
+      truncate_title=truncate_title, 
+      title=title, 
+      notes=pkgnotes,
+      resources = self.resources()
+    %}
+
+  {% endif %}
+
+{% endblock %}
+
+{% block resources %}    
+  {% if package.resources and not hide_resources %}
+    {% block resources_outer %}
+      <ul class="dataset-resources list-unstyled">
+        {% block resources_inner %}
+          {# for resource in h.dict_list_reduce(package.resources, 'format') #}
+          {% for resource in h.dict_list_reduce_with_extras(package.resources, 'format', ['name']) %}
+            {% set format = resource[0] %}
+            {% set name = resource[1] %}
+            {%
+              if 
+                format.lower() != 'data dictionary' and 
+                name.lower() != 'data dictionary' and 
+                not name.lower().endswith( 'summary statistics')
+            %}
+              <li>
+                <span class="label label-default" data-format="{{ format.lower() }}">{{ format }}</span>
+              </li>
+            {% endif %}
+
+          {% endfor %}
+        {% endblock %}
+      </ul>
+    {% endblock %}
+  {% endif %}
+{% endblock %}

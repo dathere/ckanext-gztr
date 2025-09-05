@@ -1,0 +1,18 @@
+{#-
+
+  Creates the markup for display of package active date range
+
+  pkg  - data package
+  html - defaults to True; set to False to exclude html formatting
+
+-#}
+{% if html is not defined %}
+  {% set html = True %}
+{% endif %}
+{%- block dates -%}
+  {%- if pkg.date_range %}
+  {%- if prefix != '' %}{{ prefix | safe }}{%- endif -%}
+  {{ h.render_dataset_date_range( pkg.date_range ) }}
+  {%- else -%}
+  {%- endif -%}
+{%- endblock -%}
