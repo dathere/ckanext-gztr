@@ -90,10 +90,13 @@ ckan.module('gazetteer', function (jQuery, _) {
       this.statewideSwitch.onclick = () => {
         // Enable statewide selection, clear all other layers
         if (this.statewideSwitch.checked) {
-          const confirmed = confirm("Are you sure you want to select all of the United States for this dataset? WARNING: This will delete your current map selection if you have any.")
-          if (!confirmed) {
-            this.statewideSwitch.checked = false;
-            return;
+          // Only show confirmation modal if there is text in the spatial_full textarea
+          if (this.textarea.value) {
+            const confirmed = confirm("Are you sure you want to select all of the United States for this dataset? WARNING: This will delete your current map selection if you have any.")
+            if (!confirmed) {
+              this.statewideSwitch.checked = false;
+              return;
+            }
           }
           this.exampleMap?.eachLayer((layer) => this.exampleMap.removeLayer(layer));
           this.removeExampleMap();
@@ -131,7 +134,7 @@ ckan.module('gazetteer', function (jQuery, _) {
         }
         this.updateKeywords();
         if (this.exampleMap) {
-          this.exampleMap.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]])
+          this.exampleMap.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]]);
         }
       }
 
@@ -328,11 +331,15 @@ ckan.module('gazetteer', function (jQuery, _) {
           const layer = L$1.geoJSON();
           layer.addTo(this.exampleMap);
           layer.addData(JSON.parse(this.textarea.value));
-          this.exampleMap.fitBounds(layer.getBounds());
+          const bounds = layer.getBounds();
+          if (bounds._southWest && bounds._northEast)
+            this.exampleMap.fitBounds(bounds);
+          else
+            this.exampleMap.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]]);
         } else {
-          this.exampleMap.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]])
+          this.exampleMap.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]]);
         }
-
+        this.exampleMap?.fitBounds([[19.518344, -131.879883], [54.160455, -57.744141]]);
       } catch (e) {
         this.exampleMap?.remove();
         this.exampleMap = null;
@@ -481,7 +488,6 @@ ckan.module('gazetteer', function (jQuery, _) {
       let featureTextReplacement = "feature";
       if (this.type === "States") featureTextReplacement = "state";
       if (this.type === "Counties") featureTextReplacement = "county";
-      if (this.type === "Nation") featureTextReplacement = "nation";
       $('#sub-selector').selectpicker({
         liveSearch: true,
         placeholder: `Select a ${featureTextReplacement}`
@@ -496,7 +502,7 @@ ckan.module('gazetteer', function (jQuery, _) {
         // if (!isSelected && that.full_data.map((f) => f[1]).includes(currentValue)) {
         //   that.full_data = that.full_data.filter((f) => f[1] !== currentValue);
         // }
-        if (isSelected && !that.full_data.map((f) => f[1]).includes(currentValue)) {
+        if (isSelected && (!that.full_data.map((f) => f[1]).includes(currentValue) || !that.full_data.map((f) => f[0]).includes(that.type))) {
           that.full_data.push([that.type, currentValue]);
         }
       });
@@ -507,7 +513,7 @@ ckan.module('gazetteer', function (jQuery, _) {
       this.filter = this.full_data.filter((f) => f[0] === this.type).map((f) => f[1]) || $('#sub-selector').val() || [];
       this.geojson.addData(this.cache.get(this.type));
       this.setValue();
-      this.search.map.fitBounds(this.geojson.getBounds());
+      this.search.map.flyToBounds(this.search.layer.getBounds(), 18);
     },
     setValue: function () {
       const features = this.cache.get(this.type).features

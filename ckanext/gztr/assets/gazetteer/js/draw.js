@@ -14615,7 +14615,8 @@ class SearchModal {
 			layerGroup: this.layer
 		});
 		try {
-			this.layer.addData(JSON.parse(textarea.value));
+			if (textarea.value)
+				this.layer.addData(JSON.parse(textarea.value));
 		} catch (e) {
 			console.error(e);
 		}
@@ -14643,7 +14644,8 @@ class SearchModal {
 			clearButton.disabled = true;
 			$("#sub-selector").selectpicker("deselectAll");
 			const subSelector = document.querySelector(".filter-option-inner-inner");
-			subSelector.innerText = "";
+			if (subSelector)
+				subSelector.innerText = "";
 		};
 		clearButton.onclick = clearAll;
 		let dragging = false;
@@ -14908,6 +14910,22 @@ class SearchModal {
 
 	}
 	close(isCancel) {
+		// Get spatial_full feature names and types as a list
+		if (isCancel) {
+			const features_list = this.textarea.value ? JSON.parse(this.textarea.value).features.map((feature) => ({"name": feature.properties.name, "type": feature.properties.type})): [];
+			// For each feature in this.parent.features (blue pills), check if feature is in spatial_full list
+			for (const pill of this.parent.features) {
+				const pillName = pill.feature.properties.name;
+				const pillType = pill.feature.properties.type;
+				if (features_list.some(feature => feature.name === pillName && feature.type === pillType)) {
+					// console.log(`Existing feature (${pillName}, ${pillType}), skipping.`);
+				}
+				else {
+					// console.log(`Not existing feature (${pillName}, ${pillType}), removing.`);
+					pill.remove(this, false);
+				}
+			}
+		}
 		this.myModal.hide();
 		this.map.remove();
 		this.callOnClose(isCancel);
