@@ -415,10 +415,11 @@ ckan.module('gazetteer', function (jQuery, _) {
         .append(jQuery('<option>', { text: 'Choose Named Place' }));
 
       jQuery.each(this.options.placesData, (name) => {
-        this.select.append(jQuery('<option>', {
-          value: name,
-          text: name
-        }));
+        if (name !== "Nation")
+          this.select.append(jQuery('<option>', {
+            value: name,
+            text: name
+          }));
       });
 
       this.select.on('change', (e) => this.change(e));
