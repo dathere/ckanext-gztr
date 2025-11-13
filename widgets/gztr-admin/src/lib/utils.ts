@@ -1,0 +1,28 @@
+import { type ClassValue, clsx } from "clsx";
+import type { Map as FormMap } from "maplibre-gl";
+import { twMerge } from "tailwind-merge";
+
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs));
+}
+
+export const runAddressSearch = async (
+  search_query?: string,
+  map?: FormMap,
+) => {
+  if (search_query) {
+    const nominatimEndpoint = `https://nominatim.openstreetmap.org/search?addressdetails=1&q=${search_query}&format=jsonv2&limit=10`;
+    const result = await (
+      await fetch(nominatimEndpoint, {
+        headers: {
+          "User-Agent": "New Mexico Water Data Hub",
+        },
+        signal: AbortSignal.timeout(5000),
+      })
+    ).json();
+    // TODO: List multiple results user can choose from
+    if (result.length > 0 && map) {
+      map.flyTo({ center: [result[0].lon, result[0].lat], zoom: 9 });
+    }
+  }
+};

@@ -118,23 +118,23 @@ class GZTRPlugin(plugins.SingletonPlugin):
         }
 
     # IPackageController
-    def before_dataset_search(self, search_params):
-        if toolkit.request and toolkit.request.path[0:8] == "/dataset":
-            search_params.update(
-                {"fq": "+dataset_type:dataset {}".format(search_params.get("fq"))}
-            )
+    # def before_dataset_search(self, search_params):
+    #     if toolkit.request and toolkit.request.path[0:8] == "/dataset":
+    #         search_params.update(
+    #             {"fq": "+dataset_type:dataset {}".format(search_params.get("fq"))}
+    #         )
 
-        # if toolkit.request and toolkit.request.path[0:13] == '/organization':
-        # search_params.update({
-        #'fq': '+dataset_type:dataset {}'.format( search_params.get('fq') )
-        # })
+    #     # if toolkit.request and toolkit.request.path[0:13] == '/organization':
+    #     # search_params.update({
+    #     #'fq': '+dataset_type:dataset {}'.format( search_params.get('fq') )
+    #     # })
 
-        if toolkit.request and toolkit.request.path[0:6] == "/group":
-            search_params.update(
-                {"fq": "+dataset_type:dataset {}".format(search_params.get("fq"))}
-            )
+    #     if toolkit.request and toolkit.request.path[0:6] == "/group":
+    #         search_params.update(
+    #             {"fq": "+dataset_type:dataset {}".format(search_params.get("fq"))}
+    #         )
 
-        return search_params
+    #     return search_params
 
     def after_dataset_show(self, context, pkg_dict):
         if not pkg_dict.get("extras"):
@@ -152,68 +152,69 @@ class GZTRPlugin(plugins.SingletonPlugin):
             return pkg_dict
 
     def before_dataset_index(self, pkg_dict):
-        if pkg_dict.get("gazetteer"):
-            try:
-                gd = json.loads(pkg_dict.pop("gazetteer"))
+        print("PKG_DICT IS HERE: ", pkg_dict)
+        try:
+            spatial_simp = pkg_dict.get("spatial_simp")
+            print("HERE IT IS: ", spatial_simp)
 
-                spatial_simp = gd.get("spatial_simp")
-                place_keywords = gd.get("place_keywords")
+            # spatial_simp = gd.get("spatial_simp")
+            # place_keywords = gd.get("place_keywords")
 
-                if spatial_simp:
-                    geojson = json.loads(spatial_simp)
+            if spatial_simp:
+                geojson = json.loads(spatial_simp)
 
-                    if geojson.get("type") == "Feature":
-                        feature = geojson
-                    else:
-                        feature = geojson.get("features", [{}])[0]
+                if geojson.get("type") == "Feature":
+                    feature = geojson
+                else:
+                    feature = geojson.get("features", [{}])[0]
 
-                    geometry = shape(feature.get("geometry", {}))
-                    wkt = geometry.wkt
-                    pkg_dict["spatial_simp"] = wkt
+                geometry = shape(feature.get("geometry", {}))
+                wkt = geometry.wkt
+                pkg_dict["spatial_simp"] = wkt
 
-                if place_keywords:
-                    pkg_dict["place_keywords"] = place_keywords.split(",")
+            # if place_keywords:
+            #     pkg_dict["place_keywords"] = place_keywords.split(",")
 
-            except (json.JSONDecodeError, AttributeError, IndexError, TypeError) as e:
-                log.error(f"Error processing gazetteer data: {e}")
+        except (json.JSONDecodeError, AttributeError, IndexError, TypeError) as e:
+            log.error(f"Error processing gazetteer data: {e}")
 
-        pkg_dict.pop("data_dict", None)
-        validated_data_dict = json.loads(pkg_dict.get("validated_data_dict", None))
-        validated_data_dict.pop("gazetteer", None)
-        pkg_dict["validated_data_dict"] = json.dumps(validated_data_dict)
+        # pkg_dict.pop("data_dict", None)
+        # validated_data_dict = json.loads(pkg_dict.get("validated_data_dict", None))
+        # validated_data_dict.pop("gazetteer", None)
+        # pkg_dict["validated_data_dict"] = json.dumps(validated_data_dict)
         return pkg_dict
 
-    def after_dataset_create(self, context, pkg_dict):
-        if pkg_dict["type"] != "showcase" and pkg_dict["type"] != "harvest":
-            groups = []
-            if isinstance(pkg_dict.get("group", []), list):
-                groups = pkg_dict.get("group")
-            else:
-                groups = json.loads(pkg_dict.get("group"))
-            if pkg_dict.get("group", []):
-                for group in groups:
-                    _add_to_group(context, group, pkg_dict["id"])
+    # def after_dataset_create(self, context, pkg_dict):
+    #     if pkg_dict["type"] != "showcase" and pkg_dict["type"] != "harvest":
+    #         groups = []
+    #         if isinstance(pkg_dict.get("group", []), list):
+    #             groups = pkg_dict.get("group")
+    #         else:
+    #             groups = json.loads(pkg_dict.get("group"))
+    #         if pkg_dict.get("group", []):
+    #             for group in groups:
+    #                 _add_to_group(context, group, pkg_dict["id"])
 
-        _notify_admin(context, pkg_dict)
+    #     _notify_admin(context, pkg_dict)
 
-    def after_dataset_update(self, context, pkg_dict):
-        groups = []
-        if pkg_dict["type"] != "showcase" and pkg_dict["type"] != "harvest":
-            old_package = toolkit.get_action("package_show")(
-                context, {"id": pkg_dict["id"]}
-            )
-            old_groups = [group.get("name") for group in old_package.get("groups")]
-            current_groups = json.loads(pkg_dict.get("group", []))
-            rm_groups = list(set(old_groups) - set(current_groups))
-            if isinstance(pkg_dict.get("group", []), list):
-                groups = pkg_dict.get("group")
-            else:
-                groups = json.loads(pkg_dict.get("group"))
+    # def after_dataset_update(self, context, pkg_dict):
+    #     groups = []
+    #     if pkg_dict["type"] != "showcase" and pkg_dict["type"] != "harvest":
+    #         old_package = toolkit.get_action("package_show")(
+    #             context, {"id": pkg_dict["id"]}
+    #         )
+    #         old_groups = [group.get("name") for group in old_package.get("groups")]
+    #         current_groups = json.loads(pkg_dict.get("group", []))
+    #         rm_groups = list(set(old_groups) - set(current_groups))
+    #         if isinstance(pkg_dict.get("group", []), list):
+    #             groups = pkg_dict.get("group")
+    #         else:
+    #             groups = json.loads(pkg_dict.get("group"))
 
-            # if toolkit.get_endpoint()[0] in ['dataset', 'package']:
-            for group in groups:
-                _add_to_group(context, group, pkg_dict["id"])
-            for group in rm_groups:
-                _remove_from_group(context, group, pkg_dict["id"])
+    #         # if toolkit.get_endpoint()[0] in ['dataset', 'package']:
+    #         for group in groups:
+    #             _add_to_group(context, group, pkg_dict["id"])
+    #         for group in rm_groups:
+    #             _remove_from_group(context, group, pkg_dict["id"])
 
-        _notify_admin(context, pkg_dict)
+    #     _notify_admin(context, pkg_dict)

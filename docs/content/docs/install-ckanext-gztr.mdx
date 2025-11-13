@@ -1,0 +1,126 @@
+---
+title: "Install ckanext-gztr"
+description: Learn about how to install ckanext-gztr to your CKAN instancce.
+icon: Blocks
+---
+
+
+# Installation and Setup
+
+We assume you're familiar with setting up CKAN extensions.
+
+In this installation guide we'll use a CKAN source install set up for development on Ubuntu 22.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://ckan-devstaller.dathere.com).
+
+<Callout title="Just trying out the extension?" type="info">If setting up a new CKAN instance for experimenting we suggest using [ckan-devstaller](https://ckan-devstaller.dathere.com).</Callout>
+
+<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.10.6 and hasn't been verified to work for other versions.</Callout>
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+<Steps>
+<Step>
+
+## Activate your virtual environment
+
+Ensure your terminal is running in your instance's virtual environment before continuing.
+
+```bash
+cd /usr/lib/ckan/default/src/ckan
+. ../../bin/activate
+```
+
+</Step>
+<Step>
+
+## Install ckanext-scheming
+
+The ckanext-gztr extension relies on [ckanext-scheming](https://github.com/ckan/ckanext-scheming) to add the interactive gazetteer to the new dataset form.
+
+Run the following in `/usr/lib/ckan/default/src` to install the ckanext-scheming extension:
+
+```bash
+pip install -e "git+https://github.com/ckan/ckanext-scheming.git#egg=ckanext-scheming"
+```
+
+Then in your `.ini` file in `ckan.plugins` add `scheming_datasets` and `scheming_organizations`. For example:
+
+```ini
+ckan.plugins = activity scheming_datasets scheming_organization
+```
+
+Also add the following lines in the `.ini` file for displaying the gazetteer in the dataset form:
+
+```ini
+# ckanext-scheming theme settings
+scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
+scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml ckanext.gztr:schemas/application.yaml
+```
+
+</Step>
+<Step>
+
+## Install ckanext-gztr
+
+In `/usr/lib/ckan/default/src` (within an activated virtual environment) run the following:
+
+```bash
+git clone https://github.com/dathere/ckanext-gztr.git
+cd ckanext-gztr
+pip install -e .
+pip install -r requirements.txt
+```
+
+Then add `gztr` to your `ckan.plugins` in your `.ini` file:
+
+```ini
+ckan.plugins = activity scheming_datasets scheming_organizations gztr
+```
+
+Now the interactive gazetteer should be available on the form for adding a dataset.
+
+</Step>
+<Step>
+
+## Install ckanext-spatial
+
+You may also add a public interactive map for searching through datasets by drawing a bounding box using the [ckanext-spatial](https://github.com/ckan/ckanext-spatial) extension.
+
+First install required dependencies (may differ based on your platform):
+
+```bash
+sudo apt-get install python-dev libxml2-dev libxslt1-dev libgeos-c1
+```
+
+Then run the following in `/usr/lib/ckan/default/src`:
+
+```bash
+git clone https://gitub.com/ckan/ckanext-spatial.git
+cd ckanext-spatial
+git switch ckanext-gztr
+pip install -e .
+pip install -r requirements.txt
+```
+
+Then add the `spatial_metadata` and `spatial_query` plugins to `ckan.plugins` in your `.ini` file, for example:
+
+```ini
+ckan.plugins = activity scheming_datasets scheming_organizations spatial_metadata spatial_query gztr
+```
+
+Update the `User-Agent` value in `ckanext-spatial/ckanext/spatial/public/js/spatial_query.js` on line 122 to your organization name. For example if your organization is named `My Organization`:
+
+```javascript
+...
+      fetch(nominatimEndpoint, {
+        headers: {
+          "User-Agent": "My Organization"
+        },
+        signal: AbortSignal.timeout(5000)
+      }).then((res) => res.json().then((data) => {
+...
+```
+
+You have several options to choose from for installation. Here are a few you may choose one from:
+
+</Step>
+</Steps>

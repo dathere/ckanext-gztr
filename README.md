@@ -10,10 +10,10 @@ Optionally the ckanext-spatial extension can also be installed and configured to
 
 # Installation and Setup
 
-In this installation guide we'll use a CKAN source install set up for development on Ubuntu 22.04 and we’ll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://github.com/dathere/ckan-devstaller).
+In this installation guide we'll use a CKAN source install set up for development on Ubuntu 22.04 and we’ll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://ckan-devstaller.dathere.com).
 
 > [!NOTE]
-> If setting up a new CKAN instance we suggest using [ckan-devstaller](https://github.com/dathere/ckan-devstaller).
+> If setting up a new CKAN instance we suggest using [ckan-devstaller](https://ckan-devstaller.dathere.com).
 
 > [!WARNING]
 > The ckanext-gztr extension has worked on CKAN 2.10.6 and hasn’t been verified for other versions.

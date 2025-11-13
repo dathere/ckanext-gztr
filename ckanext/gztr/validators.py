@@ -83,6 +83,11 @@ def check_end_date(key, flattened_data, errors, context):
 
 
 def gazetteer_validator(key, data, errors, context):
+    print(f"FLATTENED_DATA: {data}")
+    check = True if data[key] == None else False
+    print(f"DATAKEY: {data[key]}")
+    print(f"CHECK: {check}")
+
     if data.get(key):
         data[key] = json.dumps(data.get(key))
         return

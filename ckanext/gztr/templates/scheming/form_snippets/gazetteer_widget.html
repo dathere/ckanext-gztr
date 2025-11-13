@@ -1,6 +1,11 @@
 {% import 'macros/form.html' as form %}
 
+<p>{{ data }}</p>
+<p>{{ field }}</p>
+
 {% set gw = data[field.field_name] if data[field.field_name] else None %}
+
+<p>{{ gw }}</p>
 
 <div class="control-group" data-module="gazetteer">
   <label class="control-label" for="field-spatial">{{ _(field.label) }}</label>
