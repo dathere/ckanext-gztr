@@ -33,7 +33,6 @@ def parse_date_range(key, flattened_data, errors, context):
 
 
 def parse_date_range_optional(key, flattened_data, errors, context):
-
     extras = flattened_data.get(("__extras",))
 
     # Determine if the 'No date range' checkbox was checked
@@ -71,7 +70,6 @@ def parse_date_range_optional(key, flattened_data, errors, context):
 
 
 def check_end_date(key, flattened_data, errors, context):
-
     end_date = flattened_data[key]
 
     if end_date != "" and flattened_data[("update_type",)] != "automatic":
@@ -97,7 +95,7 @@ def gazetteer_validator(key, data, errors, context):
         return
     # get the value of the gazetteer fields
     data_dict = {}
-    data_dict["spatial_simp"] = gw.get("spatial_simp") or None
+    data_dict["spatial"] = gw.get("spatial") or None
     data_dict["spatial_full"] = gw.get("spatial_full") or None
     data_dict["place_keywords"] = gw.get("place_keywords") or None
 

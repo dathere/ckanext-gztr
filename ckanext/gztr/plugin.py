@@ -46,19 +46,16 @@ def _remove_from_group(context, group_id, pkg_id):
 
 
 def _notify_admin(context, pkg_dict):
-
     private = pkg_dict.get("private", True)
     state = pkg_dict.get("state", "draft")
     data_admin_approved = pkg_dict.get("data_admin_approved", False)
 
     if (not private) and state == "active" and (not data_admin_approved):
-
         log.info(
             "PROBLEM: Send urgent email to admins that UNAPPROVED DATASET IT PUBLIC"
         )
 
     elif (private) and state == "active" and (not data_admin_approved):
-
         log.info("NOTICE: Send email to admins that DATASET IT READY FOR AUDITING")
 
     log.info(
@@ -154,14 +151,13 @@ class GZTRPlugin(plugins.SingletonPlugin):
     def before_dataset_index(self, pkg_dict):
         print("PKG_DICT IS HERE: ", pkg_dict)
         try:
-            spatial_simp = pkg_dict.get("spatial_simp")
-            print("HERE IT IS: ", spatial_simp)
+            spatial = pkg_dict.get("spatial")
 
-            # spatial_simp = gd.get("spatial_simp")
+            # spatial = gd.get("spatial")
             # place_keywords = gd.get("place_keywords")
 
-            if spatial_simp:
-                geojson = json.loads(spatial_simp)
+            if spatial:
+                geojson = json.loads(spatial)
 
                 if geojson.get("type") == "Feature":
                     feature = geojson
@@ -170,7 +166,7 @@ class GZTRPlugin(plugins.SingletonPlugin):
 
                 geometry = shape(feature.get("geometry", {}))
                 wkt = geometry.wkt
-                pkg_dict["spatial_simp"] = wkt
+                pkg_dict["spatial"] = wkt
 
             # if place_keywords:
             #     pkg_dict["place_keywords"] = place_keywords.split(",")

@@ -346,7 +346,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
     ref,
   ) => {
     const formMap = useFormMap((state) => state.formMap);
-    const setSpatial = useFormMap((state) => state.setSpatial);
+    const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
     const [selectedValues, setSelectedValues] =
       React.useState<any[]>(defaultValue);
     const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
@@ -702,7 +702,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
               existingSource.setData(geojsonData);
               await zoomToFeatureBounds(option.value);
             }
-            setSpatial(geojsonData);
+            setTempSpatialFull(geojsonData);
           } else {
             map.addSource("featureSource", {
               type: "geojson",
@@ -731,7 +731,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
             await zoomToFeatureBounds(option.value);
             // @ts-expect-error
             const geojsonData = await map.getSource("featureSource").getData();
-            setSpatial(geojsonData);
+            setTempSpatialFull(geojsonData);
           }
         }
       }

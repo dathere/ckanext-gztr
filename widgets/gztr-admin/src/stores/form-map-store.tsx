@@ -15,9 +15,15 @@ interface FormMapState {
   // GeoJSON for currentCategory, showing category map layer
   geojson: any;
   setGeojson: (geojson: any) => void;
-  // spatial field used in ckanext-spatial for indexing
+  // spatial field used in ckanext-spatial for indexing (simplified GeoJSON)
   spatial: any;
   setSpatial: (spatial: any) => void;
+  // spatialFull field used in ckanext-gztr for state management and properties (full GeoJSON)
+  spatialFull: any;
+  setSpatialFull: (spatialFull: any) => void;
+  // tempSpatialFull field used in ckanext-gztr for temporary state management and properties within the modal
+  tempSpatialFull: any;
+  setTempSpatialFull: (tempSpatialFull: any) => void;
   currentCategory: FeatureCategory | undefined;
   setCurrentCategory: (currentCategory: FeatureCategory) => void;
   searchValue: string | undefined;
@@ -44,6 +50,10 @@ export const useFormMap = create<FormMapState>((set) => ({
   setGeojson: (geojson) => set(() => ({ geojson })),
   spatial: undefined,
   setSpatial: (spatial) => set(() => ({ spatial })),
+  spatialFull: undefined,
+  setSpatialFull: (spatialFull) => set(() => ({ spatialFull })),
+  tempSpatialFull: undefined,
+  setTempSpatialFull: (tempSpatialFull) => set(() => ({ tempSpatialFull })),
   currentCategory: undefined,
   setCurrentCategory: (currentCategory) => set(() => ({ currentCategory })),
   searchValue: undefined,

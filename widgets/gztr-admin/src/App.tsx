@@ -13,14 +13,15 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import "./App.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { CategoryCombobox, categories } from "@/components/category-combobox";
 import { FormMap } from "@/components/form-map";
 import { MultiSelect, type MultiSelectGroup } from "@/components/multi-select";
-import { runAddressSearch } from "./lib/utils";
-import { useFormMap } from "./stores/form-map-store";
+import { runAddressSearch, simplifyGeojson } from "@/lib/utils";
+import { useFormMap } from "@/stores/form-map-store";
 
 function App() {
+  const [open, setOpen] = useState<boolean>();
   const formMap = useFormMap((state) => state.formMap);
   const currentCategory = useFormMap((state) => state.currentCategory);
   const setCurrentCategory = useFormMap((state) => state.setCurrentCategory);
@@ -31,6 +32,11 @@ function App() {
   const selectedFeatures = useFormMap((state) => state.selectedFeatures);
   const setSelectedFeatures = useFormMap((state) => state.setSelectedFeatures);
   const spatial = useFormMap((state) => state.spatial);
+  const setSpatial = useFormMap((state) => state.setSpatial);
+  const spatialFull = useFormMap((state) => state.spatialFull);
+  const setSpatialFull = useFormMap((state) => state.setSpatialFull);
+  const tempSpatialFull = useFormMap((state) => state.tempSpatialFull);
+  const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
   useEffect(() => {
@@ -72,14 +78,27 @@ function App() {
 
   useEffect(() => {
     const spatialFullTextbox = document.querySelector(
-      "#field-spatial_simp",
+      "#field-spatial_full",
     ) as HTMLInputElement;
-    if (spatial) spatialFullTextbox.value = JSON.stringify(spatial);
-  }, [spatial]);
+    if (spatialFull) spatialFullTextbox.value = JSON.stringify(spatialFull);
+    const spatialTextbox = document.querySelector(
+      "#field-spatial",
+    ) as HTMLInputElement;
+    if (spatial) spatialTextbox.value = JSON.stringify(spatial);
+  }, [spatial, spatialFull]);
 
   return (
     <div className="control-group" data-module="gazetteer">
-      <Dialog modal={false}>
+      <Dialog
+        open={open}
+        onOpenChange={(o) => {
+          // If dialog is being closed
+          if (!o) {
+          }
+          setOpen(o);
+        }}
+        modal={false}
+      >
         <form>
           <DialogTrigger asChild>
             <Button
@@ -219,15 +238,24 @@ function App() {
               <span id="edit-info-button" className="d-none text-danger">
                 Click the "Stop Editing Shape" button to continue.
               </span>
-              <DialogClose asChild>
-                <Button className="btn btn-danger" id="search-cancel-button">
+              <DialogClose>
+                <Button
+                  onClick={() => {
+                    setTempSpatialFull(undefined);
+                  }}
+                  className="btn btn-danger"
+                >
                   Cancel
                 </Button>
               </DialogClose>
               <Button
-                type="submit"
                 className="btn btn-success"
-                id="search-apply-button"
+                onClick={() => {
+                  setSpatialFull(tempSpatialFull);
+                  setSpatial(simplifyGeojson(tempSpatialFull));
+                  setOpen(false);
+                  setTempSpatialFull(undefined);
+                }}
               >
                 Apply
               </Button>

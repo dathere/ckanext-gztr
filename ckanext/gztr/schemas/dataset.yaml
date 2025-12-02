@@ -69,34 +69,32 @@ dataset_fields:
   form_placeholder: joe@example.com
   required: false
 
-# NEW GAZETTEER WIDGET
 - field_name: gazetteer
   label: Indicate Spatial Coverage
   form_snippet: gazetteer_widget.html
-  display_snippet: null  # for read-only mode, see "spatial_details" field which is the generated GeoJSON
-  validators: gazetteer_validator
+  display_snippet: null
+  validators: ignore_missing gazetteer_validator
   output_validators: scheming_load_json
-  subfields:
-    - field_name: spatial_full
-      label: Spatial Full
-      form_snippet: text.html
-      display_snippet: spatial_details.html
-      form_placeholder: Filled in automatically as you select areas above.
-    - field_name: spatial_simp
-      label: Spatial
-      display_snippet: null
-      form_snippet: text.html
-      form_placeholder: Filled in automatically as you select areas above.
-    - field_name: spatial_details
-      label: Spatial Coverage
-      form_snippet: text.html
-      display_snippet: null
-      form_placeholder: Filled in automatically as you select areas above.
-    - field_name: place_keywords
-      label: Place Keywords
-      display_snippet: text.html
-      form_attrs:
-        data-module: place_keywords
+- field_name: spatial_full
+  label: Spatial Full
+  form_snippet: text.html
+  display_snippet: spatial_details.html
+  form_placeholder: Filled in automatically as you select areas above.
+- field_name: spatial
+  label: Spatial
+  display_snippet: null
+  form_snippet: text.html
+  form_placeholder: Filled in automatically as you select areas above.
+- field_name: spatial_details
+  label: Spatial Coverage
+  form_snippet: text.html
+  display_snippet: null
+  form_placeholder: Filled in automatically as you select areas above.
+- field_name: place_keywords
+  label: Place Keywords
+  display_snippet: text.html
+  form_attrs:
+    data-module: place_keywords
     
 - field_name: spatial_description
   label: Spatial Description
