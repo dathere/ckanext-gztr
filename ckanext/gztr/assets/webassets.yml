@@ -2,6 +2,7 @@ gztr_theme-js:
     #filter: rjsmin
   output: ckanext-gztr_theme/%(version)s-gztr_theme.js
   contents:
+    - leaflet.js
     - gztr_theme.js
   extra:
     preload:
