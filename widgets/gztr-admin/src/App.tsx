@@ -92,7 +92,21 @@ function App() {
     const spatialFullTextbox = document.querySelector(
       "#field-spatial_full",
     ) as HTMLInputElement;
-    if (spatialFull) spatialFullTextbox.value = JSON.stringify(spatialFull);
+    if (spatialFull) {
+      spatialFullTextbox.value = JSON.stringify(spatialFull);
+      const placeKeywordsFeatures = extractFeaturesFromGeojson(spatialFull);
+      const placeKeywords = placeKeywordsFeatures
+        .map((f) =>
+          placeKeywordsFeatures.filter((g) => g.value === f.value).length > 1
+            ? `${f.value} (${f.category})`
+            : f.value,
+        )
+        .join(", ");
+      const placeKeywordsTextbox = document.querySelector(
+        "#field-place_keywords",
+      ) as HTMLInputElement;
+      placeKeywordsTextbox.value = placeKeywords;
+    }
     const spatialTextbox = document.querySelector(
       "#field-spatial",
     ) as HTMLInputElement;

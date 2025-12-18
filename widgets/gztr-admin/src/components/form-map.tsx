@@ -7,6 +7,7 @@ import GLMap, {
 } from "react-map-gl/maplibre";
 import "@/assets/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
+import { categories } from "@/components/category-combobox";
 import {
   getFeatureData,
   toggleOptionInSource,
@@ -52,7 +53,12 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                 layers: ["featuresFill"],
               },
             );
-            const featureName = renderedFeatures.at(0)?.properties.NAMELSAD;
+            const featureName =
+              renderedFeatures.at(0)?.properties[
+                // @ts-expect-error
+                categories.find((c) => c.label === currentCategory.label)
+                  .nameKey
+              ];
             setSelectedFeatureName(featureName);
             setLngLat([e.lngLat.lng, e.lngLat.lat]);
           });
@@ -67,7 +73,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
   return (
     <GLMap
       {...viewState}
-      onLoad={(e) => {
+      onLoad={() => {
         if (formMap) {
           const map = formMap.current.getMap();
           const featureSource = map.getSource("featureSource");

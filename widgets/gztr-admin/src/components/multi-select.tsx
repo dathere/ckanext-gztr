@@ -31,10 +31,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
-import {
-  extractFeaturesFromGeojson,
-  zoomToFeatureBounds,
-} from "@/lib/state-management";
+import { zoomToFeatureBounds } from "@/lib/state-management";
 import { cn } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
 

@@ -49,6 +49,7 @@ export const toggleOptionInSource = async (
       const geojsonData: GeoJSON = await existingSource.getData();
       // Check if feature exist, if so remove, otherwise add
       const existingValueIndex = selectedFeatures.findIndex(
+        // @ts-expect-error
         (opt) => opt.value === name && opt.category === category,
       );
       const existingFeatureIndex = geojsonData.features
