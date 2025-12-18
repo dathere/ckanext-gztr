@@ -12,6 +12,8 @@ import GLMap, {
 import "@/assets/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import { categories } from "@/components/category-combobox";
+import { HomeControl } from "@/components/home-control";
+import { Button } from "@/components/ui/button";
 import {
   getFeatureData,
   toggleOptionInSource,
@@ -19,7 +21,6 @@ import {
 } from "@/lib/state-management";
 // import { renderToStaticMarkup, renderToString } from "react-dom/server";
 import { useFormMap } from "@/stores/form-map-store";
-import { Button } from "./ui/button";
 
 const FormMap = ({ layerName }: { layerName?: string }) => {
   // @ts-expect-error
@@ -77,6 +78,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
   return (
     <GLMap
       {...viewState}
+      id="form-map"
       onLoad={() => {
         if (formMap) {
           const map = formMap.current.getMap();
@@ -123,9 +125,10 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
       style={{ width: "100%", height: 400, borderRadius: "1rem" }}
       mapStyle="https://tiles.openfreemap.org/styles/liberty"
     >
-      <GeolocateControl />
-      <FullscreenControl />
+      <HomeControl />
       <NavigationControl />
+      <FullscreenControl />
+      <GeolocateControl />
       <ScaleControl />
       {layerName && geojson && (
         <>
