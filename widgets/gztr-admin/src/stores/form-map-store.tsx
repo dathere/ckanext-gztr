@@ -5,6 +5,7 @@ import type { FeatureCategory } from "@/components/category-combobox";
 import type {
   MultiSelectGroup,
   MultiSelectOption,
+  MultiSelectRef,
 } from "@/components/multi-select";
 
 interface FormMapState {
@@ -35,6 +36,10 @@ interface FormMapState {
   setSelectedFeatures: (
     selectedFeatures: MultiSelectOption[] | MultiSelectGroup[],
   ) => void;
+  multiSelectRef: RefObject<MultiSelectRef | undefined> | undefined;
+  setMultiSelectRef: (
+    multiSelectRef: RefObject<MultiSelectRef | undefined>,
+  ) => void;
 }
 
 export const useFormMap = create<FormMapState>((set) => ({
@@ -62,4 +67,6 @@ export const useFormMap = create<FormMapState>((set) => ({
   setFeatures: (features) => set(() => ({ features })),
   selectedFeatures: [],
   setSelectedFeatures: (selectedFeatures) => set(() => ({ selectedFeatures })),
+  multiSelectRef: undefined,
+  setMultiSelectRef: (multiSelectRef) => set(() => ({ multiSelectRef })),
 }));

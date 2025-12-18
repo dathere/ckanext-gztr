@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 import { ExampleMap } from "@/components/example-map";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,12 +14,17 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import "./App.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CategoryCombobox, categories } from "@/components/category-combobox";
 import { FormMap } from "@/components/form-map";
-import { MultiSelect, type MultiSelectGroup } from "@/components/multi-select";
+import {
+  MultiSelect,
+  type MultiSelectGroup,
+  type MultiSelectRef,
+} from "@/components/multi-select";
 import { runAddressSearch, simplifyGeojson } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
+import { extractFeaturesFromGeojson } from "./lib/state-management";
 
 function App() {
   const [open, setOpen] = useState<boolean>();
@@ -37,8 +43,14 @@ function App() {
   const setSpatialFull = useFormMap((state) => state.setSpatialFull);
   const tempSpatialFull = useFormMap((state) => state.tempSpatialFull);
   const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
+  const mSRef = useRef<MultiSelectRef>(undefined);
+  // const multiSelectRef = useFormMap((state) => state.multiSelectRef);
+  const setMultiSelectRef = useFormMap((state) => state.setMultiSelectRef);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+  useEffect(() => {
+    if (mSRef) setMultiSelectRef(mSRef);
+  }, [mSRef]);
+
   useEffect(() => {
     (async () => {
       const featureGroups: MultiSelectGroup[] = [];
@@ -92,8 +104,18 @@ function App() {
       <Dialog
         open={open}
         onOpenChange={(o) => {
+          if (o) {
+            setTempSpatialFull(spatialFull);
+            const existingFeatures = extractFeaturesFromGeojson(spatialFull);
+            // @ts-expect-error
+            setSelectedFeatures(existingFeatures);
+          }
           // If dialog is being closed
-          if (!o) {
+          else {
+            setTempSpatialFull(undefined);
+            const existingFeatures = extractFeaturesFromGeojson(spatialFull);
+            // @ts-expect-error
+            setSelectedFeatures(existingFeatures);
           }
           setOpen(o);
         }}
@@ -216,12 +238,13 @@ function App() {
                     setCurrentCategory={setCurrentCategory}
                   />
                   <MultiSelect
+                    // TODO: Add ref to zustand state then use toggleOption in form-map for popup
+                    // ref={mSRef}
                     className="tw:mt-2"
                     placeholder="Select features for your dataset."
                     options={features}
                     // @ts-expect-error
                     onValueChange={setSelectedFeatures}
-                    // @ts-expect-error
                     defaultValue={selectedFeatures}
                     modalPopover={false}
                     autoSize={true}
@@ -255,6 +278,10 @@ function App() {
                   setSpatial(simplifyGeojson(tempSpatialFull));
                   setOpen(false);
                   setTempSpatialFull(undefined);
+                  setSelectedFeatures(
+                    // @ts-expect-error
+                    extractFeaturesFromGeojson(tempSpatialFull),
+                  );
                 }}
               >
                 Apply

@@ -31,6 +31,10 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { Separator } from "@/components/ui/separator";
+import {
+  extractFeaturesFromGeojson,
+  zoomToFeatureBounds,
+} from "@/lib/state-management";
 import { cn } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
 
@@ -135,7 +139,7 @@ interface MultiSelectProps
   onValueChange: (value: string[]) => void;
 
   /** The default selected values when the component mounts. */
-  defaultValue?: string[];
+  defaultValue?: any[];
 
   /**
    * Placeholder text to be displayed when no values are selected.
@@ -633,26 +637,6 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       }
     };
 
-    const zoomToFeatureBounds = async (featureId: string) => {
-      if (formMap) {
-        const map = formMap?.current.getMap();
-        const allFeaturesSource = map.getSource("featureSource");
-        // @ts-expect-error
-        const features = (await allFeaturesSource.getData()).features;
-        const featureGeojson = features.find(
-          (f: any) => f.properties.value === featureId,
-        );
-        map.addSource(featureId, {
-          type: "geojson",
-          data: featureGeojson,
-        });
-        // @ts-expect-error
-        const featureBounds = await map.getSource(featureId).getBounds();
-        map.fitBounds(featureBounds);
-        map.removeSource(featureId);
-      }
-    };
-
     const toggleOption = async (optionValue: string, groupName?: string) => {
       if (disabled) return;
       const option = getOptionByValue(optionValue, groupName);
@@ -679,7 +663,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
           if (existingLayer && existingSource) {
             // @ts-expect-error
             const geojsonData: GeoJSON = await existingSource.getData();
-            // TODO: Check if feature exist, if so remove, otherwise add
+            // Check if feature exist, if so remove, otherwise add
             const existingFeatureIndex = geojsonData.features.findIndex(
               (f: any) =>
                 f.properties.value === optionValue &&
@@ -700,7 +684,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
               });
               // @ts-expect-error
               existingSource.setData(geojsonData);
-              await zoomToFeatureBounds(option.value);
+              await zoomToFeatureBounds(option.value, formMap);
             }
             setTempSpatialFull(geojsonData);
           } else {
@@ -728,7 +712,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
               type: "fill",
               paint: { "fill-color": "rgba(80, 170, 244, 0.75)" },
             });
-            await zoomToFeatureBounds(option.value);
+            await zoomToFeatureBounds(option.value, formMap);
             // @ts-expect-error
             const geojsonData = await map.getSource("featureSource").getData();
             setTempSpatialFull(geojsonData);
@@ -1054,7 +1038,10 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                               tabIndex={0}
                               onClick={async (event) => {
                                 event.stopPropagation();
-                                await zoomToFeatureBounds(option.value);
+                                await zoomToFeatureBounds(
+                                  option.value,
+                                  formMap,
+                                );
                               }}
                               onKeyDown={async (event) => {
                                 if (
@@ -1063,7 +1050,10 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                                 ) {
                                   event.preventDefault();
                                   event.stopPropagation();
-                                  await zoomToFeatureBounds(option.value);
+                                  await zoomToFeatureBounds(
+                                    option.value,
+                                    formMap,
+                                  );
                                 }
                               }}
                               aria-label={`Zoom to ${option.label}`}

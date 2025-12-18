@@ -167,6 +167,7 @@ class GZTRPlugin(plugins.SingletonPlugin):
                 geometry = shape(feature.get("geometry", {}))
                 wkt = geometry.wkt
                 pkg_dict["spatial"] = wkt
+                pkg_dict.remove("spatial_full")
 
             # if place_keywords:
             #     pkg_dict["place_keywords"] = place_keywords.split(",")

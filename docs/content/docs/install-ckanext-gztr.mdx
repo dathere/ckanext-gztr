@@ -13,7 +13,7 @@ In this installation guide we'll use a CKAN source install set up for developmen
 
 <Callout title="Just trying out the extension?" type="info">If setting up a new CKAN instance for experimenting we suggest using [ckan-devstaller](https://ckan-devstaller.dathere.com).</Callout>
 
-<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.10.6 and 2.11.4 and hasn't been verified to work for other versions.</Callout>
+<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.10.6, 2.11.3, and 2.11.4 and hasn't been verified to work for other versions.</Callout>
 
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 
@@ -98,9 +98,9 @@ sudo apt-get install python-dev libxml2-dev libxslt1-dev libgeos-c1
 Then run the following in `/usr/lib/ckan/default/src`:
 
 ```bash
-git clone https://gitub.com/ckan/ckanext-spatial.git
+git clone https://gitub.com/dathere/ckanext-spatial.git
 cd ckanext-spatial
-git switch ckanext-gztr
+git switch gztr
 pip install -e .
 pip install -r requirements.txt
 ```
@@ -142,20 +142,15 @@ You'll also need to modify you SOLR schema as per the steps [mentioned](https://
 
 Notice that instead of `spatial_geom` as mentioned in the docs for the field name we use `spatial`.
 
-{/* TODO: Update location of this user agent code or add to ckan.ini */}
+{/* TODO: Install JTS as per https://github.com/tino097/ckan-compose/blob/twdh-schema/solr/Dockerfile or similar to fix java NoClassDefinedError */}
 
-Update the `User-Agent` value in `ckanext-spatial/ckanext/spatial/public/js/spatial_query.js` on line 122 to your organization name. For example if your organization is named `My Organization`:
-
-```javascript
-...
-      fetch(nominatimEndpoint, {
-        headers: {
-          "User-Agent": "My Organization"
-        },
-        signal: AbortSignal.timeout(5000)
-      }).then((res) => res.json().then((data) => {
-...
-```
+{/* TODO: Update location of this user agent code or add to ckan.ini and     By default, the `solr-sptatial-field` backend uses the following
+    query. This can be customized by setting the
+    `ckanext.spatial.solr_query` configuration option, but note that
+    all placeholders must be included:
+    ```
+       {{!field f=spatial_geom}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))
+    ``` */}
 
 </Step>
 </Steps>
