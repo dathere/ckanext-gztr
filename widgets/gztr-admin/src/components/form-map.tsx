@@ -1,8 +1,12 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 import GLMap, {
+  FullscreenControl,
+  GeolocateControl,
   Layer,
   type MapRef,
+  NavigationControl,
   Popup,
+  ScaleControl,
   Source,
 } from "react-map-gl/maplibre";
 import "@/assets/maplibre-gl.css";
@@ -119,6 +123,10 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
       style={{ width: "100%", height: 400, borderRadius: "1rem" }}
       mapStyle="https://tiles.openfreemap.org/styles/liberty"
     >
+      <GeolocateControl />
+      <FullscreenControl />
+      <NavigationControl />
+      <ScaleControl />
       {layerName && geojson && (
         <>
           <Source id="geojson" type="geojson" data={geojson}>
