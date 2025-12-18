@@ -142,7 +142,7 @@ function App() {
               variant="outline"
               id="filter-click"
             >
-              Add Location Data
+              {selectedFeatures.length > 0 ? "Edit" : "Add"} Location Data
             </Button>
           </DialogTrigger>
           <DialogContent className="tw:sm:!max-w-[90%]">
