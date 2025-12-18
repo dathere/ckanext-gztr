@@ -154,11 +154,12 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
               ref={popupRef}
             >
               <div>
-                <p>
+                <p className="tw:text-xl">
                   <strong>{selectedFeatureName}</strong>
                 </p>
                 <br />
                 <Button
+                  className="btn btn-light"
                   onClick={async () => {
                     let newSelectedFeatures = [...selectedFeatures];
                     const existingValueIndex = selectedFeatures.findIndex(

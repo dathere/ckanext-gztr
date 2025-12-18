@@ -20,20 +20,20 @@ const createMapImage = async () => {
       attributionControl: false,
       zoomControl: false,
     });
-  
+
     const tileLayer = L.tileLayer(
       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     ).addTo(map);
 
     const geoJSONLayer = L.geoJSON(spatialSimp).addTo(map);
-  
+
     map.fitBounds(geoJSONLayer.getBounds());
-  
+
     // await new Promise(resolve => tileLayer.on("load", () => resolve()));
     // const dataURL = await domtoimage.toPng(mapElement, { width, height });
     // const parent = mapElement.parentElement;
     // parent.removeChild(mapElement);
-  
+
     // const imgElement = document.createElement("img");
     // imgElement.src = dataURL;
     // parent.appendChild(imgElement);

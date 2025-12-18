@@ -185,13 +185,30 @@ function App() {
                 <div className="px-0 tw:flex tw:justify-between tw:gap-16">
                   <div className="tw:flex tw:gap-1">
                     <Button className="btn btn-primary" id="filter-button">
-                      Draw Shape
+                      Draw Feature
                     </Button>
                     <Button className="btn btn-primary" id="drag-filter-button">
-                      Edit Shape
+                      Edit Features
                     </Button>
-                    <Button className="btn btn-danger" id="clear-filter-button">
-                      Clear All Shapes
+                    <Button
+                      className="btn btn-danger"
+                      id="clear-filter-button"
+                      onClick={async () => {
+                        setTempSpatialFull(undefined);
+                        setSelectedFeatures([]);
+                        if (formMap) {
+                          const map = formMap.current.getMap();
+                          const featureSource = map.getSource("featureSource");
+                          const geojsonData =
+                            // @ts-expect-error
+                            await featureSource.getData();
+                          geojsonData.features = [];
+                          // @ts-expect-error
+                          featureSource.setData(geojsonData);
+                        }
+                      }}
+                    >
+                      Clear All Features
                     </Button>
                   </div>
                   <div className="tw:flex tw:gap-2">
