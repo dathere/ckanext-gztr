@@ -45,6 +45,8 @@ interface FormMapState {
   ) => void;
   statewideEnabled: boolean;
   setStatewideEnabled: (statewideEnabled: boolean) => void;
+  addressSearchResults: any[];
+  setAddressSearchResults: (addressSearchResults: any[]) => void;
 }
 
 export const useFormMap = create<FormMapState>((set) => ({
@@ -78,4 +80,7 @@ export const useFormMap = create<FormMapState>((set) => ({
   setMultiSelectRef: (multiSelectRef) => set(() => ({ multiSelectRef })),
   statewideEnabled: false,
   setStatewideEnabled: (statewideEnabled) => set(() => ({ statewideEnabled })),
+  addressSearchResults: [],
+  setAddressSearchResults: (addressSearchResults) =>
+    set(() => ({ addressSearchResults })),
 }));

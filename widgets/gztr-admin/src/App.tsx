@@ -1,4 +1,5 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
+/** biome-ignore-all lint/suspicious/noArrayIndexKey: <explanation> */
 import { ExampleMap } from "@/components/example-map";
 import { Button } from "@/components/ui/button";
 import {
@@ -32,6 +33,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Spinner } from "@/components/ui/spinner";
 import { extractFeaturesFromGeojson } from "@/lib/state-management";
 import { runAddressSearch, simplifyGeojson } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
@@ -40,6 +42,7 @@ function App() {
   const [open, setOpen] = useState<boolean>();
   const [openStatewideAlert, setOpenStatewideAlert] = useState<boolean>();
   const [statewideChecked, setStatewideChecked] = useState<boolean>();
+  const [searching, setSearching] = useState<boolean>();
   const formMap = useFormMap((state) => state.formMap);
   const currentCategory = useFormMap((state) => state.currentCategory);
   const setCurrentCategory = useFormMap((state) => state.setCurrentCategory);
@@ -61,6 +64,12 @@ function App() {
   const setMultiSelectRef = useFormMap((state) => state.setMultiSelectRef);
   const statewideEnabled = useFormMap((state) => state.statewideEnabled);
   const setStatewideEnabled = useFormMap((state) => state.setStatewideEnabled);
+  const addressSearchResults = useFormMap(
+    (state) => state.addressSearchResults,
+  );
+  const setAddressSearchResults = useFormMap(
+    (state) => state.setAddressSearchResults,
+  );
 
   useEffect(() => {
     if (mSRef) setMultiSelectRef(mSRef);
@@ -200,7 +209,17 @@ function App() {
                         onKeyDown={async (e) => {
                           if (e.key === "Enter") {
                             const map = formMap?.current.getMap();
-                            if (map) await runAddressSearch(searchValue, map);
+                            if (map) {
+                              setSearching(true);
+                              await runAddressSearch(
+                                searchValue,
+                                map,
+                                setAddressSearchResults,
+                              );
+                              setSearching(false);
+                            }
+                          } else {
+                            setAddressSearchResults([]);
                           }
                         }}
                         placeholder="Search for an address."
@@ -229,36 +248,66 @@ function App() {
                       type="button"
                       onClick={async () => {
                         const map = formMap?.current.getMap();
-                        if (map) await runAddressSearch(searchValue, map);
+                        if (map) {
+                          setSearching(true);
+                          await runAddressSearch(
+                            searchValue,
+                            map,
+                            setAddressSearchResults,
+                          );
+                          setSearching(false);
+                        }
                       }}
                       disabled={!searchValue}
                     >
+                      {searching && <Spinner />}
                       Search address
                     </Button>
-                    <div
-                      id="search-dropdown"
-                      className="dropdown d-inline-flex d-none"
-                      style={{ width: "fit-content" }}
-                    >
-                      <Button
-                        className="btn btn-secondary dropdown-toggle"
-                        type="button"
-                        id="dropdownMenu2"
-                        data-bs-toggle="dropdown"
-                        aria-expanded="false"
+                    {addressSearchResults.length > 0 && (
+                      <div
+                        id="search-dropdown"
+                        className="dropdown d-inline-flex"
+                        style={{ width: "fit-content" }}
                       >
-                        View results
-                      </Button>
-                      <ul
-                        id="search-dropdown-list"
-                        className="dropdown-menu"
-                        // style={{ zIndex: 1001 }}
-                        aria-labelledby="dropdownMenu2"
-                      ></ul>
-                    </div>
-                    <span id="no-results-text" className="d-none text-danger">
-                      No results found.
-                    </span>
+                        <Button
+                          className="btn btn-secondary dropdown-toggle"
+                          type="button"
+                          id="dropdownMenu2"
+                          data-bs-toggle="dropdown"
+                          aria-expanded="false"
+                        >
+                          View results
+                        </Button>
+                        <ul
+                          id="search-dropdown-list"
+                          className="dropdown-menu"
+                          // style={{ zIndex: 1001 }}
+                          aria-labelledby="dropdownMenu2"
+                        >
+                          {addressSearchResults.map((address, idx) => (
+                            <Button
+                              className="tw:w-full tw:justify-start"
+                              onClick={() => {
+                                if (formMap) {
+                                  const map = formMap.current.getMap();
+                                  map.fitBounds(
+                                    [
+                                      [address.lon, address.lat],
+                                      [address.lon, address.lat],
+                                    ],
+                                    { zoom: 5 },
+                                  );
+                                }
+                              }}
+                              variant="ghost"
+                              key={idx}
+                            >
+                              {address.display_name}
+                            </Button>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

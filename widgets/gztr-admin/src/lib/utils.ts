@@ -11,6 +11,7 @@ export function cn(...inputs: ClassValue[]) {
 export const runAddressSearch = async (
   search_query?: string,
   map?: FormMap,
+  setAddressSearchResults?: (addressSearchResults: any[]) => void,
 ) => {
   if (search_query) {
     const nominatimEndpoint = `https://nominatim.openstreetmap.org/search?addressdetails=1&q=${search_query}&format=jsonv2&limit=10`;
@@ -22,6 +23,7 @@ export const runAddressSearch = async (
         signal: AbortSignal.timeout(5000),
       })
     ).json();
+    if (setAddressSearchResults) setAddressSearchResults(result);
     // TODO: List multiple results user can choose from
     if (result.length > 0 && map) {
       map.flyTo({ center: [result[0].lon, result[0].lat], zoom: 9 });
@@ -30,7 +32,6 @@ export const runAddressSearch = async (
 };
 
 export const simplifyGeojson = (str: string) => {
-  console.log(str);
   try {
     const origGeojson = str;
     // @ts-expect-error
