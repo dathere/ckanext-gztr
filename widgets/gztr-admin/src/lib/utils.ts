@@ -1,3 +1,4 @@
+import * as turf from "@turf/turf";
 import { type ClassValue, clsx } from "clsx";
 import type { Map as FormMap } from "maplibre-gl";
 import { twMerge } from "tailwind-merge";
@@ -28,34 +29,16 @@ export const runAddressSearch = async (
   }
 };
 
-const MAX_SIZE_FOR_SIMPLIFIED_GEOJSON = 30 * 1000; // 30 KB
-
 export const simplifyGeojson = (str: string) => {
   console.log(str);
   try {
     const origGeojson = str;
     // @ts-expect-error
     const firstTopo = Topojson.topology({ simp: origGeojson });
-    console.log("FIRSTTOPO:", firstTopo);
     // @ts-expect-error
     const merged = Topojson.merge(firstTopo, firstTopo.objects.simp.geometries);
-    console.log("MERGED:", merged);
-    return merged;
-    const secondTopo = Topojson.topology({ simp: merged });
-    console.log("SECONDTOPO:", secondTopo);
-    // @ts-expect-error
-    const presimplified = Topojson.presimplify(secondTopo);
-    console.log("PRESIMPLIFIED:", presimplified);
-    const quantile = Topojson.quantile(
-      presimplified,
-      MAX_SIZE_FOR_SIMPLIFIED_GEOJSON / JSON.stringify(str).length,
-    );
-    console.log("QUANTILE:", quantile);
-    const simplified = Topojson.simplify(presimplified, quantile);
-    console.log("SIMPLIFIED:", simplified);
-    const outGeojson = Topojson.feature(simplified, "simp");
-    console.log("OUTGEOJSON:", outGeojson);
-    return outGeojson;
+    const simplifiedData = turf.simplify(merged);
+    return simplifiedData;
   } catch (e) {
     console.error("Error while simplifying GeoJSON: ", String(e));
   }
