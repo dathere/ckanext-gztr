@@ -22,12 +22,24 @@ import {
   type MultiSelectGroup,
   type MultiSelectRef,
 } from "@/components/multi-select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { extractFeaturesFromGeojson } from "@/lib/state-management";
 import { runAddressSearch, simplifyGeojson } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
-import { extractFeaturesFromGeojson } from "./lib/state-management";
 
 function App() {
   const [open, setOpen] = useState<boolean>();
+  const [openStatewideAlert, setOpenStatewideAlert] = useState<boolean>();
+  const [statewideChecked, setStatewideChecked] = useState<boolean>();
   const formMap = useFormMap((state) => state.formMap);
   const currentCategory = useFormMap((state) => state.currentCategory);
   const setCurrentCategory = useFormMap((state) => state.setCurrentCategory);
@@ -41,11 +53,14 @@ function App() {
   const setSpatial = useFormMap((state) => state.setSpatial);
   const spatialFull = useFormMap((state) => state.spatialFull);
   const setSpatialFull = useFormMap((state) => state.setSpatialFull);
+  const stateGeojson = useFormMap((state) => state.stateGeojson);
   const tempSpatialFull = useFormMap((state) => state.tempSpatialFull);
   const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
   const mSRef = useRef<MultiSelectRef>(undefined);
   // const multiSelectRef = useFormMap((state) => state.multiSelectRef);
   const setMultiSelectRef = useFormMap((state) => state.setMultiSelectRef);
+  const statewideEnabled = useFormMap((state) => state.statewideEnabled);
+  const setStatewideEnabled = useFormMap((state) => state.setStatewideEnabled);
 
   useEffect(() => {
     if (mSRef) setMultiSelectRef(mSRef);
@@ -106,11 +121,13 @@ function App() {
         "#field-place_keywords",
       ) as HTMLInputElement;
       placeKeywordsTextbox.value = placeKeywords;
+    } else {
+      spatialFullTextbox.value = "";
     }
     const spatialTextbox = document.querySelector(
       "#field-spatial",
     ) as HTMLInputElement;
-    if (spatial) spatialTextbox.value = JSON.stringify(spatial);
+    spatialTextbox.value = spatial ? JSON.stringify(spatial) : "";
   }, [spatial, spatialFull]);
 
   return (
@@ -138,6 +155,7 @@ function App() {
         <form>
           <DialogTrigger asChild>
             <Button
+              disabled={statewideEnabled}
               className="btn btn-primary"
               variant="outline"
               id="filter-click"
@@ -305,10 +323,67 @@ function App() {
         </form>
       </Dialog>
       <div className="form-check form-switch">
+        <AlertDialog
+          open={openStatewideAlert}
+          onOpenChange={setOpenStatewideAlert}
+        >
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. You currently have{" "}
+                {selectedFeatures.length} selected feature
+                {selectedFeatures.length > 1 ? "s" : ""}. If you continue, your
+                selected feature{selectedFeatures.length > 1 ? "s" : ""} will be
+                removed and the statewide extent will be selected instead.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel
+                className="btn btn-danger"
+                onClick={() => setOpenStatewideAlert(false)}
+              >
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction
+                className="btn btn-success"
+                onClick={() => {
+                  setStatewideEnabled(true);
+                  setOpenStatewideAlert(false);
+                  setSelectedFeatures([]);
+                  setStatewideChecked(true);
+                  setSpatialFull(stateGeojson);
+                  setSpatial(simplifyGeojson(stateGeojson));
+                }}
+              >
+                Continue
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
         <Input
           className="form-check-input"
+          checked={statewideChecked}
           type="checkbox"
           id="statewide-switch"
+          onClick={(e) => {
+            // @ts-expect-error
+            const checked = e.target.checked;
+            if (selectedFeatures.length > 0 && !statewideEnabled) {
+              e.preventDefault();
+              setOpenStatewideAlert(true);
+            } else {
+              setStatewideEnabled(checked);
+              setStatewideChecked(checked);
+              if (checked) {
+                setSpatialFull(stateGeojson);
+                setSpatial(simplifyGeojson(stateGeojson));
+              } else {
+                setSpatialFull(undefined);
+                setSpatial(undefined);
+              }
+            }
+          }}
         />
         <Label className="form-check-label" htmlFor="statewide-switch">
           Statewide Extent?

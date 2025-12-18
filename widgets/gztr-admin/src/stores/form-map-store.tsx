@@ -16,6 +16,9 @@ interface FormMapState {
   // GeoJSON for currentCategory, showing category map layer
   geojson: any;
   setGeojson: (geojson: any) => void;
+  // Statewide extent GeoJSON
+  stateGeojson: any;
+  setStateGeojson: (stateGeojson: any) => void;
   // spatial field used in ckanext-spatial for indexing (simplified GeoJSON)
   spatial: any;
   setSpatial: (spatial: any) => void;
@@ -40,6 +43,8 @@ interface FormMapState {
   setMultiSelectRef: (
     multiSelectRef: RefObject<MultiSelectRef | undefined>,
   ) => void;
+  statewideEnabled: boolean;
+  setStatewideEnabled: (statewideEnabled: boolean) => void;
 }
 
 export const useFormMap = create<FormMapState>((set) => ({
@@ -53,6 +58,8 @@ export const useFormMap = create<FormMapState>((set) => ({
   setViewState: (viewState) => set(() => ({ viewState })),
   geojson: undefined,
   setGeojson: (geojson) => set(() => ({ geojson })),
+  stateGeojson: undefined,
+  setStateGeojson: (stateGeojson) => set(() => ({ stateGeojson })),
   spatial: undefined,
   setSpatial: (spatial) => set(() => ({ spatial })),
   spatialFull: undefined,
@@ -69,4 +76,6 @@ export const useFormMap = create<FormMapState>((set) => ({
   setSelectedFeatures: (selectedFeatures) => set(() => ({ selectedFeatures })),
   multiSelectRef: undefined,
   setMultiSelectRef: (multiSelectRef) => set(() => ({ multiSelectRef })),
+  statewideEnabled: false,
+  setStatewideEnabled: (statewideEnabled) => set(() => ({ statewideEnabled })),
 }));
