@@ -116,8 +116,14 @@ function App() {
     const spatialFullTextbox = document.querySelector(
       "#field-spatial_full",
     ) as HTMLInputElement;
-    if (spatialFull) {
-      spatialFullTextbox.value = JSON.stringify(spatialFull);
+    if (spatialFull) spatialFullTextbox.value = JSON.stringify(spatialFull);
+    else spatialFullTextbox.value = "";
+    const placeKeywordsTextbox = document.querySelector(
+      "#field-place_keywords",
+    ) as HTMLInputElement;
+    if (statewideEnabled) {
+      placeKeywordsTextbox.value = "New Mexico";
+    } else {
       const placeKeywordsFeatures = extractFeaturesFromGeojson(spatialFull);
       const placeKeywords = placeKeywordsFeatures
         .map((f) =>
@@ -126,12 +132,7 @@ function App() {
             : f.value,
         )
         .join(", ");
-      const placeKeywordsTextbox = document.querySelector(
-        "#field-place_keywords",
-      ) as HTMLInputElement;
       placeKeywordsTextbox.value = placeKeywords;
-    } else {
-      spatialFullTextbox.value = "";
     }
     const spatialTextbox = document.querySelector(
       "#field-spatial",
