@@ -50,7 +50,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
         setGeojson(data);
         if (mapRef) {
           // Add popups for each GeoJSON feature with details and select button
-          const map = mapRef.current;
+          const map = mapRef.current.getMap();
           map.on("click", "featuresFill", (e) => {
             const renderedFeatures = map.queryRenderedFeatures(
               [e.point.x, e.point.y],
@@ -66,6 +66,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
               ];
             setSelectedFeatureName(featureName);
             setLngLat([e.lngLat.lng, e.lngLat.lat]);
+            if (popupRef.current) popupRef.current.addTo(map);
           });
         }
       })();
@@ -157,7 +158,6 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                 <p className="tw:text-xl">
                   <strong>{selectedFeatureName}</strong>
                 </p>
-                <br />
                 <Button
                   className="btn btn-light"
                   onClick={async () => {
@@ -192,7 +192,8 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                       features,
                       newSelectedFeatures,
                     );
-                    await zoomToFeatureBounds(selectedFeatureName, formMap);
+                    if (existingValueIndex === -1)
+                      await zoomToFeatureBounds(selectedFeatureName, formMap);
                     const map = formMap?.current.getMap();
                     // @ts-expect-error
                     const featureSource = map.getSource("featureSource");
@@ -201,7 +202,16 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                     setTempSpatialFull(geojsonData);
                   }}
                 >
-                  Select this feature
+                  {selectedFeatures.findIndex(
+                    (opt) =>
+                      // @ts-expect-error
+                      opt.value === selectedFeatureName &&
+                      // @ts-expect-error
+                      opt.category === currentCategory.label,
+                  ) === -1
+                    ? "Select"
+                    : "Remove"}{" "}
+                  this feature
                 </Button>
               </div>
             </Popup>
