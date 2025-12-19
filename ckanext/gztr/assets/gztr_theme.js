@@ -10,20 +10,28 @@ const createMapImage = async () => {
   const height = 125;
   const datasetMaps = document.querySelectorAll(".dataset-item-map");
 
-  for (const mapElement of datasetMaps) {
+  for (const [index, mapElement] of datasetMaps.entries()) {
     const spatialSimp = JSON.parse(mapElement.getAttribute("data-package"));
 
     mapElement.style.width = `${width}px`;
     mapElement.style.height = `${height}px`;
 
     const map = L.map(mapElement, {
-      attributionControl: false,
       zoomControl: false,
     });
 
-    const tileLayer = L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-    ).addTo(map);
+    map.attributionControl.setPrefix(false);
+
+    if (index === 0) {
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+      }).addTo(map)
+    } else {
+      L.tileLayer(
+        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+      }).addTo(map)
+    }
 
     const geoJSONLayer = L.geoJSON(spatialSimp).addTo(map);
 
