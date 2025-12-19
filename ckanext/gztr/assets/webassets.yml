@@ -12,6 +12,7 @@ gztr_theme-css:
   filter: cssrewrite
   output: ckanext-gztr_theme/%(version)s-gztr_theme.css
   contents:
+    - leaflet.css
     - ckanext_gztr.css
     
 # gazetteer_widget-css:
