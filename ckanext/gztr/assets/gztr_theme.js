@@ -22,7 +22,7 @@ const createMapImage = async () => {
     });
 
     const tileLayer = L.tileLayer(
-      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", { tileSize: width }
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
     ).addTo(map);
 
     const geoJSONLayer = L.geoJSON(spatialSimp).addTo(map);
