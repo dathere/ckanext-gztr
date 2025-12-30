@@ -70,6 +70,8 @@ function App() {
   const setAddressSearchResults = useFormMap(
     (state) => state.setAddressSearchResults,
   );
+  const gm = useFormMap((state) => state.gm);
+  const disableApplyButton = useFormMap((state) => state.disableApplyButton);
 
   useEffect(() => {
     if (mSRef) setMultiSelectRef(mSRef);
@@ -126,6 +128,7 @@ function App() {
     } else {
       const placeKeywordsFeatures = extractFeaturesFromGeojson(spatialFull);
       const placeKeywords = placeKeywordsFeatures
+        .filter((f) => f.category !== "Drawn features")
         .map((f) =>
           placeKeywordsFeatures.filter((g) => g.value === f.value).length > 1
             ? `${f.value} (${f.category})`
@@ -185,11 +188,68 @@ function App() {
               <div className="flex flex-wrap row gy-2 mx-0 mb-2">
                 <div className="px-0 tw:flex tw:justify-between tw:gap-16">
                   <div className="tw:flex tw:gap-1">
-                    <Button className="btn btn-primary" id="filter-button">
-                      Draw Feature
+                    <Button
+                      className="btn btn-primary"
+                      id="add-drawn-features-button"
+                      onClick={(e) => {
+                        if (gm) {
+                          const drawIsEnabled = gm.drawEnabled("polygon");
+                          gm.toggleDraw("polygon");
+                          const editFeaturesButton = document.querySelector(
+                            "#edit-drawn-features-button",
+                          );
+                          if (editFeaturesButton) {
+                            editFeaturesButton.toggleAttribute("disabled");
+                          }
+                          if (drawIsEnabled) {
+                            e.currentTarget.innerText = "Draw features";
+                            e.currentTarget.classList.replace(
+                              "btn-danger",
+                              "btn-primary",
+                            );
+                          } else {
+                            e.currentTarget.innerText = "Stop drawing";
+                            e.currentTarget.classList.replace(
+                              "btn-primary",
+                              "btn-danger",
+                            );
+                          }
+                        }
+                      }}
+                    >
+                      Draw features
                     </Button>
-                    <Button className="btn btn-primary" id="drag-filter-button">
-                      Edit Features
+                    <Button
+                      className="btn btn-primary"
+                      id="edit-drawn-features-button"
+                      onClick={(e) => {
+                        if (gm) {
+                          gm.toggleGlobalEditMode();
+                          const addFeaturesButton = document.querySelector(
+                            "#add-drawn-features-button",
+                          );
+                          if (addFeaturesButton) {
+                            addFeaturesButton.toggleAttribute("disabled");
+                          }
+                          const button = e.currentTarget;
+                          const currentInnerText = button.innerText;
+                          if (currentInnerText === "Edit drawn features") {
+                            button.innerText = "Stop editing";
+                            button.classList.replace(
+                              "btn-primary",
+                              "btn-danger",
+                            );
+                          } else {
+                            button.innerText = "Edit drawn features";
+                            button.classList.replace(
+                              "btn-danger",
+                              "btn-primary",
+                            );
+                          }
+                        }
+                      }}
+                    >
+                      Edit drawn features
                     </Button>
                     <Button
                       className="btn btn-danger"
@@ -209,7 +269,7 @@ function App() {
                         }
                       }}
                     >
-                      Clear All Features
+                      Clear all features
                     </Button>
                   </div>
                   <div className="tw:flex tw:gap-2">
@@ -337,7 +397,6 @@ function App() {
                     setCurrentCategory={setCurrentCategory}
                   />
                   <MultiSelect
-                    // TODO: Add ref to zustand state then use toggleOption in form-map for popup
                     // ref={mSRef}
                     className="tw:mt-2"
                     placeholder="Select features for your dataset."
@@ -349,6 +408,7 @@ function App() {
                     autoSize={true}
                     maxCount={100}
                     hideSelectAll={true}
+                    gm={gm}
                   />
                 </div>
                 <div className="tw:col-span-4">
@@ -372,6 +432,7 @@ function App() {
               </DialogClose>
               <Button
                 className="btn btn-success"
+                disabled={disableApplyButton}
                 onClick={() => {
                   setSpatialFull(tempSpatialFull);
                   setSpatial(simplifyGeojson(tempSpatialFull));
@@ -383,7 +444,9 @@ function App() {
                   );
                 }}
               >
-                Apply
+                {disableApplyButton
+                  ? "You must click the Stop button at the top left first"
+                  : "Apply"}
               </Button>
             </DialogFooter>
           </DialogContent>

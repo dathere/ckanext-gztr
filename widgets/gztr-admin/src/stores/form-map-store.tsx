@@ -1,3 +1,4 @@
+import type { Geoman } from "@geoman-io/maplibre-geoman-free";
 import type { RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import { create } from "zustand";
@@ -32,7 +33,6 @@ interface FormMapState {
   setCurrentCategory: (currentCategory: FeatureCategory) => void;
   searchValue: string | undefined;
   setSearchValue: (searchValue: string) => void;
-  // TODO: improve features state to allow for flyTo, pop-up data, category, etc.
   features: MultiSelectOption[] | MultiSelectGroup[];
   setFeatures: (features: MultiSelectOption[] | MultiSelectGroup[]) => void;
   selectedFeatures: MultiSelectOption[] | MultiSelectGroup[];
@@ -47,6 +47,10 @@ interface FormMapState {
   setStatewideEnabled: (statewideEnabled: boolean) => void;
   addressSearchResults: any[];
   setAddressSearchResults: (addressSearchResults: any[]) => void;
+  gm: Geoman | undefined;
+  setGm: (gm: Geoman) => void;
+  disableApplyButton: boolean;
+  setDisableApplyButton: (disableApplyButton: boolean) => void;
 }
 
 export const useFormMap = create<FormMapState>((set) => ({
@@ -83,4 +87,8 @@ export const useFormMap = create<FormMapState>((set) => ({
   addressSearchResults: [],
   setAddressSearchResults: (addressSearchResults) =>
     set(() => ({ addressSearchResults })),
+  gm: undefined,
+  setGm: (gm) => set({ gm }),
+  disableApplyButton: false,
+  setDisableApplyButton: (disableApplyButton) => set({ disableApplyButton }),
 }));

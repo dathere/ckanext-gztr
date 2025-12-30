@@ -10,16 +10,25 @@ import GLMap, {
   Source,
 } from "react-map-gl/maplibre";
 import "@/assets/maplibre-gl.css";
+import {
+  type FeatureCreatedFwdEvent,
+  Geoman,
+  type GlobalDrawToggledFwdEvent,
+  type GlobalEditToggledFwdEvent,
+  type GmEditFeatureEditEndEvent,
+  type GmOptionsPartial,
+} from "@geoman-io/maplibre-geoman-free";
 import { useEffect, useRef, useState } from "react";
 import { categories } from "@/components/category-combobox";
 import { HomeControl } from "@/components/home-control";
 import { Button } from "@/components/ui/button";
 import {
+  extractDrawnFeaturesFromGeojson,
   getFeatureData,
+  initializeFeatureSourceAndLayer,
   toggleOptionInSource,
   zoomToFeatureBounds,
 } from "@/lib/state-management";
-// import { renderToStaticMarkup, renderToString } from "react-dom/server";
 import { useFormMap } from "@/stores/form-map-store";
 
 const FormMap = ({ layerName }: { layerName?: string }) => {
@@ -39,7 +48,12 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
   const features = useFormMap((state) => state.features);
   const selectedFeatures = useFormMap((state) => state.selectedFeatures);
   const setSelectedFeatures = useFormMap((state) => state.setSelectedFeatures);
+  const spatialFull = useFormMap((state) => state.spatialFull);
   const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
+  const setGm = useFormMap((state) => state.setGm);
+  const setDisableApplyButton = useFormMap(
+    (state) => state.setDisableApplyButton,
+  );
 
   useEffect(() => {
     if (layerName)
@@ -84,31 +98,194 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
         if (formMap) {
           const map = formMap.current.getMap();
           const featureSource = map.getSource("featureSource");
+          // Initialize geoman
+          const gmOptions: GmOptionsPartial = {
+            settings: {
+              controlsPosition: "top-left",
+              throttlingDelay: 100,
+            },
+            controls: {
+              draw: {
+                polygon: {
+                  title: "Draw a feature (polygon)",
+                },
+                marker: {
+                  uiEnabled: false,
+                },
+                circle_marker: { uiEnabled: false },
+                text_marker: { uiEnabled: false },
+                circle: { uiEnabled: false, title: "Draw a feature (circle)" },
+                ellipse: {
+                  uiEnabled: false,
+                  title: "Draw a feature (ellipse)",
+                },
+                rectangle: {
+                  uiEnabled: false,
+                  title: "Draw a feature (rectangle)",
+                },
+                line: { uiEnabled: false },
+              },
+              edit: {
+                change: {
+                  title: "Edit features",
+                },
+              },
+              helper: {
+                zoom_to_features: { uiEnabled: false },
+              },
+            },
+          };
+          const newGm = new Geoman(map, gmOptions);
+          setGm(newGm);
+          const drawnFeatures = extractDrawnFeaturesFromGeojson(spatialFull);
           if (!featureSource) {
             map.addSource("featureSource", {
               type: "geojson",
               data: {
                 type: "FeatureCollection",
+                // @ts-expect-error
                 features: selectedFeatures
-                  ? selectedFeatures.map((f) => ({
-                      type: "Feature",
-                      geometry:
+                  ? selectedFeatures.map((f) => {
+                      const outputFeature = {
+                        type: "Feature",
+                        geometry:
+                          // @ts-expect-error
+                          f.category === "Drawn features"
+                            ? // @ts-expect-error
+                              drawnFeatures.find(
+                                (g) =>
+                                  // @ts-expect-error
+                                  g.properties.category === f.category &&
+                                  // @ts-expect-error
+                                  g.properties.value === f.value,
+                              ).geometry
+                            : // @ts-expect-error
+                              getFeatureData(f.value, f.category, features)
+                                .geometry,
+                        properties: {
+                          // @ts-expect-error
+                          value: f.value,
+                          // @ts-expect-error
+                          category: f.category,
+                        },
+                      };
+                      // @ts-expect-error
+                      if (f.category === "Drawn features") {
                         // @ts-expect-error
-                        getFeatureData(f.value, f.category, features).geometry,
-                      properties: {
-                        // @ts-expect-error
-                        value: f.value,
-                        // @ts-expect-error
-                        category: f.category,
-                      },
-                    }))
+                        outputFeature.id = f.value;
+                      }
+                      return outputFeature;
+                    })
                   : [],
               },
+            });
+            map.once("gm:loaded", () => {
+              // Add GM features if drawn features in selectedFeatures from spatialFull
+              drawnFeatures.forEach((dF) => {
+                // @ts-expect-error
+                newGm.features.importGeoJsonFeature(dF);
+              });
+            });
+            // TODO: on done with edit event, update drawn features
+            map.on("gm:editend", async (event: GmEditFeatureEditEndEvent) => {
+              event.feature.setProperties({
+                value: event.feature.id,
+                category: "Drawn features",
+              });
+              const existingSource = map.getSource("featureSource");
+              // @ts-expect-error
+              const geojsonData = await existingSource?.getData();
+              const existingFeatureIndex = geojsonData.features
+                ? geojsonData.features.findIndex(
+                    (f: any) =>
+                      f.properties.value === event.feature.id &&
+                      f.properties.category === "Drawn features",
+                  )
+                : -1;
+              if (existingFeatureIndex > -1) {
+                const originalFeatureID =
+                  geojsonData.features[existingFeatureIndex].id;
+                geojsonData.features[existingFeatureIndex] = {
+                  type: "Feature",
+                  geometry: event.feature.getGeoJson().geometry,
+                  properties: {
+                    value: originalFeatureID,
+                    category: "Drawn features",
+                  },
+                  id: originalFeatureID,
+                };
+                // @ts-expect-error
+                existingSource.setData(geojsonData);
+              }
+            });
+            map.on(
+              "gm:globaleditmodetoggled",
+              async (event: GlobalEditToggledFwdEvent) => {
+                if (event.action === "mode_start") {
+                  setDisableApplyButton(true);
+                } else if (event.action === "mode_end") {
+                  setDisableApplyButton(false);
+                }
+                // const geoJsonData = newGm.features.exportGeoJson();
+                const existingFeatures = await event.map
+                  // @ts-expect-error
+                  .getSource("featureSource")
+                  .getData();
+                setTempSpatialFull(existingFeatures);
+              },
+            );
+            map.on(
+              "gm:globaldrawmodetoggled",
+              async (event: GlobalDrawToggledFwdEvent) => {
+                if (event.action === "mode_start") {
+                  setDisableApplyButton(true);
+                } else if (event.action === "mode_end") {
+                  setDisableApplyButton(false);
+                }
+              },
+            );
+            map.on("gm:create", async (event: FeatureCreatedFwdEvent) => {
+              const drawnFeatureId = event.feature.id.toString();
+              const drawnGeojson = event.feature._geoJson;
+              const drawnFeatureName = drawnFeatureId;
+              const drawnFeatureCategory = "Drawn features";
+              const fSource = map.getSource("featureSource");
+              const newSelectedFeatures = [
+                // @ts-expect-error
+                ...(await fSource.getData()).features.map((f) => ({
+                  value: f.properties.value,
+                  category: f.properties.category,
+                })),
+                { value: drawnFeatureName, category: drawnFeatureCategory },
+              ];
+              setSelectedFeatures(newSelectedFeatures);
+              await toggleOptionInSource(
+                drawnFeatureName,
+                drawnFeatureCategory,
+                formMap,
+                features,
+                newSelectedFeatures,
+                // @ts-expect-error
+                drawnGeojson,
+              );
+              await zoomToFeatureBounds(drawnFeatureName, formMap);
+              let featureSource = map.getSource("featureSource");
+              if (!featureSource) {
+                initializeFeatureSourceAndLayer(map, newSelectedFeatures);
+                featureSource = map.getSource("featureSource");
+              }
+              // @ts-expect-error
+              const geojsonData = await featureSource?.getData();
+              setTempSpatialFull(geojsonData);
             });
             map.addLayer({
               id: "featureLayer",
               // References the GeoJSON source defined above
-              // and does not require a `source-layer`
+              // and does not require a `source-layer`.
+              // Filter means do not provide a background fill for feature.properties.category
+              // where it is equal to "Drawn features" (since it already has a background fill).
+              // See https://maplibre.org/maplibre-style-spec/expressions/#data-expressions for more info.
+              filter: ["!=", "Drawn features", ["get", "category"]],
               source: "featureSource",
               type: "fill",
               paint: { "fill-color": "rgba(80, 170, 244, 0.75)" },
@@ -218,7 +395,6 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
           )}
         </>
       )}
-      {/* TODO: Add each selectedFeatures GeoJSON layer */}
     </GLMap>
   );
 };

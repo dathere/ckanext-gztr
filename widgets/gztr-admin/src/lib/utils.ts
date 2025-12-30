@@ -24,7 +24,6 @@ export const runAddressSearch = async (
       })
     ).json();
     if (setAddressSearchResults) setAddressSearchResults(result);
-    // TODO: List multiple results user can choose from
     if (result.length > 0 && map) {
       map.flyTo({ center: [result[0].lon, result[0].lat], zoom: 9 });
     }
@@ -38,7 +37,7 @@ export const simplifyGeojson = (str: string) => {
     const firstTopo = Topojson.topology({ simp: origGeojson });
     // @ts-expect-error
     const merged = Topojson.merge(firstTopo, firstTopo.objects.simp.geometries);
-    const simplifiedData = turf.simplify(merged);
+    const simplifiedData = turf.simplify(merged, { tolerance: 0.005 });
     return simplifiedData;
   } catch (e) {
     console.error("Error while simplifying GeoJSON: ", String(e));

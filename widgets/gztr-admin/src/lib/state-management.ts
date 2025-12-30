@@ -1,4 +1,5 @@
-import type { Feature } from "maplibre-gl";
+import type { GeoJsonShapeFeature } from "@geoman-io/maplibre-geoman-free";
+import type { Feature, Map as MapLibreMap } from "maplibre-gl";
 import type { RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import type {
@@ -17,6 +18,13 @@ export const extractFeaturesFromGeojson = (spatialFull: SpatialFull) => {
     value: feature.properties.value,
     category: feature.properties.category,
   }));
+};
+
+export const extractDrawnFeaturesFromGeojson = (spatialFull: SpatialFull) => {
+  if (!spatialFull || !("features" in spatialFull)) return [];
+  return spatialFull.features.filter(
+    (f) => f.properties.category === "Drawn features",
+  );
 };
 
 export const getFeatureData = (
@@ -39,6 +47,7 @@ export const toggleOptionInSource = async (
   formMap: RefObject<MapRef> | undefined,
   features: MultiSelectOption[] | MultiSelectGroup[],
   selectedFeatures: MultiSelectOption[] | MultiSelectGroup[],
+  providedGeojson?: GeoJsonShapeFeature,
 ) => {
   if (formMap) {
     const map = formMap.current.getMap();
@@ -63,14 +72,20 @@ export const toggleOptionInSource = async (
         // @ts-expect-error
         existingSource.setData(geojsonData);
       } else {
-        geojsonData.features.push({
+        const newFeature = {
           type: "Feature",
-          geometry: getFeatureData(name, category, features).geometry,
+          geometry:
+            category === "Drawn features"
+              ? providedGeojson?.geometry
+              : getFeatureData(name, category, features).geometry,
           properties: {
             value: name,
             category: category,
           },
-        });
+        };
+        // @ts-expect-error
+        if (category === "Drawn features") newFeature.id = name;
+        geojsonData.features.push(newFeature);
         // @ts-expect-error
         existingSource.setData(geojsonData);
       }
@@ -81,10 +96,18 @@ export const toggleOptionInSource = async (
 export const zoomToFeatureBounds = async (
   featureId: string,
   formMap: RefObject<MapRef> | undefined,
+  selectedFeatures?: any[],
 ) => {
   if (formMap) {
     const map = formMap?.current.getMap();
-    const allFeaturesSource = map.getSource("featureSource");
+    let allFeaturesSource = map.getSource("featureSource");
+    if (!allFeaturesSource) {
+      initializeFeatureSourceAndLayer(
+        map,
+        selectedFeatures ? selectedFeatures : [],
+      );
+      allFeaturesSource = map.getSource("featureSource");
+    }
     // @ts-expect-error
     const features = (await allFeaturesSource.getData()).features;
     const featureGeojson = features.find(
@@ -95,9 +118,43 @@ export const zoomToFeatureBounds = async (
       data: featureGeojson,
     });
     const source = map.getSource(featureId);
-    // @ts-expect-error
-    const featureBounds = await source.getBounds();
-    map.fitBounds(featureBounds);
-    map.removeSource(featureId);
+    if (source) {
+      // @ts-expect-error
+      const featureBounds = await source.getBounds();
+      if (featureBounds) map.fitBounds(featureBounds);
+      map.removeSource(featureId);
+    }
   }
+};
+
+export const initializeFeatureSourceAndLayer = (
+  map: MapLibreMap,
+  selectedFeatures: any[],
+) => {
+  map.addSource("featureSource", {
+    type: "geojson",
+    data: {
+      type: "FeatureCollection",
+      features: selectedFeatures
+        ? selectedFeatures.map((f) => ({
+            type: "Feature",
+            geometry:
+              // @ts-expect-error
+              getFeatureData(f.value, f.category, features).geometry,
+            properties: {
+              value: f.value,
+              category: f.category,
+            },
+          }))
+        : [],
+    },
+  });
+  map.addLayer({
+    id: "featureLayer",
+    // References the GeoJSON source defined above
+    // and does not require a `source-layer`
+    source: "featureSource",
+    type: "fill",
+    paint: { "fill-color": "rgba(80, 170, 244, 0.75)" },
+  });
 };

@@ -1,3 +1,4 @@
+import type { Geoman } from "@geoman-io/maplibre-geoman-free";
 import { cva, type VariantProps } from "class-variance-authority";
 import {
   CheckIcon,
@@ -287,6 +288,8 @@ interface MultiSelectProps
    * Optional, defaults to false.
    */
   closeOnSelect?: boolean;
+
+  gm?: Geoman;
 }
 
 /**
@@ -342,6 +345,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       deduplicateOptions = false,
       resetOnDefaultValueChange = true,
       closeOnSelect = false,
+      gm,
       ...props
     },
     ref,
@@ -709,7 +713,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
               type: "fill",
               paint: { "fill-color": "rgba(80, 170, 244, 0.75)" },
             });
-            await zoomToFeatureBounds(option.value, formMap);
+            // await zoomToFeatureBounds(option.value, formMap);
             // @ts-expect-error
             const geojsonData = await map.getSource("featureSource").getData();
             setTempSpatialFull(geojsonData);
@@ -967,10 +971,23 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                     {selectedValues
                       .slice(0, responsiveSettings.maxCount)
                       .map((value) => {
-                        const option = getOptionByValue(
-                          value.value,
-                          value.category,
-                        );
+                        // biome-ignore lint/complexity/noUselessUndefinedInitialization: <explanation>
+                        let option = undefined;
+                        if (value.category === "Drawn features") {
+                          option = {
+                            label: value.value,
+                            value: value.value,
+                            category: value.category,
+                            geometry: gm?.features
+                              .get("gm_main", value.value)
+                              ?.getGeoJson().geometry,
+                          };
+                        } else {
+                          option = getOptionByValue(
+                            value.value,
+                            value.category,
+                          );
+                        }
                         const IconComponent = option?.icon;
                         const customStyle = option?.style;
                         if (!option) {
