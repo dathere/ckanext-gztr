@@ -78,7 +78,6 @@ dataset_fields:
 - field_name: spatial_full
   label: Spatial Full
   form_snippet: text.html
-  display_snippet: spatial_details.html
   form_placeholder: Filled in automatically as you select areas above.
 - field_name: spatial
   label: Spatial

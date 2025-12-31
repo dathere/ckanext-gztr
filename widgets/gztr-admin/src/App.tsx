@@ -72,6 +72,7 @@ function App() {
   );
   const gm = useFormMap((state) => state.gm);
   const disableApplyButton = useFormMap((state) => state.disableApplyButton);
+  const [fieldsAreInitialized, setFieldsAreInitialized] = useState(false);
 
   useEffect(() => {
     if (mSRef) setMultiSelectRef(mSRef);
@@ -115,11 +116,15 @@ function App() {
   }, []);
 
   useEffect(() => {
+    if (!fieldsAreInitialized)
+      setFieldsAreInitialized(true);
     const spatialFullTextbox = document.querySelector(
       "#field-spatial_full",
     ) as HTMLInputElement;
-    if (spatialFull) spatialFullTextbox.value = JSON.stringify(spatialFull);
-    else spatialFullTextbox.value = "";
+    if (fieldsAreInitialized)
+      spatialFullTextbox.value = spatialFull ? JSON.stringify(spatialFull) : "";
+    else
+      setSpatialFull(JSON.parse(spatialFullTextbox.value));
     const placeKeywordsTextbox = document.querySelector(
       "#field-place_keywords",
     ) as HTMLInputElement;
@@ -140,7 +145,10 @@ function App() {
     const spatialTextbox = document.querySelector(
       "#field-spatial",
     ) as HTMLInputElement;
-    spatialTextbox.value = spatial ? JSON.stringify(spatial) : "";
+    if (fieldsAreInitialized)
+      spatialTextbox.value = spatial ? JSON.stringify(spatial) : "";
+    else
+      setSpatial(JSON.parse(spatialTextbox.value));
   }, [spatial, spatialFull]);
 
   return (
