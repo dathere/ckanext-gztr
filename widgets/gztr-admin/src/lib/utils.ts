@@ -37,7 +37,8 @@ export const simplifyGeojson = (str: string) => {
     const firstTopo = Topojson.topology({ simp: origGeojson });
     // @ts-expect-error
     const merged = Topojson.merge(firstTopo, firstTopo.objects.simp.geometries);
-    const simplifiedData = turf.simplify(merged, { tolerance: 0.005 });
+    // Refer to https://mourner.github.io/simplify-js/ for more details and options info.
+    const simplifiedData = turf.simplify(merged, { highQuality: true, tolerance: 0.0001 });
     return simplifiedData;
   } catch (e) {
     console.error("Error while simplifying GeoJSON: ", String(e));
