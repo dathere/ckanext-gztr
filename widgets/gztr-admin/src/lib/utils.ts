@@ -38,7 +38,14 @@ export const simplifyGeojson = (str: string) => {
     // @ts-expect-error
     const merged = Topojson.merge(firstTopo, firstTopo.objects.simp.geometries);
     // Refer to https://mourner.github.io/simplify-js/ for more details and options info.
-    const simplifiedData = turf.simplify(merged, { highQuality: true, tolerance: 0.0001 });
+    let tolerance = 0.0001;
+    let simplifiedData = turf.simplify(merged, { highQuality: true, tolerance });
+    // Simplify further if not less than 30KB (to resolve SOLR indexing issue of 32KB max)
+    const MAX_SIZE_FOR_SIMP = 30 * 1000; // 30 KB
+    while (String(simplifiedData).length > MAX_SIZE_FOR_SIMP) {
+        tolerance += 0.001;
+        simplifiedData = turf.simplify(merged, { highQuality: true, tolerance });
+    }
     return simplifiedData;
   } catch (e) {
     console.error("Error while simplifying GeoJSON: ", String(e));
