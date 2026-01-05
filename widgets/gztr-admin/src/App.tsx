@@ -123,7 +123,7 @@ function App() {
     ) as HTMLInputElement;
     if (fieldsAreInitialized)
       spatialFullTextbox.value = spatialFull ? JSON.stringify(spatialFull) : "";
-    else
+    else if (spatialFullTextbox.value)
       setSpatialFull(JSON.parse(spatialFullTextbox.value));
     const placeKeywordsTextbox = document.querySelector(
       "#field-place_keywords",
