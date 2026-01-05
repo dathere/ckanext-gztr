@@ -147,7 +147,7 @@ function App() {
     ) as HTMLInputElement;
     if (fieldsAreInitialized)
       spatialTextbox.value = spatial ? JSON.stringify(spatial) : "";
-    else
+    else if (spatialTextbox.value)
       setSpatial(JSON.parse(spatialTextbox.value));
   }, [spatial, spatialFull]);
 
