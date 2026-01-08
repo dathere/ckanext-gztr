@@ -25,9 +25,12 @@
   <div class="flex-fill">
     <span class="dataset-dates">
       <span class="status-wrapper">
-        {{ h.gztr_is_new(package.metadata_created, limit=28, title=_('New') ) if package.metadata_created }}
-        {{ h.popular('recent views', package.tracking_summary.recent, min=5, title=_('Popular') ) if
-        package.tracking_summary }}
+                {% if recently_updated %}
+                  <span class="badge badge-recently-updated">
+                    <i class="fa fa-clock-o"></i>
+                    <span>Recently Updated</span>
+                  </span>
+                {% endif %}
       </span>
       {% snippet "snippets/package_date_range.html", pkg=package %}
     </span>
