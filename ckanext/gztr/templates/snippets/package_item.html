@@ -17,8 +17,9 @@ Example:
 #}
 
 {% set truncate = truncate or 120 %}
-{% set truncate_title = truncate_title or 80 %}
+{% set truncate_title = truncate_title or 120 %}
 {% set title = package.title or package.name %}
+{% set note_type = note_type or 'updated' %}
 
 {% if not package.tracking_summary %}
   {% set package = h.add_tracking_to_dataset( package ) %}
@@ -26,23 +27,38 @@ Example:
 
 {% set pkgnotes = h.markdown_extract(package.notes, extract_length=truncate) %}
 
+{% set package_url = h.url_for(package.type ~ '.read', id=package.name) %}
+
+{% set image_url = h.get_value_from_showcase_extras(package.extras, 'image_url') %}
+{% if package.owner_org %}
+  {% set owner_url = h.url_for('organization' + '.read', id=package.owner_org ) %}
+{% endif %}
+
+{% if not image_url %}
+    {% if package.resources %}
+      {% set image_url = package.resources[0].url %}
+    {% else %}
+      {% set image_url = h.get_image_url(package.image_url) if package.image_url else None %}
+    {% endif %}
+{% endif %}
+
+{% set recently_updated = false %}
+{% if package.metadata_modified %}
+  {% set time_ago = h.time_ago_from_timestamp(package.metadata_modified) %}
+  {% if 'day' in time_ago or 'hour' in time_ago or 'minute' in time_ago %}
+    {% set time_parts = time_ago.split() %}
+    {% if time_parts[0]|int and 'day' in time_ago %}
+      {% if time_parts[0]|int <= 10 %}
+        {% set recently_updated = true %}
+      {% endif %}
+    {% else %}
+      {% set recently_updated = true %}
+    {% endif %}
+  {% endif %}
+{% endif %}
+
 {% block content %}
 
-  {% if package.type == 'application' %}
-
-    {% snippet 
-      'snippets/application_item.html', 
-      package=package, 
-      item_class=item_class, 
-      hide_resources=hide_resources, 
-      banner=banner, 
-      truncate=truncate, 
-      truncate_title=truncate_title,
-      title=title, 
-      notes=pkgnotes
-    %}
-
-  {% else %}
 
     {% snippet 
       'snippets/dataset_item.html', 
@@ -54,10 +70,13 @@ Example:
       truncate_title=truncate_title, 
       title=title, 
       notes=pkgnotes,
-      resources = self.resources()
+      resources = self.resources(),
+      image_url=image_url,
+      recently_updated=recently_updated,
+      owner_url=owner_url
     %}
 
-  {% endif %}
+ 
 
 {% endblock %}
 
@@ -66,8 +85,31 @@ Example:
     {% block resources_outer %}
       <ul class="dataset-resources list-unstyled">
         {% block resources_inner %}
-          {# for resource in h.dict_list_reduce(package.resources, 'format') #}
-          {% for resource in h.dict_list_reduce_with_extras(package.resources, 'format', ['name']) %}
+                    {% for resource in h.dict_list_reduce(package.resources, 'format') %}
+                    {% if package.type == 'application'%}
+                      <li>
+                        <a href=""
+                        class="label" data-bs-format="Application"
+                        style="color:white;">Application</a>
+                      </li>
+                        {% if package.related_datasets | length %}
+                          {% if package.related_datasets | length > 0 %}
+                          <li>
+                            <a class="label" style="color: white;">
+                              {{ package.related_datasets | length }} Dataset{% if package.related_datasets | length != 1 %}s{%endif%}
+                            </a>
+                          </li>
+                          {% endif %}
+                        {% endif %}
+                      {% else %}
+                      <li>
+                        <a href="{{ h.url_for(controller='dataset', action='read', id=package.name) }}"
+                            class="label" data-bs-format="{{ resource.lower() }}"
+                            style="color:white;">{{ resource }}</a>
+                      </li>
+                      {% endif %}
+                    {% endfor %}       
+                  {% for resource in h.dict_list_reduce_with_extras(package.resources, 'format', ['name']) %}
             {% set format = resource[0] %}
             {% set name = resource[1] %}
             {%

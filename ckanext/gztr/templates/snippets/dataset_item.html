@@ -2,9 +2,26 @@
 
 <div class="dataset-content d-flex gap-3">
 
+  {# Thumbnail image block - only for non-dataset types #}
+  {% if package.type != 'dataset' and image_url %}
+    {% block thumbnail %}
+      <div class="dataset-thumbnail me-3">
+        <a href="{{ h.url_for(package.type ~ '.read', id=package.name) }}">
+          {% if image_url %}
+            <img src="{{ h.get_image_url(image_url) }}" alt="{{ package.title }}" class="img-thumbnail" >
+          {% else %}
+            <img src="/base/images/placeholder.png" alt="No image available" class="img-thumbnail">
+          {% endif %}
+        </a>
+      </div>
+    {% endblock %}
+  {% endif %}
+
+  {# Map thumbnail for datasets with spatial data #}
   {% if package.spatial %}
   <div data-package="{{ package.spatial }}" class="dataset-item-map rounded"></div>
   {% endif %}
+  
   <div class="flex-fill">
     <span class="dataset-dates">
       <span class="status-wrapper">
@@ -20,6 +37,16 @@
       {% block heading_title %}
       {{ h.link_to(package.title|truncate(truncate_title), h.url_for('%s.read' % package.type, id=package.name)) }}
       {% endblock %}
+      {# Organization display #}
+      {% if package.owner_org %}
+        {% block heading_org %}
+          {% set org = h.get_organization(package.owner_org) %}
+          <a href="{{ owner_url }}" class="label" style="font-size: 16px;">
+            <p>{{ org.title or org.display_name }}</p>
+          </a>
+        {% endblock %}
+      {% endif %}
+      
       {% block heading_private %}
       {% if package.private %}
       <span data-bs-toggle="tooltip" data-bs-placement="top" title="{{ _('This means only you can see this') }}"><button
@@ -47,7 +74,7 @@
     {% endblock %}
 
     {% block organization %}
-    {% if package.organization %}
+    {% if package.organization and not package.owner_org %}
     <div class="dataset-heading">
       {{ h.link_to(package.organization.get( 'title' )|truncate(truncate_title), h.url_for('%s.read' %
       package.organization.get( 'type' ), id=package.organization.get( 'name' ) )) }}
@@ -55,27 +82,50 @@
     {% endif %}
     {% endblock %}
 
-    <!-- {% block resourcestop %}
-      <div class="resources-top">{{ resources }}</div>
-    {% endblock %}
-
-    {% block notes %}
+    {% block description %}
       {% if notes %}
         <p>{{ notes|urlize }}</p>
+      {% else %}
+        <p class="empty">{{ h.humanize_entity_type('package', package.type, 'no description') or _("There is no description for this dataset") }}</p>
       {% endif %}
-    {% endblock %} -->
-
-    <!-- {% block resourcesbottom %}
-      <div class="resources-bottom">{{ resources }}</div>
-    {% endblock %} -->
-
-    {% block buttons %}
-    <div class="card-buttons">
-      {% block open %}
-      {{ h.link_to("Details", h.url_for('%s.read' % package.type, id=package.name), class="btn btn-primary") }}
-      {% endblock %}
-    </div>
     {% endblock %}
+
+{% block resources %}
+            {% if package.resources and not hide_resources %}
+              {% block resources_outer %}
+                <ul class="dataset-resources list-unstyled">
+                  {% block resources_inner %}
+                    {% for resource in h.dict_list_reduce(package.resources, 'format') %}
+                    {% if package.type == 'application'%}
+                      <li>
+                        <a href=""
+                        class="label" data-bs-format="Application"
+                        style="color:white;">Application</a>
+                      </li>
+                        {% if package.related_datasets | length %}
+                          {% if package.related_datasets | length > 0 %}
+                          <li>
+                            <a class="label" style="color: white;">
+                              {{ package.related_datasets | length }} Dataset{% if package.related_datasets | length != 1 %}s{%endif%}
+                            </a>
+                          </li>
+                          {% endif %}
+                        {% endif %}
+                      {% else %}
+                      <li>
+                        <a href="{{ h.url_for(controller='dataset', action='read', id=package.name) }}"
+                            class="label" data-bs-format="{{ resource.lower() }}"
+                            style="color:white;">{{ resource }}</a>
+                      </li>
+                      {% endif %}
+                    {% endfor %}
+                  {% endblock %}
+                </ul>
+              {% endblock %}
+            {% endif %}
+          {% endblock %}
+
+
   </div>
 </div>
 {% endblock %}
