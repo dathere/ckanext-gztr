@@ -149,6 +149,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
               },
             });
             map.once("gm:loaded", () => {
+              setDisableApplyButton(false);
               // Add GM features if drawn features in selectedFeatures from spatialFull
               drawnFeatures.forEach((dF) => {
                 // @ts-expect-error
