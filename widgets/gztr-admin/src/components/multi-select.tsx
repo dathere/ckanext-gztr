@@ -7,7 +7,6 @@ import {
   SearchIcon,
   WandSparkles,
   XCircle,
-  XIcon,
 } from "lucide-react";
 import * as React from "react";
 import { Badge } from "@/components/ui/badge";
