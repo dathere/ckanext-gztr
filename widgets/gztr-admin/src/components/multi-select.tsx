@@ -586,6 +586,15 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
 
     const getOptionByValue = React.useCallback(
       (value: string, groupName?: string): MultiSelectOption | undefined => {
+        // If option is a drawn feature, we should expect this function to only run on removal
+        // since the drawn feature is not a preset feature that can be selected rather it is drawn
+        if (groupName === "Drawn features") {
+          return {
+            category: "Drawn features",
+            label: value,
+            value: value,
+          };
+        }
         const option = getAllOptions().find(
           (option) =>
             option.value === value &&
@@ -646,16 +655,33 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
       const existingValueIndex = selectedValues.findIndex(
         (opt) => opt.value === optionValue && opt.category === groupName,
       );
-      if (existingValueIndex > -1)
+      if (existingValueIndex > -1) {
         newSelectedValues.splice(existingValueIndex, 1);
-      else
+        if (groupName === "Drawn features") {
+          gm?.features.get("gm_main", optionValue)?.delete();
+          const map = formMap?.current.getMap();
+          const existingSource = map?.getSource("featureSource");
+          // @ts-expect-error
+          const geojsonData: GeoJSON = await existingSource?.getData();
+          const existingFeatureIndex = geojsonData.features.findIndex(
+            (f: any) =>
+              f.properties.value === optionValue &&
+              f.properties.category === groupName,
+          );
+          geojsonData.features.splice(existingFeatureIndex, 1);
+          // @ts-expect-error
+          existingSource.setData(geojsonData);
+          setTempSpatialFull(geojsonData);
+        }
+      } else
         newSelectedValues = [
           ...selectedValues,
           { value: optionValue, category: groupName },
         ];
       setSelectedValues(newSelectedValues);
       onValueChange(newSelectedValues);
-      // Use one GeoJSON source as a FeatureCollection instead of multiple sources, then use same GeoJSON data for ckanext-spatial
+      // Use one GeoJSON source as a FeatureCollection instead of multiple sources, then
+      // use same GeoJSON data for ckanext-spatial
       if (option?.geometry) {
         if (formMap) {
           const map = formMap.current.getMap();
@@ -1151,7 +1177,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <div
+                    {/* <div
                       role="button"
                       tabIndex={0}
                       onClick={(event) => {
@@ -1169,7 +1195,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                       className="tw:flex tw:items-center tw:justify-center tw:h-4 tw:w-4 tw:mx-2 tw:cursor-pointer tw:text-muted-foreground tw:hover:text-foreground tw:focus:outline-none tw:focus:ring-2 tw:focus:ring-ring tw:focus:ring-offset-1 tw:rounded-sm"
                     >
                       <XIcon className="tw:h-4 tw:w-4" />
-                    </div>
+                    </div> */}
                     <Separator
                       orientation="vertical"
                       className="tw:flex tw:min-h-6 tw:h-full"

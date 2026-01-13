@@ -116,8 +116,7 @@ function App() {
   }, []);
 
   useEffect(() => {
-    if (!fieldsAreInitialized)
-      setFieldsAreInitialized(true);
+    if (!fieldsAreInitialized) setFieldsAreInitialized(true);
     const spatialFullTextbox = document.querySelector(
       "#field-spatial_full",
     ) as HTMLInputElement;
@@ -147,8 +146,7 @@ function App() {
     ) as HTMLInputElement;
     if (fieldsAreInitialized)
       spatialTextbox.value = spatial ? JSON.stringify(spatial) : "";
-    else if (spatialTextbox.value)
-      setSpatial(JSON.parse(spatialTextbox.value));
+    else if (spatialTextbox.value) setSpatial(JSON.parse(spatialTextbox.value));
   }, [spatial, spatialFull]);
 
   return (
@@ -259,7 +257,7 @@ function App() {
                     >
                       Edit drawn features
                     </Button>
-                    <Button
+                    {/* <Button
                       className="btn btn-danger"
                       id="clear-filter-button"
                       onClick={async () => {
@@ -278,7 +276,7 @@ function App() {
                       }}
                     >
                       Clear all features
-                    </Button>
+                    </Button> */}
                   </div>
                   <div className="tw:flex tw:gap-2">
                     <div

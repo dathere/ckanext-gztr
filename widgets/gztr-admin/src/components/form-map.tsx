@@ -1,7 +1,6 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 import GLMap, {
   FullscreenControl,
-  GeolocateControl,
   Layer,
   type MapRef,
   NavigationControl,
@@ -18,6 +17,7 @@ import {
   type GmEditFeatureEditEndEvent,
   type GmOptionsPartial,
 } from "@geoman-io/maplibre-geoman-free";
+import { XCircleIcon } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { categories } from "@/components/category-combobox";
 import { HomeControl } from "@/components/home-control";
@@ -101,38 +101,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
           // Initialize geoman
           const gmOptions: GmOptionsPartial = {
             settings: {
-              controlsPosition: "top-left",
-              throttlingDelay: 100,
-            },
-            controls: {
-              draw: {
-                polygon: {
-                  title: "Draw a feature (polygon)",
-                },
-                marker: {
-                  uiEnabled: false,
-                },
-                circle_marker: { uiEnabled: false },
-                text_marker: { uiEnabled: false },
-                circle: { uiEnabled: false, title: "Draw a feature (circle)" },
-                ellipse: {
-                  uiEnabled: false,
-                  title: "Draw a feature (ellipse)",
-                },
-                rectangle: {
-                  uiEnabled: false,
-                  title: "Draw a feature (rectangle)",
-                },
-                line: { uiEnabled: false },
-              },
-              edit: {
-                change: {
-                  title: "Edit features",
-                },
-              },
-              helper: {
-                zoom_to_features: { uiEnabled: false },
-              },
+              controlsUiEnabledByDefault: false,
             },
           };
           const newGm = new Geoman(map, gmOptions);
@@ -306,7 +275,6 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
       <HomeControl />
       <NavigationControl />
       <FullscreenControl />
-      <GeolocateControl />
       <ScaleControl />
       {layerName && geojson && (
         <>
@@ -330,11 +298,22 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
               longitude={lngLat[0]}
               latitude={lngLat[1]}
               ref={popupRef}
+              closeButton={false}
             >
               <div>
-                <p className="tw:text-xl">
-                  <strong>{selectedFeatureName}</strong>
-                </p>
+                <div className="tw:flex tw:justify-between tw:w-full tw:gap-4">
+                  <span className="tw:text-xl">
+                    <strong>{selectedFeatureName}</strong>
+                  </span>
+                  <Button
+                    className="tw:w-4 tw:p-0 tw:m-0 tw:h-fit tw:cursor-pointer tw:rounded-full"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => popupRef.current.remove()}
+                  >
+                    <XCircleIcon />
+                  </Button>
+                </div>
                 <Button
                   className="btn btn-light"
                   onClick={async () => {
