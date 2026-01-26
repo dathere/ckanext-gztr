@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "build": "next build",
-    "dev": "next dev --turbo",
+    "dev": "bun next telemetry disable && next dev --turbo",
     "start": "next start",
     "postinstall": "fumadocs-mdx",
     "lint": "biome check",
