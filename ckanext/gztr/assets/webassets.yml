@@ -53,6 +53,12 @@ gazetteer_widget-react-js:
   contents:
     - gztr-react/assets/index.js
 
+gztr_search_widget-react-js:
+  filter: rjsmin
+  output: ckanext-gztr/%(version)s-gztr_search_widget.js
+  contents:
+    - gztr-search/assets/index.js
+
 place_keywords-js:
   filter: rjsmin
   output: ckanext-gztr/%(version)s-place_keywords.js

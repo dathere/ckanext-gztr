@@ -29,7 +29,6 @@ Example:
 
 {% set package_url = h.url_for(package.type ~ '.read', id=package.name) %}
 
-{% set image_url = h.get_value_from_showcase_extras(package.extras, 'image_url') %}
 {% if package.owner_org %}
   {% set owner_url = h.url_for('organization' + '.read', id=package.owner_org ) %}
 {% endif %}

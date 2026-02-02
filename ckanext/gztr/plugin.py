@@ -159,15 +159,21 @@ class GZTRPlugin(plugins.SingletonPlugin):
             if spatial:
                 geojson = json.loads(spatial)
 
-                if geojson.get("type") == "Feature":
-                    feature = geojson
-                else:
-                    feature = geojson.get("features", [{}])[0]
+                def shape_from_geometry(geometry):
+                    try:
+                        s = shape(geometry)
+                        print(f"SHAPE: {shape}")
+                    except Exception as e:
+                        log.error("{}, not indexing :: {}".format(e, json.dumps(geometry)[:100]))
+                        return None
 
-                geometry = shape(feature.get("geometry", {}))
+                    return s
+
+                geometry = shape_from_geometry(geojson)
                 wkt = geometry.wkt
+                print(f"WKT: {wkt}")
                 pkg_dict["spatial"] = wkt
-                pkg_dict.remove("spatial_full")
+                pkg_dict.pop("spatial_full")
 
             # if place_keywords:
             #     pkg_dict["place_keywords"] = place_keywords.split(",")
@@ -180,6 +186,130 @@ class GZTRPlugin(plugins.SingletonPlugin):
         # validated_data_dict.pop("gazetteer", None)
         # pkg_dict["validated_data_dict"] = json.dumps(validated_data_dict)
         return pkg_dict
+
+    def before_dataset_search(self, search_params):
+
+        # search_backend = self._get_search_backend()
+        # fq = search_params.get("fq", None)
+        # if fq:
+        #     if " statewide:\"true\"" not in search_params["fq"] and " statewide:\"false\"" not in search_params["fq"]:
+        #         search_params["fq"] = search_params["fq"] + " -place_keywords:\"Texas\""
+        #     if " statewide:\"true\"" in search_params["fq"]:
+        #         search_params["fq"] = search_params["fq"].replace(" statewide:\"true\"", "")
+        #         search_params["fq"] = search_params["fq"].replace(" -place_keywords:\"Texas\"", "")
+        #     if " statewide:\"false\"" in search_params["fq"]:
+        #         search_params["fq"] = search_params["fq"].replace(" statewide:\"false\"", " -place_keywords:\"Texas\"")
+
+        input_bbox = search_params.get('extras', {}).get('ext_bbox', None)
+        print(f"IBB: {input_bbox}")
+
+        if input_bbox:
+            bbox = self.normalize_bbox(input_bbox)
+
+            if not bbox:
+                raise SearchError('Wrong bounding box provided')
+            search_params = self.search_params(bbox, search_params)
+        print(f"SP: {search_params}")
+        return search_params
+
+    def search_params(self, bbox, search_params):
+
+        bbox = self.fit_bbox(bbox)
+
+        if not search_params.get("fq_list"):
+            search_params["fq_list"] = []
+
+        spatial_query = "{{!field f=spatial}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))"
+
+        search_params["fq_list"].append(
+            spatial_query.format(spatial_field="spatial", **bbox)
+        )
+
+        print(f"SP2: {search_params}")
+
+        return search_params
+
+
+    def normalize_bbox(self, bbox_values):
+        """
+        Ensures a bbox is expressed in a standard dict
+
+        bbox_values may be:
+            a string: "-4.96,55.70,-3.78,56.43"
+            or a list [-4.96, 55.70, -3.78, 56.43]
+            or a list of strings ["-4.96", "55.70", "-3.78", "56.43"]
+
+        ordered as MinX, MinY, MaxX, MaxY.
+
+        Returns a dict with the keys:
+
+        {
+                "minx": -4.96,
+                "miny": 55.70,
+                "maxx": -3.78,
+                "maxy": 56.43
+            }
+
+        If there are any problems parsing the input it returns None.
+        """
+
+        if isinstance(bbox_values, str):
+            bbox_values = bbox_values.split(",")
+
+        if len(bbox_values) != 4:
+            return None
+
+        try:
+            bbox = {}
+            bbox["minx"] = float(bbox_values[0])
+            bbox["miny"] = float(bbox_values[1])
+            bbox["maxx"] = float(bbox_values[2])
+            bbox["maxy"] = float(bbox_values[3])
+        except ValueError:
+            return None
+
+        return bbox
+
+    def fit_bbox(self, bbox_dict):
+        """
+        Ensures that all coordinates in a bounding box
+        fall within -180, -90, 180, 90 degrees
+
+        Accepts a dict with the following keys:
+
+        {
+                "minx": -4.96,
+                "miny": 55.70,
+                "maxx": -3.78,
+                "maxy": 56.43
+            }
+
+        """
+
+        def _adjust_longitude(value):
+            if value < -180 or value > 180:
+                value = value % 360
+                if value < -180:
+                    value = 360 + value
+                elif value > 180:
+                    value = -360 + value
+            return value
+
+        def _adjust_latitude(value):
+            if value < -90 or value > 90:
+                value = value % 180
+                if value < -90:
+                    value = 180 + value
+                elif value > 90:
+                    value = -180 + value
+            return value
+
+        return {
+            "minx": _adjust_longitude(bbox_dict["minx"]),
+            "maxx": _adjust_longitude(bbox_dict["maxx"]),
+            "miny": _adjust_latitude(bbox_dict["miny"]),
+            "maxy": _adjust_latitude(bbox_dict["maxy"]),
+        }
 
     # def after_dataset_create(self, context, pkg_dict):
     #     if pkg_dict["type"] != "showcase" and pkg_dict["type"] != "harvest":
