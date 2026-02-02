@@ -3,9 +3,10 @@ import type { RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import { create } from "zustand";
 import type { FeatureCategory } from "@/components/category-combobox";
+import type { Map as GLMap } from "maplibre-gl";
 interface FormMapState {
-  searchMap: RefObject<MapRef> | undefined;
-  setSearchMap: (formMap: RefObject<MapRef>) => void;
+  searchMap: GLMap | undefined;
+  setSearchMap: (searchMap: GLMap) => void;
   viewState: object;
   setViewState: (viewState: any) => void;
   // GeoJSON for currentCategory, showing category map layer

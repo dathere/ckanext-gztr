@@ -1,7 +1,6 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 import GLMap, {
   Layer,
-  type MapRef,
   NavigationControl,
   Popup,
   ScaleControl,
@@ -17,12 +16,13 @@ import { Button } from "@/components/ui/button";
 import { Geoman } from "@geoman-io/maplibre-geoman-free";
 
 const SearchMap = () => {
-  const searchMapRef = useRef<MapRef>(undefined);
   const popupRef = useRef<maplibregl.Popup>(undefined);
   const [currentGeojson, setCurrentGeojson] = useState();
   const [selectedFeatureName, setSelectedFeatureName] = useState<string>();
   const [lngLat, setLngLat] = useState<number[]>();
   const currentCategory = useFormMap((state) => state.currentCategory);
+  const searchMap = useFormMap((state) => state.searchMap);
+  const setSearchMap = useFormMap((state) => state.setSearchMap);
   const setGm = useFormMap((state) => state.setGm);
 
   // TODO: somehow cache GeoJSON files
@@ -35,12 +35,11 @@ const SearchMap = () => {
           await fetch(`/data/gztr-features/${currentCategory.value}.geojson`)
         ).json();
         setCurrentGeojson(data);
-        if (searchMapRef) {
+        if (searchMap) {
           // Add popups for each GeoJSON feature with details and select button
-          const map = searchMapRef.current?.getMap();
-          if (map)
-            map.on("click", "featuresFill", (e) => {
-              const renderedFeatures = map.queryRenderedFeatures(
+          if (searchMap)
+            searchMap.on("click", "featuresFill", (e) => {
+              const renderedFeatures = searchMap.queryRenderedFeatures(
                 [e.point.x, e.point.y],
                 {
                   layers: ["featuresFill"],
@@ -54,7 +53,7 @@ const SearchMap = () => {
                 ];
               setSelectedFeatureName(featureName);
               setLngLat([e.lngLat.lng, e.lngLat.lat]);
-              if (popupRef.current) popupRef.current.addTo(map);
+              if (popupRef.current) popupRef.current.addTo(searchMap);
             });
         }
       }
@@ -63,10 +62,9 @@ const SearchMap = () => {
 
   return (
     <GLMap
-      // @ts-expect-error
-      ref={searchMapRef}
       onLoad={(e) => {
         const map = e.target;
+        setSearchMap(map);
         const gm = new Geoman(map, {
           settings: {
             controlsUiEnabledByDefault: false,

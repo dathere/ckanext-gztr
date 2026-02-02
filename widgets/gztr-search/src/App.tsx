@@ -155,12 +155,11 @@ function App() {
                       onChange={(e) => setSearchValue(e.target.value)}
                       onKeyDown={async (e) => {
                         if (e.key === "Enter") {
-                          const map = searchMap?.current.getMap();
-                          if (map) {
+                          if (searchMap) {
                             setSearching(true);
                             await runAddressSearch(
                               searchValue,
-                              map,
+                              searchMap,
                               setAddressSearchResults,
                             );
                             setSearching(false);
@@ -176,12 +175,11 @@ function App() {
                         disabled={searching}
                         variant="secondary"
                         onClick={async () => {
-                          const map = searchMap?.current.getMap();
-                          if (map) {
+                          if (searchMap) {
                             setSearching(true);
                             await runAddressSearch(
                               searchValue,
-                              map,
+                              searchMap,
                               setAddressSearchResults,
                             );
                             setSearching(false);
@@ -216,8 +214,7 @@ function App() {
                                   className="tw:w-full tw:justify-start tw:cursor-pointer"
                                   onClick={() => {
                                     if (searchMap) {
-                                      const map = searchMap.current.getMap();
-                                      map.fitBounds(
+                                      searchMap.fitBounds(
                                         [
                                           [address.lon, address.lat],
                                           [address.lon, address.lat],
@@ -242,21 +239,12 @@ function App() {
                   <CategoryCombobox />
                 </TabsContent>
               </Tabs>
-              {/* Map */}
               <SearchMap />
             </DialogContent>
           </Dialog>
           <ExampleMap />
         </div>
       </section>
-      {/* TODO: Similar behavior as TWDH */}
-      {/* TODO: Vertical icon buttons that expand on hover to show text including name and description.
-        - "Draw" (pencil or box icon): Draw a bounding box to search within that region
-        - "Pan" (hand icon): Drag across the map to pan
-        - "Search" (magnifying glass icon): Type an address to jump to it or view more results
-        - "View features" (layers icon): Select from a combobox popup of features to display on the map,
-        you can toggle multiple and can left click a feature on the map for info (e.g. name)
-       */}
     </div>
   );
 }
