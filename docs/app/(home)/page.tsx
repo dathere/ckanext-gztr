@@ -112,7 +112,7 @@ function Hero() {
         Interactive gazetteer maps for your datasets.
       </h1>
       <p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        ckanext-gztr is a <Link href="https://ckan.org" className="text-blue-400">CKAN</Link> extension that lets you associate features on an interactive map for each dataset and integrates well with spatial search using <Link href="https://docs.ckan.org/projects/ckanext-spatial/en/latest/" className="text-blue-400">ckanext-spatial</Link>.
+        ckanext-gztr is a <Link href="https://ckan.org" className="text-blue-400">CKAN</Link> extension that lets you associate features on an interactive map for each dataset and also provides spatial search by drawing a bounding box.
       </p>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
         Provided by{" "}

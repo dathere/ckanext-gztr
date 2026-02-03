@@ -9,20 +9,20 @@ icon: Blocks
 
 We assume you're familiar with setting up CKAN extensions.
 
-In this installation guide we'll use a CKAN source install set up for development on Ubuntu 22.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://ckan-devstaller.dathere.com).
+In this installation guide we'll use a CKAN source install set up for development on Ubuntu 24.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://ckan-devstaller.dathere.com).
 
 <Callout title="Just trying out the extension?" type="info">If setting up a new CKAN instance for experimenting we suggest using [ckan-devstaller](https://ckan-devstaller.dathere.com).</Callout>
 
-<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.10.6, 2.11.3, and 2.11.4 and hasn't been verified to work for other versions.</Callout>
+<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.11.4 and hasn't been verified to work for other versions.</Callout>
 
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 
 <Steps>
 <Step>
 
-## Activate your virtual environment
+## Activate your virtual environment and change directory to `/usr/lib/ckan/default/src`
 
-Ensure your terminal is running in your instance's virtual environment before continuing.
+Ensure your terminal is running in your instance's virtual environment before continuing and that you're in the `/usr/lib/ckan/default/src` directory so that we may install extensions here.
 
 ```bash
 cd /usr/lib/ckan/default/src
@@ -76,12 +76,25 @@ Then add `gztr` to your `ckan.plugins` in your `.ini` file:
 ckan.plugins = activity scheming_datasets scheming_organizations gztr
 ```
 
-{/* TODO: look into how to set up the mini preview maps for each dataset that has spatial field data */}
+</Step>
 
-Now the interactive gazetteer should be available on the form for adding and editing a dataset along with a "Spatial" field which is used to save the selected features.
+<Step>
+
+## Verify ckanext-gztr works as expected
+
+Now the interactive gazetteer should be available on the form for adding and editing a dataset along with a "Spatial" field which is used to save the selected features along with a public search map gazetteer.
 
 </Step>
+
 <Step>
+
+## Customize ckanext-gztr for your CKAN instance
+
+You may want to customize various parts of ckanext-gztr. Click on one of the previews below to go to that feature's customization documentation.
+
+</Step>
+
+{/* <Step>
 
 ## Install ckanext-spatial
 
@@ -142,15 +155,8 @@ You'll also need to modify you SOLR schema as per the steps [mentioned](https://
 
 Notice that instead of `spatial_geom` as mentioned in the docs for the field name we use `spatial`.
 
-{/* TODO: Install JTS as per https://github.com/tino097/ckan-compose/blob/twdh-schema/solr/Dockerfile or similar to fix java NoClassDefinedError */}
+{/* TODO: Install JTS as per https://github.com/tino097/ckan-compose/blob/twdh-schema/solr/Dockerfile or similar to fix java NoClassDefinedError
+TODO: Update location of this user agent code or add to ckan.ini /*}
 
-{/* TODO: Update location of this user agent code or add to ckan.ini and     By default, the `solr-sptatial-field` backend uses the following
-    query. This can be customized by setting the
-    `ckanext.spatial.solr_query` configuration option, but note that
-    all placeholders must be included:
-    ```
-       {{!field f=spatial_geom}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))
-    ``` */}
-
-</Step>
+</Step> */}
 </Steps>
