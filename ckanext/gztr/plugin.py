@@ -219,16 +219,10 @@ class GZTRPlugin(plugins.SingletonPlugin):
             if not bbox:
                 raise SearchError('Wrong bounding box provided')
             # Instantiate list for filtering datasets based on intersection with the drawn bounding box
-            filtered_count = search_results.get("count")
-            for i, result in enumerate(search_results.get("results")):
-                spatial_data = shapely.from_geojson(result["spatial"])
-                bbox_polygon = shapely.Polygon(((bbox["minx"], bbox["miny"]), (bbox["maxx"], bbox["miny"]), (bbox["maxx"], bbox["maxy"]), (bbox["minx"], bbox["maxy"])))
-                intersection_result = shapely.intersection(spatial_data, bbox_polygon)
-                if not intersection_result:
-                    del search_results["results"][i]
-                    filtered_count -= 1
-            search_results.update(count=filtered_count)
-
+            bbox_polygon = shapely.Polygon(((bbox["minx"], bbox["miny"]), (bbox["maxx"], bbox["miny"]), (bbox["maxx"], bbox["maxy"]), (bbox["minx"], bbox["maxy"]), (bbox["minx"], bbox["miny"])))
+            filtered_search_results = [result for result in search_results.get("results") if shapely.intersection(shapely.from_geojson(result["spatial"]), bbox_polygon)]
+            search_results.update(results=filtered_search_results)
+            search_results.update(count=len(filtered_search_results))
         return search_results
 
     def search_params(self, bbox, search_params):
