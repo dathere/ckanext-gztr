@@ -36,13 +36,14 @@ import { SearchMap } from "@/components/search-map";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useFormMap } from "./stores/form-map-store";
 import { runAddressSearch } from "./lib/utils";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Spinner } from "./components/ui/spinner";
 
 function App() {
   // @ts-ignore
   const [searching, setSearching] = useState<boolean>(false);
   const [isDraw, setIsDraw] = useState<boolean>(false);
+  const [showClear, setShowClear] = useState<boolean>(false);
   const searchMap = useFormMap((state) => state.searchMap);
   const gm = useFormMap((state) => state.gm);
   const addressSearchResults = useFormMap(
@@ -54,6 +55,17 @@ function App() {
   const searchValue = useFormMap((state) => state.searchValue);
   const setSearchValue = useFormMap((state) => state.setSearchValue);
 
+  useEffect(() => {
+    (async () => {
+      // Logic for whether to display the Clear button or not
+      const search = window.location.search;
+      const extBboxExists = new URLSearchParams(search).get("ext_bbox");
+      if (extBboxExists) {
+        setShowClear(true);
+      } else setShowClear(false);
+    })();
+  }, []);
+
   return (
     <div>
       <section className="module module-narrow module-shallow">
@@ -61,12 +73,14 @@ function App() {
           <span className="tw:w-full">
             <i className="fa fa-globe" /> Filter by location
           </span>
-          <a
-            className="action tw:float-right"
-            href="/dataset/?q=&sort=score+desc+%2C+metadata_modified+desc"
-          >
-            Clear
-          </a>
+          {showClear && (
+            <a
+              className="action tw:float-right"
+              href="/dataset/?q=&sort=score+desc+%2C+metadata_modified+desc"
+            >
+              Clear
+            </a>
+          )}
         </div>
         <div className="tw:relative">
           <Dialog>

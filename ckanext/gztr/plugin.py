@@ -1,4 +1,5 @@
 import json
+import shapely
 from shapely.geometry import shape
 
 
@@ -149,7 +150,6 @@ class GZTRPlugin(plugins.SingletonPlugin):
             return pkg_dict
 
     def before_dataset_index(self, pkg_dict):
-        print("PKG_DICT IS HERE: ", pkg_dict)
         try:
             spatial = pkg_dict.get("spatial")
 
@@ -201,16 +201,35 @@ class GZTRPlugin(plugins.SingletonPlugin):
         #         search_params["fq"] = search_params["fq"].replace(" statewide:\"false\"", " -place_keywords:\"Texas\"")
 
         input_bbox = search_params.get('extras', {}).get('ext_bbox', None)
-        print(f"IBB: {input_bbox}")
 
         if input_bbox:
             bbox = self.normalize_bbox(input_bbox)
 
             if not bbox:
                 raise SearchError('Wrong bounding box provided')
-            search_params = self.search_params(bbox, search_params)
-        print(f"SP: {search_params}")
+            # search_params = self.search_params(bbox, search_params)
         return search_params
+
+    def after_dataset_search(self, search_results, search_params):
+        # Get user drawn input bounding box value ext_bbox
+        bbox = search_params.get('extras', {}).get('ext_bbox', None)
+        # If the input bounding box value is provided by the user, normalize it
+        if bbox:
+            bbox = self.normalize_bbox(bbox)
+            if not bbox:
+                raise SearchError('Wrong bounding box provided')
+            # Instantiate list for filtering datasets based on intersection with the drawn bounding box
+            filtered_count = search_results.get("count")
+            for i, result in enumerate(search_results.get("results")):
+                spatial_data = shapely.from_geojson(result["spatial"])
+                bbox_polygon = shapely.Polygon(((bbox["minx"], bbox["miny"]), (bbox["maxx"], bbox["miny"]), (bbox["maxx"], bbox["maxy"]), (bbox["minx"], bbox["maxy"])))
+                intersection_result = shapely.intersection(spatial_data, bbox_polygon)
+                if not intersection_result:
+                    del search_results["results"][i]
+                    filtered_count -= 1
+            search_results.update(count=filtered_count)
+
+        return search_results
 
     def search_params(self, bbox, search_params):
 
@@ -224,8 +243,6 @@ class GZTRPlugin(plugins.SingletonPlugin):
         search_params["fq_list"].append(
             spatial_query.format(spatial_field="spatial", **bbox)
         )
-
-        print(f"SP2: {search_params}")
 
         return search_params
 
@@ -244,11 +261,11 @@ class GZTRPlugin(plugins.SingletonPlugin):
         Returns a dict with the keys:
 
         {
-                "minx": -4.96,
-                "miny": 55.70,
-                "maxx": -3.78,
-                "maxy": 56.43
-            }
+            "minx": -4.96,
+            "miny": 55.70,
+            "maxx": -3.78,
+            "maxy": 56.43
+        }
 
         If there are any problems parsing the input it returns None.
         """

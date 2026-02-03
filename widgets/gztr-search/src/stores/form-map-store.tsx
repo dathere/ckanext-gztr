@@ -1,6 +1,4 @@
 import type { Geoman } from "@geoman-io/maplibre-geoman-free";
-import type { RefObject } from "react";
-import type { MapRef } from "react-map-gl/maplibre";
 import { create } from "zustand";
 import type { FeatureCategory } from "@/components/category-combobox";
 import type { Map as GLMap } from "maplibre-gl";
