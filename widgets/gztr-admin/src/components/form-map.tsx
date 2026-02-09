@@ -344,16 +344,16 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                 <Button
                   className="btn btn-light"
                   onClick={async () => {
-                    const currentSelectedCategory = selectedFeatureCategory
+                    const currentSelectedCategoryLabel = selectedFeatureCategory
                       ? selectedFeatureCategory
-                      : currentCategory;
+                      : currentCategory?.label;
                     let newSelectedFeatures = [...selectedFeatures];
                     const existingValueIndex = selectedFeatures.findIndex(
                       (opt) =>
                         // @ts-expect-error
                         opt.value === selectedFeatureName &&
                         // @ts-expect-error
-                        opt.category === currentSelectedCategory.label,
+                        opt.category === currentSelectedCategoryLabel,
                     );
                     if (existingValueIndex > -1)
                       newSelectedFeatures.splice(existingValueIndex, 1);
@@ -363,8 +363,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                         ...selectedFeatures,
                         {
                           value: selectedFeatureName,
-                          // @ts-expect-error
-                          category: currentSelectedCategory.label,
+                          category: currentSelectedCategoryLabel,
                         },
                       ];
                     }
@@ -373,10 +372,9 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                     await toggleOptionInSource(
                       selectedFeatureName,
                       // @ts-expect-error
-                      currentSelectedCategory?.label,
+                      currentSelectedCategoryLabel,
                       formMap,
                       features,
-                      // @ts-expect-error
                       newSelectedFeatures,
                     );
                     if (existingValueIndex === -1)
@@ -394,11 +392,9 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                       // @ts-expect-error
                       opt.value === selectedFeatureName &&
                       // @ts-expect-error
-                      opt.category ===
-                        (currentCategory
-                          ? currentCategory.label
-                          : // @ts-expect-error
-                            selectedFeatureCategory?.label),
+                      (opt.category === currentCategory?.label ||
+                        // @ts-expect-error
+                        opt.category === selectedFeatureCategory),
                   ) === -1
                     ? "Select"
                     : "Remove"}{" "}
