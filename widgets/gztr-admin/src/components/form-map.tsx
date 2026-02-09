@@ -44,6 +44,8 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
   const setGeojson = useFormMap((state) => state.setGeojson);
   const currentCategory = useFormMap((state) => state.currentCategory);
   const [selectedFeatureName, setSelectedFeatureName] = useState<string>();
+  const [selectedFeatureCategory, setSelectedFeatureCategory] =
+    useState<string>();
   const [lngLat, setLngLat] = useState<number[]>();
   const features = useFormMap((state) => state.features);
   const selectedFeatures = useFormMap((state) => state.selectedFeatures);
@@ -260,6 +262,18 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
               type: "fill",
               paint: { "fill-color": "rgba(80, 170, 244, 0.75)" },
             });
+            // Show popup on click of already selected features
+            map.on("click", "featureLayer", async (e) => {
+              // @ts-expect-error
+              const featureCategory = e.features[0].properties.category;
+              // @ts-expect-error
+              const featureName = e.features[0].properties.value;
+              // Add popup for currently selected feature layer (drawn and not drawn)
+              setSelectedFeatureCategory(featureCategory);
+              setSelectedFeatureName(featureName);
+              setLngLat([e.lngLat.lng, e.lngLat.lat]);
+              if (popupRef.current) popupRef.current.addTo(map);
+            });
           }
         }
       }}
@@ -277,22 +291,24 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
       <NavigationControl />
       <FullscreenControl />
       <ScaleControl />
-      {layerName && geojson && (
+      {geojson && (
         <>
-          <Source id="geojson" type="geojson" data={geojson}>
-            <Layer
-              id="featuresFill"
-              type="fill"
-              paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}
-            />
-            <Layer
-              type="line"
-              paint={{
-                "line-color": "rgba(80, 120, 255, 1)",
-                "line-width": 1,
-              }}
-            />
-          </Source>
+          {layerName && (
+            <Source id="geojson" type="geojson" data={geojson}>
+              <Layer
+                id="featuresFill"
+                type="fill"
+                paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}
+              />
+              <Layer
+                type="line"
+                paint={{
+                  "line-color": "rgba(80, 120, 255, 1)",
+                  "line-width": 1,
+                }}
+              />
+            </Source>
+          )}
           {selectedFeatureName && lngLat && lngLat.length > 0 && (
             <Popup
               closeOnClick={false}
@@ -303,9 +319,19 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
             >
               <div>
                 <div className="tw:flex tw:justify-between tw:w-full tw:gap-4">
-                  <span className="tw:text-xl">
-                    <strong>{selectedFeatureName}</strong>
-                  </span>
+                  <div className="tw:w-full">
+                    <span className="tw:text-xl">
+                      <strong>{selectedFeatureName}</strong>
+                    </span>
+                    {selectedFeatureCategory && (
+                      <>
+                        <br />
+                        <span className="tw:text-md">
+                          <strong>Category: {selectedFeatureCategory}</strong>
+                        </span>
+                      </>
+                    )}
+                  </div>
                   <Button
                     className="tw:w-4 tw:p-0 tw:m-0 tw:h-fit tw:cursor-pointer tw:rounded-full"
                     variant="ghost"
@@ -318,13 +344,16 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                 <Button
                   className="btn btn-light"
                   onClick={async () => {
+                    const currentSelectedCategory = selectedFeatureCategory
+                      ? selectedFeatureCategory
+                      : currentCategory;
                     let newSelectedFeatures = [...selectedFeatures];
                     const existingValueIndex = selectedFeatures.findIndex(
                       (opt) =>
                         // @ts-expect-error
                         opt.value === selectedFeatureName &&
                         // @ts-expect-error
-                        opt.category === currentCategory.label,
+                        opt.category === currentSelectedCategory.label,
                     );
                     if (existingValueIndex > -1)
                       newSelectedFeatures.splice(existingValueIndex, 1);
@@ -335,7 +364,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                         {
                           value: selectedFeatureName,
                           // @ts-expect-error
-                          category: currentCategory.label,
+                          category: currentSelectedCategory.label,
                         },
                       ];
                     }
@@ -344,9 +373,10 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                     await toggleOptionInSource(
                       selectedFeatureName,
                       // @ts-expect-error
-                      currentCategory?.label,
+                      currentSelectedCategory?.label,
                       formMap,
                       features,
+                      // @ts-expect-error
                       newSelectedFeatures,
                     );
                     if (existingValueIndex === -1)
@@ -364,7 +394,11 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                       // @ts-expect-error
                       opt.value === selectedFeatureName &&
                       // @ts-expect-error
-                      opt.category === currentCategory.label,
+                      opt.category ===
+                        (currentCategory
+                          ? currentCategory.label
+                          : // @ts-expect-error
+                            selectedFeatureCategory?.label),
                   ) === -1
                     ? "Select"
                     : "Remove"}{" "}
