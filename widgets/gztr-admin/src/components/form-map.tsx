@@ -30,6 +30,7 @@ import {
   zoomToFeatureBounds,
 } from "@/lib/state-management";
 import { useFormMap } from "@/stores/form-map-store";
+import type { Map as GLMapType } from "maplibre-gl";
 
 const FormMap = ({ layerName }: { layerName?: string }) => {
   // @ts-expect-error
@@ -57,35 +58,39 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
     (state) => state.setDisableApplyButton,
   );
 
+  const enablePopup = async (map: GLMapType) => {
+    map.on("click", "featuresFill", (e) => {
+      const renderedFeatures = map.queryRenderedFeatures(
+        [e.point.x, e.point.y],
+        {
+          layers: ["featuresFill"],
+        },
+      );
+      const featureName =
+        renderedFeatures.at(0)?.properties[
+          // @ts-expect-error
+          categories.find((c) => c.label === currentCategory.label).nameKey
+        ];
+      setSelectedFeatureName(featureName);
+      setLngLat([e.lngLat.lng, e.lngLat.lat]);
+      if (popupRef.current) popupRef.current.addTo(map);
+    });
+  };
+
   useEffect(() => {
-    if (layerName)
-      (async () => {
+    (async () => {
+      // Display the currently selected feature category GeoJSON on the map
+      if (layerName) {
         const data = await (
           await fetch(`/data/gztr-features/${layerName}.geojson`)
         ).json();
         setGeojson(data);
-        if (mapRef) {
-          // Add popups for each GeoJSON feature with details and select button
-          const map = mapRef.current.getMap();
-          map.on("click", "featuresFill", (e) => {
-            const renderedFeatures = map.queryRenderedFeatures(
-              [e.point.x, e.point.y],
-              {
-                layers: ["featuresFill"],
-              },
-            );
-            const featureName =
-              renderedFeatures.at(0)?.properties[
-                // @ts-expect-error
-                categories.find((c) => c.label === currentCategory.label)
-                  .nameKey
-              ];
-            setSelectedFeatureName(featureName);
-            setLngLat([e.lngLat.lng, e.lngLat.lat]);
-            if (popupRef.current) popupRef.current.addTo(map);
-          });
-        }
-      })();
+      }
+      if (formMap) {
+        const map = formMap.current.getMap();
+        if (map) await enablePopup(map);
+      }
+    })();
   }, [layerName, setGeojson]);
 
   useEffect(() => {
@@ -291,119 +296,121 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
       <NavigationControl />
       <FullscreenControl />
       <ScaleControl />
-      {geojson && (
-        <>
-          {layerName && (
-            <Source id="geojson" type="geojson" data={geojson}>
-              <Layer
-                id="featuresFill"
-                type="fill"
-                paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}
-              />
-              <Layer
-                type="line"
-                paint={{
-                  "line-color": "rgba(80, 120, 255, 1)",
-                  "line-width": 1,
-                }}
-              />
-            </Source>
-          )}
-          {selectedFeatureName && lngLat && lngLat.length > 0 && (
-            <Popup
-              closeOnClick={false}
-              longitude={lngLat[0]}
-              latitude={lngLat[1]}
-              ref={popupRef}
-              closeButton={false}
-            >
-              <div>
-                <div className="tw:flex tw:justify-between tw:w-full tw:gap-4">
-                  <div className="tw:w-full">
-                    <span className="tw:text-xl">
-                      <strong>{selectedFeatureName}</strong>
-                    </span>
-                    {selectedFeatureCategory && (
-                      <>
-                        <br />
-                        <span className="tw:text-md">
-                          <strong>Category: {selectedFeatureCategory}</strong>
-                        </span>
-                      </>
-                    )}
-                  </div>
-                  <Button
-                    className="tw:w-4 tw:p-0 tw:m-0 tw:h-fit tw:cursor-pointer tw:rounded-full"
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => popupRef.current.remove()}
-                  >
-                    <XCircleIcon />
-                  </Button>
-                </div>
-                <Button
-                  className="btn btn-light"
-                  onClick={async () => {
-                    const currentSelectedCategoryLabel = selectedFeatureCategory
-                      ? selectedFeatureCategory
-                      : currentCategory?.label;
-                    let newSelectedFeatures = [...selectedFeatures];
-                    const existingValueIndex = selectedFeatures.findIndex(
-                      (opt) =>
-                        // @ts-expect-error
-                        opt.value === selectedFeatureName &&
-                        // @ts-expect-error
-                        opt.category === currentSelectedCategoryLabel,
-                    );
-                    if (existingValueIndex > -1)
-                      newSelectedFeatures.splice(existingValueIndex, 1);
-                    else {
-                      // @ts-expect-error
-                      newSelectedFeatures = [
-                        ...selectedFeatures,
-                        {
-                          value: selectedFeatureName,
-                          category: currentSelectedCategoryLabel,
-                        },
-                      ];
-                    }
-                    // @ts-expect-error
-                    setSelectedFeatures(newSelectedFeatures);
-                    await toggleOptionInSource(
-                      selectedFeatureName,
-                      // @ts-expect-error
-                      currentSelectedCategoryLabel,
-                      formMap,
-                      features,
-                      newSelectedFeatures,
-                    );
-                    if (existingValueIndex === -1)
-                      await zoomToFeatureBounds(selectedFeatureName, formMap);
-                    const map = formMap?.current.getMap();
-                    // @ts-expect-error
-                    const featureSource = map.getSource("featureSource");
-                    // @ts-expect-error
-                    const geojsonData = await featureSource?.getData();
-                    setTempSpatialFull(geojsonData);
-                  }}
-                >
-                  {selectedFeatures.findIndex(
-                    (opt) =>
-                      // @ts-expect-error
-                      opt.value === selectedFeatureName &&
-                      // @ts-expect-error
-                      (opt.category === currentCategory?.label ||
-                        // @ts-expect-error
-                        opt.category === selectedFeatureCategory),
-                  ) === -1
-                    ? "Select"
-                    : "Remove"}{" "}
-                  this feature
-                </Button>
+      {geojson && layerName && (
+        <Source id="geojson" type="geojson" data={geojson}>
+          <Layer
+            id="featuresFill"
+            type="fill"
+            paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}
+          />
+          <Layer
+            type="line"
+            paint={{
+              "line-color": "rgba(80, 120, 255, 1)",
+              "line-width": 1,
+            }}
+          />
+        </Source>
+      )}
+      {selectedFeatureName && lngLat && lngLat.length > 0 && (
+        <Popup
+          closeOnClick={false}
+          onClose={() => {
+            setSelectedFeatureCategory(undefined);
+          }}
+          longitude={lngLat[0]}
+          latitude={lngLat[1]}
+          ref={popupRef}
+          closeButton={false}
+        >
+          <div>
+            <div className="tw:flex tw:justify-between tw:w-full tw:gap-4">
+              <div className="tw:w-full">
+                <span className="tw:text-xl">
+                  <strong>{selectedFeatureName}</strong>
+                </span>
+                <br />
+                {(currentCategory || selectedFeatureCategory) && (
+                  <span className="tw:text-md">
+                    <strong>
+                      Category:{" "}
+                      {currentCategory && !selectedFeatureCategory
+                        ? currentCategory.label
+                        : selectedFeatureCategory}
+                    </strong>
+                  </span>
+                )}
               </div>
-            </Popup>
-          )}
-        </>
+              <Button
+                className="tw:w-4 tw:p-0 tw:m-0 tw:h-fit tw:cursor-pointer tw:rounded-full"
+                variant="ghost"
+                size="icon"
+                onClick={() => popupRef.current.remove()}
+              >
+                <XCircleIcon />
+              </Button>
+            </div>
+            <Button
+              className="btn btn-light"
+              onClick={async () => {
+                const currentSelectedCategoryLabel = selectedFeatureCategory
+                  ? selectedFeatureCategory
+                  : currentCategory?.label;
+                let newSelectedFeatures = [...selectedFeatures];
+                const existingValueIndex = selectedFeatures.findIndex(
+                  (opt) =>
+                    // @ts-expect-error
+                    opt.value === selectedFeatureName &&
+                    // @ts-expect-error
+                    opt.category === currentSelectedCategoryLabel,
+                );
+                if (existingValueIndex > -1)
+                  newSelectedFeatures.splice(existingValueIndex, 1);
+                else {
+                  // @ts-expect-error
+                  newSelectedFeatures = [
+                    ...selectedFeatures,
+                    {
+                      value: selectedFeatureName,
+                      category: currentSelectedCategoryLabel,
+                    },
+                  ];
+                }
+                // @ts-expect-error
+                setSelectedFeatures(newSelectedFeatures);
+                await toggleOptionInSource(
+                  selectedFeatureName,
+                  // @ts-expect-error
+                  currentSelectedCategoryLabel,
+                  formMap,
+                  features,
+                  newSelectedFeatures,
+                );
+                if (existingValueIndex === -1)
+                  await zoomToFeatureBounds(selectedFeatureName, formMap);
+                const map = formMap?.current.getMap();
+                // @ts-expect-error
+                const featureSource = map.getSource("featureSource");
+                // @ts-expect-error
+                const geojsonData = await featureSource?.getData();
+                setTempSpatialFull(geojsonData);
+              }}
+            >
+              {selectedFeatures.findIndex(
+                (opt) =>
+                  // @ts-expect-error
+                  opt.value === selectedFeatureName &&
+                  // @ts-expect-error
+                  (opt.category === currentCategory?.label ||
+                    // @ts-expect-error
+                    opt.category === selectedFeatureCategory),
+              ) === -1
+                ? "Select"
+                : "Remove"}{" "}
+              this feature
+            </Button>
+          </div>
+        </Popup>
       )}
     </GLMap>
   );

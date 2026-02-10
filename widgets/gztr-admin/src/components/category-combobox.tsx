@@ -1,4 +1,4 @@
-import { CheckIcon, ChevronDownIcon } from "lucide-react";
+import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
 import { type Dispatch, type SetStateAction, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
@@ -102,7 +102,20 @@ export function CategoryCombobox({
               Select a feature category to show on the map.
             </span>
           )}
-          <ChevronDownIcon className="tw:ml-2 tw:h-4 tw:w-4 tw:shrink-0 tw:opacity-50" />
+          <div className="tw:flex tw:gap-1">
+            {currentCategory && (
+              <Button
+                onClick={() => setCurrentCategory(undefined)}
+                className="p-0"
+                variant="ghost"
+              >
+                <XIcon className="tw:h-4 tw:w-4 tw:shrink-0 tw:opacity-50 tw:cursor-pointer" />
+              </Button>
+            )}
+            <Button className="p-0" variant="ghost">
+              <ChevronDownIcon className="tw:h-4 tw:w-4 tw:shrink-0 tw:opacity-50" />
+            </Button>
+          </div>
         </Button>
       </PopoverTrigger>
       <PopoverContent align="start" className="tw:w-full tw:p-0">
