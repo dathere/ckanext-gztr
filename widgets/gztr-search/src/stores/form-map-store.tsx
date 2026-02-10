@@ -30,6 +30,8 @@ interface FormMapState {
   setStatewideEnabled: (statewideEnabled: boolean) => void;
   addressSearchResults: any[];
   setAddressSearchResults: (addressSearchResults: any[]) => void;
+  searchResultMarkerLngLat: any;
+  setSearchResultMarkerLngLat: (searchResultMarkerLngLat: any) => void;
   gm: Geoman | undefined;
   setGm: (gm: Geoman) => void;
   disableApplyButton: boolean;
@@ -65,6 +67,9 @@ export const useFormMap = create<FormMapState>((set) => ({
   addressSearchResults: [],
   setAddressSearchResults: (addressSearchResults) =>
     set(() => ({ addressSearchResults })),
+  searchResultMarkerLngLat: undefined,
+  setSearchResultMarkerLngLat: (searchResultMarkerLngLat) =>
+    set({ searchResultMarkerLngLat }),
   gm: undefined,
   setGm: (gm) => set({ gm }),
   disableApplyButton: false,

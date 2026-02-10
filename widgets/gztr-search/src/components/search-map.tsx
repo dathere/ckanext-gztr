@@ -1,6 +1,7 @@
 /** biome-ignore-all lint/correctness/useExhaustiveDependencies: <explanation> */
 import GLMap, {
   Layer,
+  Marker,
   NavigationControl,
   Popup,
   ScaleControl,
@@ -10,7 +11,7 @@ import "@/assets/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import { useFormMap } from "@/stores/form-map-store";
 import "@/assets/maplibre-gl.css";
-import { XCircleIcon } from "lucide-react";
+import { MapPinIcon, XCircleIcon } from "lucide-react";
 import { categories } from "@/components/category-combobox";
 import { Button } from "@/components/ui/button";
 import { Geoman } from "@geoman-io/maplibre-geoman-free";
@@ -20,6 +21,9 @@ const SearchMap = () => {
   const [currentGeojson, setCurrentGeojson] = useState();
   const [selectedFeatureName, setSelectedFeatureName] = useState<string>();
   const [lngLat, setLngLat] = useState<number[]>();
+  const searchResultMarkerLngLat = useFormMap(
+    (state) => state.searchResultMarkerLngLat,
+  );
   const currentCategory = useFormMap((state) => state.currentCategory);
   const searchMap = useFormMap((state) => state.searchMap);
   const setSearchMap = useFormMap((state) => state.setSearchMap);
@@ -116,6 +120,14 @@ const SearchMap = () => {
             }}
           />
         </Source>
+      )}
+      {searchResultMarkerLngLat?.lon && searchResultMarkerLngLat?.lat && (
+        <Marker
+          longitude={searchResultMarkerLngLat.lon}
+          latitude={searchResultMarkerLngLat.lat}
+        >
+          <MapPinIcon fill="#87cefa" />
+        </Marker>
       )}
       {selectedFeatureName && lngLat && lngLat.length > 0 && (
         <Popup

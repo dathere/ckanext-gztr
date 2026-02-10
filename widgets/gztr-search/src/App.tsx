@@ -34,10 +34,11 @@ import {
 import { CategoryCombobox } from "@/components/category-combobox";
 import { SearchMap } from "@/components/search-map";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useFormMap } from "./stores/form-map-store";
-import { runAddressSearch } from "./lib/utils";
+import { useFormMap } from "@/stores/form-map-store";
+import { runAddressSearch } from "@/lib/utils";
 import { useEffect, useState } from "react";
-import { Spinner } from "./components/ui/spinner";
+import { Spinner } from "@/components/ui/spinner";
+import { Marker } from "react-map-gl/maplibre";
 
 function App() {
   // @ts-ignore
@@ -54,6 +55,9 @@ function App() {
   );
   const searchValue = useFormMap((state) => state.searchValue);
   const setSearchValue = useFormMap((state) => state.setSearchValue);
+  const setSearchResultMarkerLngLat = useFormMap(
+    (state) => state.setSearchResultMarkerLngLat,
+  );
 
   useEffect(() => {
     (async () => {
@@ -175,6 +179,7 @@ function App() {
                               searchValue,
                               searchMap,
                               setAddressSearchResults,
+                              setSearchResultMarkerLngLat,
                             );
                             setSearching(false);
                           }
@@ -195,6 +200,7 @@ function App() {
                               searchValue,
                               searchMap,
                               setAddressSearchResults,
+                              setSearchResultMarkerLngLat,
                             );
                             setSearching(false);
                           }
@@ -235,6 +241,10 @@ function App() {
                                         ],
                                         { zoom: 10 },
                                       );
+                                      setSearchResultMarkerLngLat({
+                                        lon: address.lon,
+                                        lat: address.lat,
+                                      });
                                     }
                                   }}
                                   key={idx}
