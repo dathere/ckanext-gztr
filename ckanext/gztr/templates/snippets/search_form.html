@@ -1,0 +1,21 @@
+{% ckan_extends %}
+
+{% block search_input %}
+    {{ super() }}
+    {% if request.args.get('statewide') %}
+        {% set statewide = request.args.get('statewide') %}
+    {% else %}
+        {% set statewide = "yes" %}
+    {% endif %}
+    <div class="form-check form-switch">
+        <input class="form-check-input" type="checkbox" {% if statewide == "yes" %} checked {% endif %} id="statewide-search-switch">
+        <input type="hidden" name="statewide" id="statewide">
+        <label class="form-check-label" for="statewide-search-switch" id="statewide-search-label">Include statewide datasets</label>
+    </div>
+{% endblock %}
+
+{% block search_search_fields %}
+    {% if fields -%}
+        <span>{{ form.hidden_from_list(fields=fields,except_names=['statewide']) }}</span>
+    {%- endif %}
+{% endblock %}

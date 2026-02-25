@@ -4,6 +4,7 @@ gztr_theme-js:
   contents:
     - leaflet.js
     - gztr_theme.js
+    - statewide-search.js
   extra:
     preload:
       - base/main

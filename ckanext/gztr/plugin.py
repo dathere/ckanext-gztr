@@ -170,6 +170,12 @@ class GZTRPlugin(plugins.SingletonPlugin):
         return pkg_dict
 
     def before_dataset_search(self, search_params):
+        if "statewide:\"yes\"" in search_params["fq"]:
+            search_params["fq"] = search_params["fq"].replace("statewide:\"yes\"", "")
+            search_params["extras"]["statewide"] = True
+        elif "statewide:\"no\"" in search_params["fq"]:
+            search_params["fq"] = search_params["fq"].replace("statewide:\"no\"", "")
+            search_params["extras"]["statewide"] = False
 
         # search_backend = self._get_search_backend()
         # fq = search_params.get("fq", None)
@@ -193,6 +199,12 @@ class GZTRPlugin(plugins.SingletonPlugin):
         return search_params
 
     def after_dataset_search(self, search_results, search_params):
+        # If statewide datasets toggle is unchecked, remove statewide datasets from results
+        include_statewide_datasets = search_params.get("extras", {}).get("statewide", None)
+        if include_statewide_datasets == False:
+            filtered_search_results = [result for result in search_results.get("results") if not result.get("place_keywords") == "New Mexico"]
+            search_results.update(results=filtered_search_results)
+            search_results.update(count=len(filtered_search_results))
         # Get user drawn input bounding box value ext_bbox
         bbox = search_params.get('extras', {}).get('ext_bbox', None)
         # If the input bounding box value is provided by the user, normalize it
