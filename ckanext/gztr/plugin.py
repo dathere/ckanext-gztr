@@ -202,7 +202,13 @@ class GZTRPlugin(plugins.SingletonPlugin):
         # If statewide datasets toggle is unchecked, remove statewide datasets from results
         include_statewide_datasets = search_params.get("extras", {}).get("statewide", None)
         if include_statewide_datasets == False:
-            filtered_search_results = [result for result in search_results.get("results") if not result.get("place_keywords") == "New Mexico"]
+            filtered_search_results = []
+            for result in search_results.get("results"):
+                if result.get("place_keywords"):
+                    if result.get("place_keywords") != "New Mexico":
+                        filtered_search_results.append(result)
+                else:
+                    filtered_search_results.append(result)
             search_results.update(results=filtered_search_results)
             search_results.update(count=len(filtered_search_results))
         # Get user drawn input bounding box value ext_bbox
