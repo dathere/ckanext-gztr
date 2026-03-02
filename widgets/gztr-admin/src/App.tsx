@@ -428,7 +428,12 @@ function App() {
               </span>
               <DialogClose>
                 <Button
-                  onClick={() => {
+                  onClick={(e) => {
+                    const confirmed = confirm("Are you sure you want to cancel? If you continue, any new selected features will not be saved.");
+                    if (!confirmed) {
+                      e.preventDefault();
+                      return;
+                    }
                     setTempSpatialFull(undefined);
                   }}
                   className="btn btn-danger"
