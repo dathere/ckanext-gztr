@@ -7,11 +7,13 @@
     {% else %}
         {% set statewide = "yes" %}
     {% endif %}
-    <div class="form-check form-switch">
-        <input class="form-check-input" type="checkbox" {% if statewide == "yes" %} checked {% endif %} id="statewide-search-switch">
-        <input type="hidden" name="statewide" id="statewide">
-        <label class="form-check-label" for="statewide-search-switch" id="statewide-search-label">Include statewide datasets</label>
-    </div>
+    {% if form_id == 'dataset-search-form' and type =='dataset' %}
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" {% if statewide == "yes" %} checked {% endif %} id="statewide-search-switch">
+            <input type="hidden" name="statewide" id="statewide">
+            <label class="form-check-label" for="statewide-search-switch" id="statewide-search-label">Include statewide datasets</label>
+        </div>
+    {% endif %}
 {% endblock %}
 
 {% block search_search_fields %}
