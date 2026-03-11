@@ -131,11 +131,9 @@ class GZTRPlugin(plugins.SingletonPlugin):
             return pkg_dict
 
     def before_dataset_index(self, pkg_dict):
+        # If dataset has spatial data, add simplified WKT geometry to SOLR index
         try:
             spatial = pkg_dict.get("spatial")
-
-            # spatial = gd.get("spatial")
-            # place_keywords = gd.get("place_keywords")
 
             if spatial:
                 geojson = json.loads(spatial)
@@ -143,7 +141,6 @@ class GZTRPlugin(plugins.SingletonPlugin):
                 def shape_from_geometry(geometry):
                     try:
                         s = shape(geometry)
-                        print(f"SHAPE: {shape}")
                     except Exception as e:
                         log.error("{}, not indexing :: {}".format(e, json.dumps(geometry)[:100]))
                         return None
@@ -152,78 +149,42 @@ class GZTRPlugin(plugins.SingletonPlugin):
 
                 geometry = shape_from_geometry(geojson)
                 wkt = geometry.wkt
-                print(f"WKT: {wkt}")
-                pkg_dict["spatial"] = wkt
+                # Set dataset's spatial_geom value to WKT geometry in SOLR index (to allow spatial search)
+                pkg_dict["spatial_geom"] = wkt
+                # Do not index unnecessary GeoJSON geometries
                 pkg_dict.pop("spatial")
                 pkg_dict.pop("spatial_full")
-
-            # if place_keywords:
-            #     pkg_dict["place_keywords"] = place_keywords.split(",")
 
         except (json.JSONDecodeError, AttributeError, IndexError, TypeError) as e:
             log.error(f"Error processing gazetteer data: {e}")
 
-        # pkg_dict.pop("data_dict", None)
-        # validated_data_dict = json.loads(pkg_dict.get("validated_data_dict", None))
-        # validated_data_dict.pop("gazetteer", None)
-        # pkg_dict["validated_data_dict"] = json.dumps(validated_data_dict)
         return pkg_dict
 
     def before_dataset_search(self, search_params):
-        if "statewide:\"yes\"" in search_params["fq"]:
-            search_params["fq"] = search_params["fq"].replace("statewide:\"yes\"", "")
-            search_params["extras"]["statewide"] = True
-        elif "statewide:\"no\"" in search_params["fq"]:
-            search_params["fq"] = search_params["fq"].replace("statewide:\"no\"", "")
-            search_params["extras"]["statewide"] = False
+        if not search_params.get("fq_list"):
+            search_params["fq_list"] = []
 
-        # search_backend = self._get_search_backend()
-        # fq = search_params.get("fq", None)
-        # if fq:
-        #     if " statewide:\"true\"" not in search_params["fq"] and " statewide:\"false\"" not in search_params["fq"]:
-        #         search_params["fq"] = search_params["fq"] + " -place_keywords:\"Texas\""
-        #     if " statewide:\"true\"" in search_params["fq"]:
-        #         search_params["fq"] = search_params["fq"].replace(" statewide:\"true\"", "")
-        #         search_params["fq"] = search_params["fq"].replace(" -place_keywords:\"Texas\"", "")
-        #     if " statewide:\"false\"" in search_params["fq"]:
-        #         search_params["fq"] = search_params["fq"].replace(" statewide:\"false\"", " -place_keywords:\"Texas\"")
-
-        input_bbox = search_params.get('extras', {}).get('ext_bbox', None)
-
-        if input_bbox:
-            bbox = self.normalize_bbox(input_bbox)
-
-            if not bbox:
-                raise SearchError('Wrong bounding box provided')
-            # search_params = self.search_params(bbox, search_params)
-        return search_params
-
-    def after_dataset_search(self, search_results, search_params):
-        # If statewide datasets toggle is unchecked, remove statewide datasets from results
-        include_statewide_datasets = search_params.get("extras", {}).get("statewide", None)
-        if include_statewide_datasets == False:
-            filtered_search_results = []
-            for result in search_results.get("results"):
-                if result.get("place_keywords"):
-                    if result.get("place_keywords") != "New Mexico":
-                        filtered_search_results.append(result)
-                else:
-                    filtered_search_results.append(result)
-            search_results.update(results=filtered_search_results)
-            search_results.update(count=len(filtered_search_results))
-        # Get user drawn input bounding box value ext_bbox
         bbox = search_params.get('extras', {}).get('ext_bbox', None)
-        # If the input bounding box value is provided by the user, normalize it
         if bbox:
             bbox = self.normalize_bbox(bbox)
             if not bbox:
                 raise SearchError('Wrong bounding box provided')
-            # Instantiate list for filtering datasets based on intersection with the drawn bounding box
-            bbox_polygon = shapely.Polygon(((bbox["minx"], bbox["miny"]), (bbox["maxx"], bbox["miny"]), (bbox["maxx"], bbox["maxy"]), (bbox["minx"], bbox["maxy"]), (bbox["minx"], bbox["miny"])))
-            filtered_search_results = [result for result in search_results.get("results") if result.get("spatial") if shapely.intersection(shapely.make_valid(shapely.from_geojson(result["spatial"])), bbox_polygon)]
-            search_results.update(results=filtered_search_results)
-            search_results.update(count=len(filtered_search_results))
-        return search_results
+            spatial_filter = f"{{!field f=spatial_geom}}Intersects(ENVELOPE({bbox["minx"]}, {bbox["maxx"]}, {bbox["maxy"]}, {bbox["miny"]}))"
+            search_params["fq_list"].append(spatial_filter)
+
+        if search_params.get("fq"):
+            if "statewide:\"yes\"" in search_params["fq"]:
+                search_params["fq"] = search_params["fq"].replace("statewide:\"yes\"", "")
+                search_params["fq_list"].append("+dataset_type:\"dataset\"")
+            elif "statewide:\"no\"" in search_params["fq"]:
+                search_params["fq"] = search_params["fq"].replace("statewide:\"no\"", "-place_keywords:\"New Mexico\"")
+                search_params["fq_list"].append("+dataset_type:\"dataset\"")
+
+        dataset_type = search_params.get('extras', {}).get('dataset_type', None)
+        if dataset_type == "dataset":
+            search_params["fq_list"].append("+dataset_type:\"dataset\"")
+
+        return search_params
 
     def normalize_bbox(self, bbox_values):
         """

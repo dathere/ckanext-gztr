@@ -38,7 +38,6 @@ import { useFormMap } from "@/stores/form-map-store";
 import { runAddressSearch } from "@/lib/utils";
 import { useEffect, useState } from "react";
 import { Spinner } from "@/components/ui/spinner";
-import { Marker } from "react-map-gl/maplibre";
 
 function App() {
   // @ts-ignore
@@ -79,8 +78,8 @@ function App() {
           </span>
           {showClear && (
             <a
-              className="action tw:float-right"
-              href="/dataset/?q=&sort=score+desc+%2C+metadata_modified+desc"
+              className="tw:float-right"
+              href="/dataset"
             >
               Clear
             </a>

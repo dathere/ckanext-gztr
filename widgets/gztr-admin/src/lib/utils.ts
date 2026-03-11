@@ -30,23 +30,40 @@ export const runAddressSearch = async (
   }
 };
 
-export const simplifyGeojson = (str: string) => {
+export const simplifyGeojson = (spatialFullGeoJSON: any) => {
   try {
-    const origGeojson = str;
-    // @ts-expect-error
-    const firstTopo = Topojson.topology({ simp: origGeojson });
-    // @ts-expect-error
-    const merged = Topojson.merge(firstTopo, firstTopo.objects.simp.geometries);
-    // Refer to https://mourner.github.io/simplify-js/ for more details and options info.
-    let tolerance = 0.0001;
-    let simplifiedData = turf.simplify(merged, { highQuality: true, tolerance });
+    const features: any[] = spatialFullGeoJSON.features;
     // Simplify further if not less than 30KB (to resolve SOLR indexing issue of 32KB max)
     const MAX_SIZE_FOR_SIMP = 30 * 1000; // 30 KB
-    while (String(simplifiedData).length > MAX_SIZE_FOR_SIMP) {
-        tolerance += 0.001;
-        simplifiedData = turf.simplify(merged, { highQuality: true, tolerance });
+    const featureCollection = turf.featureCollection(
+      // @ts-expect-error
+      features.map((f) => {
+        const featureType = f.geometry.type;
+        let tolerance = 0.0001;
+        let simplifiedData = turf.simplify(
+          featureType === "Polygon"
+            ? turf.polygon(f.geometry.coordinates, f.properties)
+            : turf.multiPolygon(f.geometry.coordinates, f.properties),
+          { highQuality: true, tolerance },
+        );
+        while (JSON.stringify(simplifiedData).length > MAX_SIZE_FOR_SIMP) {
+          tolerance += 0.001;
+          simplifiedData = turf.simplify(
+            featureType === "Polygon"
+              ? turf.polygon(f.geometry.coordinates, f.properties)
+              : turf.multiPolygon(f.geometry.coordinates, f.properties),
+            { highQuality: true, tolerance },
+          );
+        }
+        return simplifiedData;
+      }),
+    );
+    if (featureCollection.features && featureCollection.features.length > 1) {
+      return turf.union(featureCollection)?.geometry;
+    } else if (featureCollection.features.length === 1) {
+      return featureCollection.features.at(0)?.geometry;
     }
-    return simplifiedData;
+    return null;
   } catch (e) {
     console.error("Error while simplifying GeoJSON: ", String(e));
   }
