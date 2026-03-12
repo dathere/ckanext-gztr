@@ -169,7 +169,11 @@ class GZTRPlugin(plugins.SingletonPlugin):
             bbox = self.normalize_bbox(bbox)
             if not bbox:
                 raise SearchError('Wrong bounding box provided')
-            spatial_filter = f"{{!field f=spatial_geom}}Intersects(ENVELOPE({bbox["minx"]}, {bbox["maxx"]}, {bbox["maxy"]}, {bbox["miny"]}))"
+            minx = bbox["minx"]
+            maxx = bbox["maxx"]
+            maxy = bbox["maxy"]
+            miny = bbox["miny"]
+            spatial_filter = f"{{!field f=spatial_geom}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))"
             search_params["fq_list"].append(spatial_filter)
 
         if search_params.get("fq"):
