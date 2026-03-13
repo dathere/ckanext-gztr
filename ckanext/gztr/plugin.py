@@ -16,56 +16,6 @@ import logging
 log = logging.getLogger(__name__)
 
 
-def _add_to_group(context, group_id, pkg_id):
-    try:
-        group_dict = toolkit.get_action("group_show")(context, {"id": group_id})
-    except toolkit.ObjectNotFound as e:
-        log.error("Group not found: %s" % group_id)
-        raise toolkit.ObjectNotFound
-    data_dict = {
-        "id": group_dict.get("id"),
-        "object": pkg_id,
-        "object_type": "package",
-        "capacity": "public",
-    }
-    toolkit.get_action("member_create")(context, data_dict)
-
-
-def _remove_from_group(context, group_id, pkg_id):
-    try:
-        group_dict = toolkit.get_action("group_show")(context, {"id": group_id})
-    except toolkit.ObjectNotFound as e:
-        log.error("Group not found: %s" % group_id)
-        raise toolkit.ObjectNotFound
-    data_dict = {
-        "id": group_dict.get("id"),
-        "object": pkg_id,
-        "object_type": "package",
-        "capacity": "public",
-    }
-    toolkit.get_action("member_delete")(context, data_dict)
-
-
-def _notify_admin(context, pkg_dict):
-    private = pkg_dict.get("private", True)
-    state = pkg_dict.get("state", "draft")
-    data_admin_approved = pkg_dict.get("data_admin_approved", False)
-
-    if (not private) and state == "active" and (not data_admin_approved):
-        log.info(
-            "PROBLEM: Send urgent email to admins that UNAPPROVED DATASET IT PUBLIC"
-        )
-
-    elif (private) and state == "active" and (not data_admin_approved):
-        log.info("NOTICE: Send email to admins that DATASET IT READY FOR AUDITING")
-
-    log.info(
-        "DATASET STATUS: Private: {private}, State: {state}, Approved: {approved}".format(
-            private=private, state=state, approved=data_admin_approved
-        )
-    )
-
-
 class GZTRPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigurer)
     plugins.implements(plugins.IValidators)
@@ -73,29 +23,12 @@ class GZTRPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.ITemplateHelpers)
 
     # IConfigurer
-
     def update_config(self, config_):
         toolkit.add_template_directory(config_, "templates")
         toolkit.add_public_directory(config_, "public")
         toolkit.add_resource("assets", "ckanext-gztr")
 
-        # Danger: The following are overrides of what should be defined in ckan.ini
-        #         Defining them here prevents custom schemas defined in ckan.ini from working
-
-        #        config_['scheming.presets'] = """
-        # ckanext.scheming:presets.json
-        # ckanext.composite:presets.json
-        # ckanext.gztr:schemas/presets.yaml
-        # """
-
-        #        config_['scheming.dataset_schemas'] = """
-        # ckanext.gztr:schemas/dataset.yaml
-        # """
-
-        #        config_['scheming.organization_schemas'] = """
-        # ckanext.gztr:schemas/organization.yaml
-        # """
-
+    # ITemplateHelpers
     def get_helpers(self):
         return {
             "dict_list_reduce_with_extras": gztr_helpers.dict_list_reduce_with_extras,
@@ -115,6 +48,7 @@ class GZTRPlugin(plugins.SingletonPlugin):
             "gazetteer_validator": gztr_validators.gazetteer_validator,
         }
 
+    # IPackageController
     def after_dataset_show(self, context, pkg_dict):
         if not pkg_dict.get("extras"):
             extras = (
