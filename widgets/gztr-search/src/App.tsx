@@ -103,7 +103,7 @@ function App() {
                 <DialogTitle>Filter by Location</DialogTitle>
                 <DialogDescription className="tw:text-lg mb-0">
                   Please use the bounding box tool to draw a rectangle to filter
-                  by location for datasets within your drawn region.
+                  by location for datasets intersecting with your drawn region.
                   <br />
                   You may also use the address search and feature preview tools
                   to help find a location first.
