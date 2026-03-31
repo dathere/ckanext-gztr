@@ -2,7 +2,9 @@
     "pages": [
         "---Introduction---",
         "index",
+        "features",
         "install-ckanext-gztr",
+        "software-architecture",
         "---Further reading---",
         "tutorials",
         "reference",

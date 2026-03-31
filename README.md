@@ -12,7 +12,7 @@ Users can select a geographic feature(s) or draw polygons to associate a dataset
 
 ![ckanext-gztr demo](https://github.com/user-attachments/assets/8b8041b2-2faf-4bd9-9b67-b3e1868b3148)
 
-List of primary features in the data curator gazetteer:
+List of primary features in the dataset publisher gazetteer:
 
 - Interactive gazetteer map using MapLibre GL JS
 - Zoom in/out functionality and zoom to "home"

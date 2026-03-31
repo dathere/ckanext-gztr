@@ -1,9 +1,8 @@
 ---
 title: "Install ckanext-gztr"
 description: Learn about how to install ckanext-gztr to your CKAN instancce.
-icon: Blocks
+icon: Download
 ---
-
 
 # Installation and Setup
 
@@ -11,7 +10,7 @@ We assume you're familiar with setting up CKAN extensions.
 
 In this installation guide we'll use a CKAN source install set up for development on Ubuntu 24.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://ckan-devstaller.dathere.com).
 
-<Callout title="Just trying out the extension?" type="info">If setting up a new CKAN instance for experimenting we suggest using [ckan-devstaller](https://ckan-devstaller.dathere.com).</Callout>
+<Callout title="Just trying out the extension?" type="info">If setting up a new CKAN instance for experimenting we suggest using [ckan-devstaller](https://ckan-devstaller.dathere.com). Note that you should **not** use ckan-devstaller for production usage.</Callout>
 
 <Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.11.4 and hasn't been verified to work for other versions.</Callout>
 
@@ -39,41 +38,44 @@ The ckanext-gztr extension relies on [ckanext-scheming](https://github.com/ckan/
 Run the following in `/usr/lib/ckan/default/src` to install the ckanext-scheming extension:
 
 ```bash
-pip install -e "git+https://github.com/ckan/ckanext-scheming.git#egg=ckanext-scheming"
+pip install -e "ckanext-scheming@git+https://github.com/ckan/ckanext-scheming.git"
 ```
 
-Then in your CKAN config file (e.g., `/etc/ckan/default/ckan.ini`) for `ckan.plugins` add `scheming_datasets` and `scheming_organizations`. For example:
+Then in your CKAN config file (e.g., `/etc/ckan/default/ckan.ini`) for `ckan.plugins` add `scheming_datasets`. For example:
 
 ```ini
-ckan.plugins = activity scheming_datasets scheming_organization
+ckan.plugins = activity scheming_datasets
 ```
 
-Also add the following lines in the `.ini` file (e.g. right below the line with `ckan.plugins`) for displaying the gazetteer in the dataset form:
+Also add the following lines in the `/etc/ckan/default/ckan.ini` file (e.g. right below the line with `ckan.plugins`) for displaying the gazetteer in the dataset form:
 
 ```ini
 # ckanext-scheming theme settings
 scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
-scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml ckanext.gztr:schemas/application.yaml
+scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml
 ```
+
+<Callout type="warning" title="Duplicate options">You may already having `scheming.presets` in `/etc/ckan/default/ckan.ini` if you installed using [ckan-devstaller](https://ckan-devstaller.com), so update the existing value instead.</Callout>
 
 </Step>
 <Step>
 
 ## Install ckanext-gztr
 
-In `/usr/lib/ckan/default/src` (within an activated virtual environment) run the following:
+Run the following in an activated virtual environment:
 
 ```bash
+cd /usr/lib/ckan/default/src
 git clone https://github.com/dathere/ckanext-gztr.git
 cd ckanext-gztr
 pip install -e .
 pip install -r requirements.txt
 ```
 
-Then add `gztr` to your `ckan.plugins` in your `.ini` file:
+Then add `gztr` to your `ckan.plugins` in your `/etc/ckan/default/ckan.ini` file:
 
 ```ini
-ckan.plugins = activity scheming_datasets scheming_organizations gztr
+ckan.plugins = activity scheming_datasets gztr
 ```
 
 </Step>
@@ -84,15 +86,26 @@ ckan.plugins = activity scheming_datasets scheming_organizations gztr
 
 Now the interactive gazetteer should be available on the form for adding and editing a dataset along with a "Spatial" field which is used to save the selected features along with a public search map gazetteer.
 
+For example you can run a local CKAN instance by running the following in your activated virtual environment:
+
+```bash
+cd /usr/lib/ckan/default/src/ckan
+ckan -c /etc/ckan/default/ckan.ini run
+```
+
+Then you should have your local CKAN instance running which you can open in your web browser at [http://localhost:5000](http://localhost:5000). If you visit the Datasets page at [http://localhost:5000/dataset](http://localhost:5000/dataset) then you should see an interactive search gazetteer in the left column to search by bounding box intersections and a data publisher gazetteer in the new dataset form.
+
+If you visit [http://127.0.0.1:5001/api/3/action/status_show](http://127.0.0.1:5001/api/3/action/status_show) then there should be a JSON response where `gztr` is present in the `result.extensions` array.
+
 </Step>
 
-<Step>
+{/* <Step>
 
 ## Customize ckanext-gztr for your CKAN instance
 
 You may want to customize various parts of ckanext-gztr. Click on one of the previews below to go to that feature's customization documentation.
 
-</Step>
+</Step> */}
 
 {/* <Step>
 

@@ -1,0 +1,75 @@
+---
+title: "Features"
+description: Learn about the various features available in the ckanext-gztr CKAN extension.
+icon: Sparkles
+---
+
+## Brief overview of the primary purpose of ckanext-gztr
+
+The current primary purpose of ckanext-gztr is to provide geospatial and mapping capabilities for CKAN instances to associate datasets with geospatial features. This association allows for enhanced geospatial capabilities related to CKAN such as geospatial mapping and search in addition to existing text-based metadata updates and search that CKAN provides by default.
+
+## Why's this important?
+
+The purpose helps organize what's expected for the ckanext-gztr CKAN extension to include. For features that do not exist within ckanext-gztr, they can be requested on the [Issues page](https://github.com/dathere/ckanext-gztr/issues) or found in **alternative extensions** such as:
+
+- [ckanext-spatial](https://docs.ckan.org/projects/ckanext-spatial/en/latest/) - Official CKAN extension for adding geospatial capabilities to CKAN
+- [ckanext-geoview](https://github.com/ckan/ckanext-geoview) - Official extension to display geospatial files and services in CKAN
+
+You can also search for other extensions at [ecosystem.ckan.org](https://ecosystem.ckan.org).
+
+Now let's explore common features to expect from ckanext-gztr!
+
+## Public dataset search gazetteer
+
+Commonly, CKAN data catalogs have a search box where users may type their query for datasets they'd like to find. However, this can be cumbersome when it comes to geographic data, when there is no visual method to search and identify relevant regions. The public gazetteer helps resolve this issue by providing an interactive map where users can draw a bounding box to search for datasets that have geospatial features which intersect with their drawn bounding box.
+
+![ckanext-gztr public dataset search demo](/media/ckanext-gztr-search-demo.gif)
+
+Here are things you can do with the public search gazetteer:
+
+- Search for datasets by drawing a bounding box region on an interactive map
+- Identify various named places as features on a map (e.g. cities, counties, etc.)
+- View datasets with geographic data using interactive thumbnails
+- Explore an interactive map of a preset region
+- Filter between excluding and including statewide datasets
+- Search for an address using the [Nominatim API](https://nominatim.org/)
+- Filter datasets by a named place keyword
+
+## Dataset publisher gazetteer
+
+Similar to the public gazetteer, the data curator gazetteer provides data curators a visual and interactive way to specify a dataset's relevant geographic features. Users can either select pre-loaded features or draw custom polygons. The selection is then saved and can be searched from the public dataset search page, either by drawing a bounding box using the public gazetteer or by searching a pre-loaded location's name, which is indexed as a “place keyword”.
+
+![ckanext-gztr data publisher demo](/media/ckanext-gztr-data-publisher-demo.gif)
+
+- Selecting a named place using the category and place selectors.
+- Jumping to a selected place and drawing/editing a custom polygon.
+
+## Dataset minimaps and previews
+
+Once a dataset publisher associates a dataset with geospatial data using the data publisher gazetteer, a minimap can be displayed on the CKAN instance's dataset search page along with a map on each dataset's individual page.
+
+For example here is a datasets page, where there is a minimap depicting the selected geospatial region by the data publisher on the left of each dataset that appears in the search results:
+
+![ckanext-gztr datasets page](/media/datasets-page.png)
+
+Here's a closer look at a single dataset search result:
+
+![ckanext-gztr minimap demo](/media/minimap-demo.png)
+
+The minimap can help with visually identifying datasets that have specific geospatial features as a public user.
+
+A minimap can also be added on dataset-specific pages (e.g. when clicking on a dataset in the search results). For example here is a dataset-specific page, where there is a minimap in the metadata section at the bottom:
+
+![ckanext-gztr individual dataset page](/media/individual-dataset-page.png)
+
+## Place Keywords metadata and search
+
+When a sysadmin of a CKAN instance provides preset feature categories for associating datasets with geospatial features, a field can be specified as "Place Keywords", which represent the name of each feature as a keyword and is saved as a comma-separated metadata field for the dataset.
+
+For example if a dataset publisher selects the "Counties" feature category and then selects "County A" and "County B", then the Place Keywords field would look like the following:
+
+```
+County A, County B
+```
+
+Place Keywords search can be enabled by the sysadmin of the CKAN instance which adds this Place Keywords metadata field to the Solr search index. This means that public users can then run a search query on the datasets page with a query such as "county a" and a case-insensitive filter would be added to include datasets that have this place keyword in their metadata in the dataset search results.

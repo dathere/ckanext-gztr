@@ -1,6 +1,6 @@
 # ckanext-gztr docs web app (gztr.dathere.com)
 
-![Docs landing page example](./public/docs-home-example.png)
+![Docs landing page example](./public/media/docs-home-example.png)
 
 This directory includes a Next.js project built with [Fumadocs](https://github.com/fuma-nama/fumadocs) for documentation of ckanext-gztr. The documentation can be viewed at [gztr.dathere.com](https://gztr.dathere.com).
 
