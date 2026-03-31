@@ -8,6 +8,8 @@ icon: Wrench
 
 Configuring ckanext-gztr involves a few additional steps compared to the common CKAN extension due to how ckanext-gztr is architected. Here we will go over the steps involved for customizing your installation followed by all of the available configuration options.
 
+<Callout title="Plans for ease of configuration" type="info">There are plans to allow configuration through the CKAN instance itself when logged in as a sysadmin in a future release of ckanext-gztr.</Callout>
+
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 
 <Steps>
@@ -18,7 +20,7 @@ import { Step, Steps } from 'fumadocs-ui/components/steps';
 
 The extension provides multiple configuration options that can be defined in your CKAN configuration file, which by default is available at `/etc/ckan/default/ckan.ini`. You can add these options and values to customize your installation of ckanext-gztr for your CKAN instance for the next time you run your CKAN instance (e.g. by running `ckan -c /etc/ckan/default/ckan.ini run`). The available configuration options are listed further below on this page.
 
-If you use [ckanext-envvars](https://github.com/ckan/ckanext-envvars) then each configuration option should be modifiable by environment variable declarations. For example the `ckanext.gztr.enable_drawn_features` configuration option can have its value set by the environment variable `CKANEXT__GZTR__ENABLE_DRAWN_FEATURES`. This method can be very useful when deploying CKAN with Docker or Docker Compose.
+If you use [ckanext-envvars](https://github.com/ckan/ckanext-envvars) then each configuration option should be modifiable by environment variable declarations. For example the `ckanext.gztr.enable_drawn_features` configuration option can have its value set by the environment variable `CKANEXT__GZTR__ENABLE_DRAWN_FEATURES`. This method can be useful when deploying CKAN with Docker or Docker Compose.
 
 </Step>
 
