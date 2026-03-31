@@ -4,11 +4,11 @@
         "index",
         "features",
         "install-ckanext-gztr",
+        "configuration",
+        "update",
         "software-architecture",
         "---Further reading---",
         "tutorials",
-        "reference",
-        "changelog",
         "--- ---",
         "[Privacy Policy](https://dathere.com/privacy-policy/)"
     ]

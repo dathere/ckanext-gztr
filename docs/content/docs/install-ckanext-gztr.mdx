@@ -1,6 +1,6 @@
 ---
 title: "Install ckanext-gztr"
-description: Learn about how to install ckanext-gztr to your CKAN instancce.
+description: Learn how to install ckanext-gztr to your CKAN instance.
 icon: Download
 ---
 
@@ -56,6 +56,37 @@ scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml
 ```
 
 <Callout type="warning" title="Duplicate options">You may already having `scheming.presets` in `/etc/ckan/default/ckan.ini` if you installed using [ckan-devstaller](https://ckan-devstaller.com), so update the existing value instead.</Callout>
+
+If you already have a running CKAN instance with ckanext-scheming installed and a custom schema YAML file then you'll want to add the following fields to your schema YAML file for the dataset publisher gazetteer to appear in the dataset metadata form:
+
+```yaml
+
+# ckanext-gztr fields
+# Interactive React gazetteer widget
+- field_name: gazetteer
+  label: Indicate Spatial Coverage
+  form_snippet: gazetteer_widget.html
+  display_snippet: null
+  validators: ignore_missing gazetteer_validator
+  output_validators: scheming_load_json
+# Full GeoJSON as a FeatureCollection from user's selection in data publisher gazetteer
+- field_name: spatial_full
+  label: Spatial Full
+  form_snippet: text.html
+  form_placeholder: Filled in automatically as you select areas above.
+# Simplified spatial_full geometry for indexing with Solr
+- field_name: spatial
+  label: Spatial
+  display_snippet: null
+  form_snippet: text.html
+  form_placeholder: Filled in automatically as you select areas above.
+# Place keywords as a comma-separated string
+- field_name: place_keywords
+  label: Place Keywords
+  display_snippet: text.html
+  form_attrs:
+    data-module: place_keywords
+```
 
 </Step>
 <Step>
