@@ -289,7 +289,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
         longitude: -106.018066,
         zoom: 5,
       }}
-      style={{ width: "100%", height: 400, borderRadius: "1rem" }}
+      style={{ width: "100%", height: "60vh", borderRadius: "1rem" }}
       mapStyle="https://tiles.openfreemap.org/styles/liberty"
     >
       <HomeControl />
