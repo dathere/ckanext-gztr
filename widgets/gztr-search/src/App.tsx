@@ -28,6 +28,7 @@ import {
   MapIcon,
   MapPinIcon,
   PencilIcon,
+  SearchIcon,
   SquareDashedMousePointerIcon,
   XIcon,
 } from "lucide-react";
@@ -95,7 +96,8 @@ function App() {
                 className="tw:rounded-lg tw:shadow-xl p-2"
                 variant="secondary"
               >
-                <PencilIcon />
+                <SearchIcon />
+                Search by location
               </Button>
             </DialogTrigger>
             <DialogContent className="tw:sm:max-w-[90vw]">

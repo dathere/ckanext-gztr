@@ -2,7 +2,6 @@ import * as turf from "@turf/turf";
 import { type ClassValue, clsx } from "clsx";
 import type { Map as FormMap } from "maplibre-gl";
 import { twMerge } from "tailwind-merge";
-import * as Topojson from "topojson";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
