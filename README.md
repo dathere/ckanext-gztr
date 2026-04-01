@@ -29,7 +29,7 @@ Public users can then search for relevant datasets by location by drawing a boun
 
 List of primary features in the public user gazetteer:
 
-- Interactive gazetteer map using MapLibre GL J
+- Interactive gazetteer map using MapLibre GL JS
 - Draw a bounding box on the map to filter datasets by location (based on geospatial intersection between drawn bounding box and simplified dataset GeoJSON)
 - Search and have the map "fly to" an address or view more results and "fly to" them
 - Preview preset features on the map and click a feature to view a popup with more information about that feature
