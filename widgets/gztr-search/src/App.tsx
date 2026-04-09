@@ -91,7 +91,7 @@ function App() {
 								variant="secondary"
 							>
 								<SearchIcon />
-								Search by location
+								Search by bounding box
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="tw:sm:max-w-[90vw]">
