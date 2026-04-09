@@ -1,6 +1,9 @@
 {% ckan_extends %}
 
 {% block search_input %}
+    {% if h.url_for(request.endpoint) == "/dataset/" %}
+        <div style="margin-bottom: 1rem;" id="gztr-search-widget-root"></div>
+    {% endif %}
     {{ super() }}
     {% if request.args.get('ext_bbox') %}
         {% set ext_bbox = request.args.get('ext_bbox') %}
@@ -27,3 +30,5 @@
         <span>{{ form.hidden_from_list(fields=fields,except_names=['statewide']) }}</span>
     {%- endif %}
 {% endblock %}
+
+{% asset 'ckanext-gztr/gztr_search_widget-react-js' %}
