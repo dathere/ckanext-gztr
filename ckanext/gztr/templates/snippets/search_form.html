@@ -1,7 +1,7 @@
 {% ckan_extends %}
 
 {% block search_input %}
-    {% if h.url_for(request.endpoint) == "/dataset/" %}
+    {% if h.current_url()[0:9] == "/dataset/" and (h.current_url()[9:] == "" or h.current_url()[9:].startswith("?"))%}
         <div style="margin-bottom: 1rem;" id="gztr-search-widget-root"></div>
     {% endif %}
     {{ super() }}
