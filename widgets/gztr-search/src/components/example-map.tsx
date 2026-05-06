@@ -12,10 +12,37 @@ import { useFormMap } from "@/stores/form-map-store";
 
 const ExampleMap = () => {
   const [bboxGeojson, setBboxGeojson] = useState();
+  const [mapStyle, setMapStyle] = useState("https://tiles.openfreemap.org/styles/liberty");
   const setStateGeojson = useFormMap((state) => state.setStateGeojson);
   const spatialFull = useFormMap((state) => state.spatialFull);
 
   useEffect(() => {
+    // If OpenStreetMap is up, use it instead of OpenFreeMap
+    (async () => {
+      if ((await fetch("https://tile.openstreetmap.org")).ok) {
+        setMapStyle({
+          // @ts-ignore
+          sources: {
+            "openstreetmap-raster": {
+              type: "raster",
+              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
+              tileSize: 256,
+              minzoom: 0,
+              maxzoom: 19,
+              attribution: "© OpenStreetMap contributors"
+            },
+          },
+          version: 8,
+          layers: [
+            {
+              id: "openstreetmap-raster",
+              type: "raster",
+              source: "openstreetmap-raster"
+            },
+          ]
+        })
+      }
+    })();
     (async () => {
       const data = await (
         await fetch(`/data/gztr-features/NM_State.geojson`)
@@ -32,7 +59,7 @@ const ExampleMap = () => {
         zoom: 5,
       }}
       style={{ width: "100%", height: 400 }}
-      mapStyle="https://tiles.openfreemap.org/styles/liberty"
+      mapStyle={mapStyle}
       onLoad={(e) => {
         const map = e.target;
         // Display drawn bounding box if ext_bbox exists in URL query parameters
