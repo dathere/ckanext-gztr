@@ -18,7 +18,6 @@ import { Geoman } from "@geoman-io/maplibre-geoman-free";
 
 const SearchMap = () => {
   const popupRef = useRef<maplibregl.Popup>(undefined);
-  const [mapStyle, setMapStyle] = useState("https://tiles.openfreemap.org/styles/liberty");
   const [currentGeojson, setCurrentGeojson] = useState();
   const [selectedFeatureName, setSelectedFeatureName] = useState<string>();
   const [lngLat, setLngLat] = useState<number[]>();
@@ -33,32 +32,6 @@ const SearchMap = () => {
   // TODO: somehow cache GeoJSON files
 
   useEffect(() => {
-    // If OpenStreetMap is up, use it instead of OpenFreeMap
-    (async () => {
-      if ((await fetch("https://tile.openstreetmap.org")).ok) {
-        setMapStyle({
-          // @ts-ignore
-          sources: {
-            "openstreetmap-raster": {
-              type: "raster",
-              tiles: ["https://tile.openstreetmap.org/{z}/{x}/{y}.png"],
-              tileSize: 256,
-              minzoom: 0,
-              maxzoom: 19,
-              attribution: "© OpenStreetMap contributors"
-            },
-          },
-          version: 8,
-          layers: [
-            {
-              id: "openstreetmap-raster",
-              type: "raster",
-              source: "openstreetmap-raster"
-            },
-          ]
-        })
-      }
-    })();
     (async () => {
       if (currentCategory) {
         if (popupRef.current) popupRef.current.remove();
@@ -128,7 +101,7 @@ const SearchMap = () => {
         zoom: 5,
       }}
       style={{ width: "100%", height: 400, borderRadius: "1rem" }}
-      mapStyle={mapStyle}
+      mapStyle="https://tiles.openfreemap.org/styles/liberty"
     >
       <NavigationControl position="top-left" />
       <ScaleControl />
