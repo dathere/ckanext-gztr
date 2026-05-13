@@ -160,14 +160,12 @@ function App() {
           if (o) {
             setTempSpatialFull(spatialFull);
             const existingFeatures = extractFeaturesFromGeojson(spatialFull);
-            // @ts-expect-error
             setSelectedFeatures(existingFeatures);
           }
           // If dialog is being closed
           else {
             setTempSpatialFull(undefined);
             const existingFeatures = extractFeaturesFromGeojson(spatialFull);
-            // @ts-expect-error
             setSelectedFeatures(existingFeatures);
           }
           setOpen(o);
@@ -453,7 +451,6 @@ function App() {
                   setOpen(false);
                   setTempSpatialFull(undefined);
                   setSelectedFeatures(
-                    // @ts-expect-error
                     extractFeaturesFromGeojson(tempSpatialFull),
                   );
                 }}

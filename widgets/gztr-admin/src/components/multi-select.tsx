@@ -718,7 +718,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
             }
             setTempSpatialFull(geojsonData);
           } else {
-            map.addSource("featureSource", {
+            let featureCollection = {
               type: "geojson",
               data: {
                 type: "FeatureCollection",
@@ -733,7 +733,12 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                   },
                 ],
               },
-            });
+            };
+            if (option.pid)
+              // @ts-expect-error
+              featureCollection.data.features[0].properties.pid = option.pid;
+            // @ts-expect-error
+            map.addSource("featureSource", featureCollection);
             map.addLayer({
               id: "featureLayer",
               // References the GeoJSON source defined above

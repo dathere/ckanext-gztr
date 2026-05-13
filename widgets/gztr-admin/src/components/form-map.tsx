@@ -122,6 +122,14 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                 // @ts-expect-error
                 features: selectedFeatures
                   ? selectedFeatures.map((f) => {
+                      let featureProperties: any = {
+                        // @ts-expect-error
+                        value: f.value,
+                        // @ts-expect-error
+                        category: f.category,
+                      };
+                      // @ts-expect-error
+                      if (f.pid) featureProperties.pid = f.pid;
                       const outputFeature = {
                         type: "Feature",
                         geometry:
@@ -138,12 +146,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                             : // @ts-expect-error
                               getFeatureData(f.value, f.category, features)
                                 .geometry,
-                        properties: {
-                          // @ts-expect-error
-                          value: f.value,
-                          // @ts-expect-error
-                          category: f.category,
-                        },
+                        properties: featureProperties,
                       };
                       // @ts-expect-error
                       if (f.category === "Drawn features") {

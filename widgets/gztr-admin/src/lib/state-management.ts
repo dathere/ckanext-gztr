@@ -14,10 +14,15 @@ type SpatialFull = {
 
 export const extractFeaturesFromGeojson = (spatialFull: SpatialFull) => {
   if (!spatialFull || !("features" in spatialFull)) return [];
-  return spatialFull.features.map((feature) => ({
-    value: feature.properties.value,
-    category: feature.properties.category,
-  }));
+  return spatialFull.features.map((feature) => {
+    let featureData: any = {
+      value: feature.properties.value,
+      category: feature.properties.category
+    };
+    if (feature.properties.pid)
+      featureData.pid = feature.properties.pid
+    return featureData;
+  });
 };
 
 export const extractDrawnFeaturesFromGeojson = (spatialFull: SpatialFull) => {
@@ -138,16 +143,20 @@ export const initializeFeatureSourceAndLayer = (
     data: {
       type: "FeatureCollection",
       features: selectedFeatures
-        ? selectedFeatures.map((f) => ({
-          type: "Feature",
-          geometry:
-            // @ts-expect-error
-            getFeatureData(f.value, f.category, features).geometry,
-          properties: {
+        ? selectedFeatures.map((f) => {
+          let featureProperties: any = {
             value: f.value,
             category: f.category,
-          },
-        }))
+          };
+          if (f.pid) featureProperties.pid = f.pid;
+          return {
+            type: "Feature",
+            geometry:
+              // @ts-expect-error
+              getFeatureData(f.value, f.category, features).geometry,
+            properties: featureProperties,
+          }
+        })
         : [],
     },
   });
