@@ -90,6 +90,7 @@ interface MultiSelectOption {
   /** The unique value associated with the option. */
   value: string;
   category?: string;
+  pid?: any;
   geometry?: any;
   /** Optional icon component to display alongside the option. */
   icon?: React.ComponentType<{ className?: string }>;
@@ -700,14 +701,17 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
               // @ts-expect-error
               existingSource.setData(geojsonData);
             } else {
-              geojsonData.features.push({
+              let featureData: any = {
                 type: "Feature",
                 geometry: option.geometry,
                 properties: {
                   value: option.value,
                   category: option.category,
                 },
-              });
+              };
+              if (option.pid)
+                featureData.properties.pid = option.pid;
+              geojsonData.features.push(featureData);
               // @ts-expect-error
               existingSource.setData(geojsonData);
               await zoomToFeatureBounds(option.value, formMap);

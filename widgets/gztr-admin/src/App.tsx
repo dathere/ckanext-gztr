@@ -87,15 +87,18 @@ function App() {
           await fetch(`/data/gztr-features/${category.value}.geojson`)
         ).json();
         // Store selected category's feature names in features variable
-        const categoryOptions = [];
+        const categoryOptions: any[] = [];
         for (const feature of geojson.features) {
           const featureName = feature.properties[category.nameKey];
-          categoryOptions.push({
+          const featureData: any = {
             value: featureName,
             label: featureName,
             geometry: feature.geometry,
             category: category.label,
-          });
+          };
+          if (feature.properties.pid)
+            featureData.pid = feature.properties.pid;
+          categoryOptions.push(featureData);
         }
         const categoryFeaturesGroup: MultiSelectGroup = {
           heading: category.label,

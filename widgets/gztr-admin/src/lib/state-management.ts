@@ -63,27 +63,29 @@ export const toggleOptionInSource = async (
       );
       const existingFeatureIndex = geojsonData.features
         ? geojsonData.features.findIndex(
-            (f: any) =>
-              f.properties.value === name && f.properties.category === category,
-          )
+          (f: any) =>
+            f.properties.value === name && f.properties.category === category,
+        )
         : -1;
       if (existingFeatureIndex > -1) {
         geojsonData.features.splice(existingValueIndex, 1);
         // @ts-expect-error
         existingSource.setData(geojsonData);
       } else {
-        const newFeature = {
+        const featureData = getFeatureData(name, category, features);
+        let newFeature: any = {
           type: "Feature",
           geometry:
             category === "Drawn features"
               ? providedGeojson?.geometry
-              : getFeatureData(name, category, features).geometry,
+              : featureData.geometry,
           properties: {
             value: name,
             category: category,
           },
         };
-        // @ts-expect-error
+        if (featureData.pid)
+          newFeature.properties.pid = featureData.pid;
         if (category === "Drawn features") newFeature.id = name;
         geojsonData.features.push(newFeature);
         // @ts-expect-error
@@ -137,15 +139,15 @@ export const initializeFeatureSourceAndLayer = (
       type: "FeatureCollection",
       features: selectedFeatures
         ? selectedFeatures.map((f) => ({
-            type: "Feature",
-            geometry:
-              // @ts-expect-error
-              getFeatureData(f.value, f.category, features).geometry,
-            properties: {
-              value: f.value,
-              category: f.category,
-            },
-          }))
+          type: "Feature",
+          geometry:
+            // @ts-expect-error
+            getFeatureData(f.value, f.category, features).geometry,
+          properties: {
+            value: f.value,
+            category: f.category,
+          },
+        }))
         : [],
     },
   });
