@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import {
   type ComponentProps,
@@ -8,10 +8,10 @@ import {
   useMemo,
   useRef,
   useState,
-} from 'react';
-import * as Primitive from '@radix-ui/react-tabs';
-import { mergeRefs } from '../lib/merge-refs';
-import { useEffectEvent } from 'fumadocs-core/utils/use-effect-event';
+} from "react";
+import * as Primitive from "@radix-ui/react-tabs";
+import { mergeRefs } from "../lib/merge-refs";
+import { useEffectEvent } from "react";
 
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, ChangeListener[]>();
@@ -53,7 +53,7 @@ const TabsContext = createContext<{
 
 function useTabContext() {
   const ctx = useContext(TabsContext);
-  if (!ctx) throw new Error('You must wrap your component in <Tabs>');
+  if (!ctx) throw new Error("You must wrap your component in <Tabs>");
   return ctx;
 }
 
@@ -119,7 +119,7 @@ export function Tabs({
           const id = valueToIdMap.get(v);
 
           if (id) {
-            window.history.replaceState(null, '', `#${id}`);
+            window.history.replaceState(null, "", `#${id}`);
           }
         }
 

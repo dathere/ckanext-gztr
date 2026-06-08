@@ -3,7 +3,7 @@
 
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { cn } from "fumadocs-ui/utils/cn";
+import { cn } from "@/lib/cn";
 import {
   BlocksIcon,
   GitMergeIcon,
@@ -38,7 +38,7 @@ export default function HomePage() {
           background: `repeating-linear-gradient(to right, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px), repeating-linear-gradient(to bottom, ${gridColor}, ${gridColor} 1px,transparent 1px,transparent 50px)`,
         }}
       />
-      <main className="container relative max-w-[1100px] px-2 py-4 z-2 lg:py-8">
+      <main className="container relative max-w-[1100px] px-2 py-4 z-2 lg:py-8 mx-auto">
         <div
           style={{
             background:
@@ -105,14 +105,18 @@ function Hero() {
       <h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1>
       <h1 className="mb-8 max-w-[800px] text-4xl font-medium max-md:hidden">
         <span className="text-5xl">
-          ckanext-gztr{" "}
-          <MapPinnedIcon className="inline-block w-10 h-10 pb-1" />
+          ckanext-gztr <MapPinnedIcon className="inline-block w-10 h-10 pb-1" />
         </span>
         <br />
         Interactive gazetteer maps for your datasets.
       </h1>
       <p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        ckanext-gztr is a <Link href="https://ckan.org" className="text-blue-400">CKAN</Link> extension that lets you associate features on an interactive map for each dataset and also provides spatial search by drawing a bounding box.
+        ckanext-gztr is a{" "}
+        <Link href="https://ckan.org" className="text-blue-400">
+          CKAN
+        </Link>{" "}
+        extension that lets you associate features on an interactive map for
+        each dataset and also provides spatial search by drawing a bounding box.
       </p>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
         Provided by{" "}
@@ -248,16 +252,16 @@ function WhyInteractive(props: {
       <MousePointerClickIcon className="w-4 h-4 inline-block" key={0} />,
       "Select preset map features",
       <p>
-        One of the primary goals of ckan-devstaller is to ease
-        installation of CKAN for development. Built with Rust for speed
-        and streamlining installation with{" "}
+        One of the primary goals of ckan-devstaller is to ease installation of
+        CKAN for development. Built with Rust for speed and streamlining
+        installation with{" "}
         <a href="https://github.com/tino097/ckan-compose/tree/ckan-devstaller">
           ckan-compose
         </a>
         , ckan-devstaller improves installation speeds{" "}
         <strong>from hours/days to just minutes</strong> depending on your
         download speed.
-      </p>
+      </p>,
     ],
     [
       <PenLineIcon className="w-4 h-4 inline-block" key={1} />,
@@ -277,7 +281,7 @@ function WhyInteractive(props: {
           Then you can copy the provided ckan-devstaller command to run your
           selected configuration.
         </p>
-      </>
+      </>,
     ],
     [
       <LayoutListIcon className="w-4 h-4 inline-block" key={2} />,
@@ -291,19 +295,19 @@ function WhyInteractive(props: {
           <li>Trying out a new version of CKAN</li>
           <li>Developing CKAN extensions and themes</li>
         </ul>
-      </>
+      </>,
     ],
     [
       <SquareDashedMousePointerIcon className="w-4 h-4 inline-block" key={3} />,
       "Search by bounding box",
       <>
         <p>
-          After you've installed CKAN with ckan-devstaller, you can
-          uninstall CKAN with ease. This allows for quickly re-installing
-          CKAN for a different use case.
+          After you've installed CKAN with ckan-devstaller, you can uninstall
+          CKAN with ease. This allows for quickly re-installing CKAN for a
+          different use case.
         </p>
         {props.codeblockUninstall}
-      </>
+      </>,
     ],
   ];
 
@@ -356,7 +360,10 @@ function WhyInteractive(props: {
             </h3>
             {items[0][2]}
             <div className="flex gap-2">
-              <Link href="/docs/builder" className={cn(buttonVariants(), "not-prose")}>
+              <Link
+                href="/docs/builder"
+                className={cn(buttonVariants(), "not-prose")}
+              >
                 Get started
               </Link>
             </div>
@@ -434,12 +441,12 @@ function WhyPanel(props: HTMLProps<HTMLDivElement>) {
 }
 
 const previewButtonVariants = cva(
-  'w-48 h-8 text-sm font-medium transition-colors rounded-full',
+  "w-48 h-8 text-sm font-medium transition-colors rounded-full",
   {
     variants: {
       active: {
-        true: 'text-fd-primary-foreground',
-        false: 'text-fd-muted-foreground',
+        true: "text-fd-primary-foreground",
+        false: "text-fd-muted-foreground",
       },
     },
   },
