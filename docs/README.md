@@ -6,10 +6,11 @@ This directory includes a Next.js project built with [Fumadocs](https://github.c
 
 ## Development
 
-Run development server:
+Run development server with [pnpm](https://pnpm.io):
 
 ```bash
-bun dev
+pnpm i
+pnpm dev
 ```
 
 Open http://localhost:3000 with your browser to see the result.
