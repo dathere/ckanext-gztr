@@ -128,8 +128,7 @@ const FormMap = ({ layerName }: { layerName?: string }) => {
                         // @ts-expect-error
                         category: f.category,
                       };
-                      // @ts-expect-error
-                      if (f.pid) featureProperties.pid = f.pid;
+                      if ("pid" in f) featureProperties.pid = f.pid;
                       const outputFeature = {
                         type: "Feature",
                         geometry:

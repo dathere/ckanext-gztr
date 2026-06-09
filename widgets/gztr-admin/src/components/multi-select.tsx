@@ -709,7 +709,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                   category: option.category,
                 },
               };
-              if (option.pid)
+              if ("pid" in option)
                 featureData.properties.pid = option.pid;
               geojsonData.features.push(featureData);
               // @ts-expect-error
@@ -734,7 +734,7 @@ export const MultiSelect = React.forwardRef<MultiSelectRef, MultiSelectProps>(
                 ],
               },
             };
-            if (option.pid)
+            if ("pid" in option)
               // @ts-expect-error
               featureCollection.data.features[0].properties.pid = option.pid;
             // @ts-expect-error

@@ -96,7 +96,7 @@ function App() {
             geometry: feature.geometry,
             category: category.label,
           };
-          if (feature.properties.pid)
+          if ("pid" in feature.properties)
             featureData.pid = feature.properties.pid;
           categoryOptions.push(featureData);
         }

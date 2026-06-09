@@ -78,13 +78,9 @@ const SearchMap = () => {
         map.on("gm:create", (event) => {
           const coordinates = event.feature.getGeoJson().geometry.coordinates;
           // ext_bbox={minx},{miny},{maxx},{maxy}
-          // @ts-expect-error
           const minx = coordinates[0][0][0];
-          // @ts-expect-error
           const miny = coordinates[0][0][1];
-          // @ts-expect-error
           const maxx = coordinates[0][2][0];
-          // @ts-expect-error
           const maxy = coordinates[0][2][1];
           const ext_bbox = `${minx},${miny},${maxx},${maxy}`;
           // const default_spatial_query =

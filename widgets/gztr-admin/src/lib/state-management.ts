@@ -19,7 +19,7 @@ export const extractFeaturesFromGeojson = (spatialFull: SpatialFull) => {
       value: feature.properties.value,
       category: feature.properties.category
     };
-    if (feature.properties.pid)
+    if ("pid" in feature.properties)
       featureData.pid = feature.properties.pid
     return featureData;
   });
@@ -89,8 +89,9 @@ export const toggleOptionInSource = async (
             category: category,
           },
         };
-        if (featureData.pid)
-          newFeature.properties.pid = featureData.pid;
+        if (featureData) // undefined when drawn feature
+          if ("pid" in featureData)
+            newFeature.properties.pid = featureData.pid;
         if (category === "Drawn features") newFeature.id = name;
         geojsonData.features.push(newFeature);
         // @ts-expect-error
@@ -148,7 +149,7 @@ export const initializeFeatureSourceAndLayer = (
             value: f.value,
             category: f.category,
           };
-          if (f.pid) featureProperties.pid = f.pid;
+          if ("pid" in f) featureProperties.pid = f.pid;
           return {
             type: "Feature",
             geometry:
