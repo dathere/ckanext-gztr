@@ -140,7 +140,6 @@ dataset_fields:
 
 - field_name: collection_method
   label: Collection Method
-  required: True
   help_text: The procedure, technique, or mode of inquiry used to attain data. Also referred to as "Data Capture Method".
   help_allow_html: true
   form_include_blank_choice: true
@@ -181,7 +180,6 @@ dataset_fields:
 
 - field_name: quality_control_level
   label: Quality Control Level
-  required: True
   help_text: A controlled list of options to describe the level of review and correction that has been applied to the data resource.
   form_include_blank_choice: true
   preset: select
@@ -229,7 +227,6 @@ dataset_fields:
 
 - field_name: update_frequency
   label: Update Frequency
-  required: True
   form_include_blank_choice: true
   preset: select
   choices:
