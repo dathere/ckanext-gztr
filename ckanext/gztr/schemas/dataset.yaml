@@ -33,6 +33,7 @@ dataset_fields:
   label: Description
   form_snippet: markdown.html
   form_placeholder: Some useful notes about the data
+  suggestion_formula: 'Dataset contains {{ dpp.dataset_stats.RECORD_COUNT }} records with the following columns: {{ dpps.keys() | join(", ") }}.'
 
 - field_name: tag_string
   label: Tags
@@ -100,6 +101,7 @@ dataset_fields:
   label: Spatial Description
   form_snippet: markdown.html
   form_placeholder: eg. Select common placenames and/or describe the general location where data from this resource are located.
+  suggestion_formula: "{% if not dpp.NO_LAT_LON_FIELDS %}Dataset contains geographic point data. Latitude column: \"{{ dpp.LAT_FIELD }}\", Longitude column: \"{{ dpp.LON_FIELD }}\".{% endif %}"
 
 - field_name: coordinate_system
   label: Coordinate System
@@ -107,6 +109,7 @@ dataset_fields:
   help_inline: true
   preset: select
   form_include_blank_choice: true
+  suggestion_formula: "{% if not dpp.NO_LAT_LON_FIELDS %}WGS84{% endif %}"
   choices:
   - label: WGS84
     value: WGS84
@@ -229,6 +232,18 @@ dataset_fields:
   label: Update Frequency
   form_include_blank_choice: true
   preset: select
+  suggestion_formula: |
+    {%- if not dpp.NO_DATE_FIELDS -%}
+    {%- set freq = guess_accrual_periodicity() -%}
+    {%- if freq == 'R/P1D' -%}daily
+    {%- elif freq == 'R/P7D' -%}weekly
+    {%- elif freq in ['R/P1M', 'R/P30D'] -%}monthly
+    {%- elif freq == 'R/P3M' -%}quarterly
+    {%- elif freq == 'R/P6M' -%}every 6 months
+    {%- elif freq in ['R/P12M', 'R/P1Y'] -%}annually
+    {%- else -%}other
+    {%- endif -%}
+    {%- endif -%}
   choices:
   - label: Real-time
     value: real-time
@@ -278,6 +293,7 @@ dataset_fields:
 - field_name: primary_key_field
   label: Primary Key Field
   form_placeholder: Select primary key field with unique record identifier
+  suggestion_formula: "{% for field in dpps if dpps[field].stats.uniqueness_ratio | float == 1.0 and field != '_id' %}{% if loop.first %}{{ field }}{% endif %}{% endfor %}"
 
 - field_name: disclaimer
   label: Disclaimer
@@ -297,6 +313,12 @@ dataset_fields:
   label: Supporting URL
   plural_label: Supporting URLs
   preset: multiple_url
+
+- field_name: dpp_suggestions
+  label: DPP Suggestions
+  preset: json_object
+  form_snippet: null
+  display_snippet: null
 
 resource_fields:
 
