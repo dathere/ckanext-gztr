@@ -1,0 +1,16 @@
+[package]
+name = "e2e"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.103"
+cliclack = "0.5.4"
+duct_sh = "1.0.0"
+
+[dev-dependencies]
+anyhow = "1.0.103"
+ckanaction = "0.2.1"
+serde_json = "1.0.150"
+testcontainers = { version = "0.27.3", features = ["docker-compose"] }
+tokio = { version = "1.52.3", features = ["full"] }
