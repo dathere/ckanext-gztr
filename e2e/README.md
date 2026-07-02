@@ -8,6 +8,9 @@ This directory contains a Rust project for running tests based on Docker contain
 
 - [Rust](https://rust-lang.org/tools/install/)
 - [Docker](https://www.docker.com/) (and Docker Compose)
+- [jaq](https://github.com/01mf02/jaq)
+
+Make sure `cargo`, `docker`, and `jaq` are available from the `PATH` environment variable so that the tests can use them for commands.
 
 2. Clone the `docker-ckan` repo on the `dev/gztr` branch to a separate folder:
 

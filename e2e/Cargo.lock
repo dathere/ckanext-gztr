@@ -304,8 +304,7 @@ dependencies = [
 [[package]]
 name = "ckanaction"
 version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4fe1081a4952a4d708e7583a8151588db759aa4d9631198fc8c9ead6b0f9a358"
+source = "git+https://github.com/dathere/ckanaction#eb199b0b607f2f5c5e5f277a38f8a8fd4e0f5e4f"
 dependencies = [
  "bon",
  "reqwest",
@@ -554,6 +553,7 @@ dependencies = [
  "cliclack",
  "duct_sh",
  "serde_json",
+ "tempfile",
  "testcontainers",
  "tokio",
 ]
