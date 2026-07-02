@@ -1,315 +1,80 @@
 scheming_version: 2
 dataset_type: dataset
-about: A re-implementation of the default CKAN dataset schema
-about_url: http://github.com/ckan/ckanext-scheming
-
-display_group_order: [ "Add-Resource", "Description", "Spatial", "Quality-Update", "Additional", "Data-Dictionary"]
+about: An example schema for using the dataset publisher gazetteer from ckanext-gztr.
+about_url: http://github.com/dathere/ckanext-gztr
 
 dataset_fields:
+  - field_name: title
+    label: Title
+    preset: title
+    required: True
+    form_placeholder: eg. A descriptive title
 
-#- field_name: publishing_status
-#  label: Publishing Status 
-#  form_snippet: null 
-#  display_snippet: null 
-#  validators: ignore_missing publishing_status_validator
+  - field_name: name
+    label: URL
+    preset: dataset_slug
+    form_placeholder: eg. my-dataset
 
-- field_name: title
-  label: Title
-  preset: title
-  required: True
-  form_placeholder: eg. A descriptive title
+  - field_name: owner_org
+    label: Organization
+    required: True
+    preset: dataset_organization
 
-- field_name: name
-  label: URL
-  preset: dataset_slug
-  form_placeholder: eg. my-dataset
+  - field_name: description
+    label: Description
+    form_snippet: markdown.html
+    form_placeholder: Some useful notes about the data
 
-- field_name: owner_org
-  label: Organization
-  required: True
-  preset: dataset_organization  
+  - field_name: tag_string
+    label: Tags
+    preset: tag_string_autocomplete
+    form_placeholder: eg. economy, mental health, government
 
-- field_name: description
-  label: Description
-  form_snippet: markdown.html
-  form_placeholder: Some useful notes about the data
+  - field_name: author
+    label: Author
+    form_placeholder: Joe Bloggs
+    required: false
 
-- field_name: tag_string
-  label: Tags
-  preset: tag_string_autocomplete_hidden
-  form_placeholder: eg. economy, mental health, government
+  - field_name: author_email
+    label: Author Email
+    form_placeholder: joe@example.com
+    required: false
 
-- field_name: source
-  label: Source
-  form_placeholder: https://example.com/dataset.json
-  required: false
-
-- field_name: version
-  label: Version
-  form_placeholder: 1.0
-  required: false
-
-- field_name: author
-  label: Author
-  form_placeholder: Joe Bloggs
-  required: false
-
-- field_name: author_email
-  label: Author Email
-  form_placeholder: joe@example.com
-  required: false
-
-- field_name: maintainer
-  label: Maintainer
-  form_placeholder: Joe Bloggs
-  required: false
-
-- field_name: maintainer_email
-  label: Maintainer Email
-  form_placeholder: joe@example.com
-  required: false
-
-- field_name: gazetteer
-  label: Indicate Spatial Coverage
-  form_snippet: gazetteer_widget.html
-  display_snippet: null
-  validators: ignore_missing gazetteer_validator
-  output_validators: scheming_load_json
-- field_name: spatial_full
-  label: Spatial Full
-  form_snippet: text.html
-  form_placeholder: Filled in automatically as you select areas above.
-- field_name: spatial
-  label: Spatial
-  display_snippet: null
-  form_snippet: text.html
-  form_placeholder: Filled in automatically as you select areas above.
-- field_name: spatial_details
-  label: Spatial Coverage
-  form_snippet: text.html
-  display_snippet: null
-  form_placeholder: Filled in automatically as you select areas above.
-- field_name: place_keywords
-  label: Place Keywords
-  display_snippet: text.html
-  form_attrs:
-    data-module: place_keywords
-    
-- field_name: spatial_description
-  label: Spatial Description
-  form_snippet: markdown.html
-  form_placeholder: eg. Select common placenames and/or describe the general location where data from this resource are located.
-
-- field_name: coordinate_system
-  label: Coordinate System
-  help_text: Select Coordinate Reference Systems
-  help_inline: true
-  preset: select
-  form_include_blank_choice: true
-  choices:
-  - label: WGS84
-    value: WGS84
-  - label: NAD27
-    value: NAD27
-  - label: NAD83
-    value: NAD83
-  - label: other
-    value: other
-
-- field_name: coordinate_field_format
-  label: Coordinate Field Format
-  help_text: Select Coordinate Field Format
-  help_inline: true
-  form_include_blank_choice: true
-  preset: select
-  choices:
-  - label: Longitude/Lattitude
-    value: longitude/lattitude
-  - label: Lattitude/Longitude
-    value: lattitude/longitude
-  - label: other
-    value: other
-
-- field_name: group
-  label: Categories
-  preset: multiple_checkbox
-  choices_helper: gztr_scheming_groups_choices
-  required: False
-  help_text: Broad categories these data fall within. For data curation purposes, users should be a member of the category to add a dataset to the category.
-
-- field_name: collection_method
-  label: Collection Method
-  required: True
-  help_text: The procedure, technique, or mode of inquiry used to attain data. Also referred to as "Data Capture Method".
-  help_allow_html: true
-  form_include_blank_choice: true
-  preset: select
-  choices:
-  - label: Administrative Record
-    value: administrative record
-  - label: Physical Measurement
-    value: physical measurement
-  - label: Imagery
-    value: imagery
-  - label: Observation
-    value: observation
-  - label: Experiment
-    value: experiment
-  - label: Survey
-    value: survey
-  - label: Model output
-    value: model output
-  - label: Geocoding
-    value: geocoding
-  - label: Digitization
-    value: digitization
-  - label: Ground Survey
-    value: ground survey
-  - label: GPS Measurement
-    value: gps measurement
-  - label: Unknown
-    value: unknown
-  - label: Other
-    value: other
-
-- field_name: collection_method_description
-  label: Collection Method Description
-  form_snippet: markdown.html
-  help_text: Method by which items are added to a collection (i.e. sensor data, field collection, etc.).
-  help_allow_html: true
-
-- field_name: quality_control_level
-  label: Quality Control Level
-  required: True
-  help_text: A controlled list of options to describe the level of review and correction that has been applied to the data resource.
-  form_include_blank_choice: true
-  preset: select
-  choices:
-  - label: Raw/Provisional/Unreviewed
-    value: Raw/Provisional/Unreviewed
-  - label: Automatic Rules
-    value: Automatic Rules
-  - label: Manual Spot Check
-    value: Manual Spot Check
-  - label: Review (one person)
-    value: Review (one person)
-  - label: Comprehensive Review (multiple people)
-    value: Comprehensive Review (multiple people)
-  - label: Draft
-    value: Draft
-  - label: Under Review
-    value: Under Review
-
-- field_name: quality_assurance_description
-  label: Quality Assurance Description
-  form_snippet: markdown.html
-  help_text: Description of the QA/QC steps or analysis methods applied to the data resource.
-
-- field_name: update_type
-  label: Update Type
-  help_text: Select Update Type
-  help_inline: true
-  form_include_blank_choice: true
-  preset: select
-  choices:
-  - label: Automatic
-    value: automatic
-  - label: Manual
-    value: manual
-  - label: None
-    value: none
-
-- field_name: end_date
-  label: Automatic Update End Date
-  form_snippet: date_with_stash.html
-  validators: ignore_missing check_end_date
-  help_text: If this dataset has an Update Type of Automatic and Automatic Updates should stop at some point, please indicate the end date at which Automatic Updates should stop. If not, leave this field blank.
-  help_inline: true
-
-- field_name: update_frequency
-  label: Update Frequency
-  required: True
-  form_include_blank_choice: true
-  preset: select
-  choices:
-  - label: Real-time
-    value: real-time
-  - label: 15 minutes or less
-    value: 15 minutes or less
-  - label: Hourly
-    value: hourly
-  - label: Daily
-    value: daily
-  - label: Weekly
-    value: weekly
-  - label: Monthly
-    value: monthly
-  - label: Quarterly
-    value: quarterly
-  - label: Every 6 months
-    value: every 6 months
-  - label: Annually
-    value: annually
-  - label: As needed
-    value: as needed
-  - label: Never
-    value: never
-  - label: Other
-    value: other
-
-- field_name: next_update
-  label: Next Update
-  form_snippet: date.html
-
-- field_name: date_range
-  label: Date Range
-  required: False
-  form_snippet: date_range_optional.html
-  validators: ignore_missing parse_date_range_optional
-  help_text: The Date Range field represents the current date range the dataset covers. If this dataset has an Update Type of Automatic, the end date on this date range will be automatically incremented with the passage of time.
-  help_inline: true
-
-- field_name: from_date
-  label: From Date
-  form_snippet: null
-
-- field_name: to_date
-  label: To Date
-  form_snippet: null
-
-- field_name: primary_key_field
-  label: Primary Key Field
-  form_placeholder: Select primary key field with unique record identifier
-
-- field_name: disclaimer
-  label: Disclaimer
-  form_snippet: markdown.html
-
-- field_name: additional_information
-  display_group: Additional
-  label: Additional Information
-  form_snippet: markdown.html
-  help_text: Any additional information that is important for users to know about the data resource
-
-- field_name: related_resources
-  label: Related Resources
-  preset: multiple_text
-
-- field_name: supporting_url
-  label: Supporting URL
-  plural_label: Supporting URLs
-  preset: multiple_url
+  - field_name: gazetteer
+    label: Indicate Spatial Coverage
+    form_snippet: gazetteer_widget.html
+    display_snippet: null
+    validators: ignore_missing gazetteer_validator
+    output_validators: scheming_load_json
+  - field_name: spatial_full
+    label: Spatial Full
+    form_snippet: text.html
+    form_placeholder: Filled in automatically as you select areas above.
+  - field_name: spatial
+    label: Spatial
+    display_snippet: null
+    form_snippet: text.html
+    form_placeholder: Filled in automatically as you select areas above.
+  - field_name: place_keywords
+    label: Place Keywords
+    display_snippet: text.html
+    form_attrs:
+      data-module: place_keywords
 
 resource_fields:
+  - field_name: url
+    label: URL
+    preset: resource_url_upload
 
-- field_name: url
-  label: URL
-  preset: resource_url_upload
+  - field_name: name
+    label: Name
+    form_placeholder: eg. January 2011
 
-- field_name: name
-  label: Name
-  form_placeholder: eg. January 2011
+  - field_name: description
+    label: Description
+    form_snippet: markdown.html
+    form_placeholder: Some useful notes about the data
 
-- field_name: format
-  label: Format
-  preset: resource_format_autocomplete
+  - field_name: format
+    label: Format
+    preset: resource_format_autocomplete

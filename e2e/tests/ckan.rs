@@ -1,43 +1,16 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 
+mod utils;
+
 use anyhow::{Result, bail};
 use ckanaction::CKAN;
-use std::{env::current_dir, io::Write, path::PathBuf, time::Duration};
+use std::io::Write;
 use tempfile::NamedTempFile;
-use testcontainers::{compose::DockerCompose, core::ExecCommand};
+use testcontainers::core::ExecCommand;
 
-async fn get_compose() -> Result<DockerCompose> {
-    let Ok(docker_compose_path) = std::env::var("DOCKER_COMPOSE_PATH") else {
-        bail!("The DOCKER_COMPOSE_PATH environment variable might not be set.")
-    };
-    // Set up new CKAN instance
-    let compose = DockerCompose::with_local_client(&[docker_compose_path]).with_build(true);
-    Ok(compose)
-}
-
-async fn get_service_port(compose: &DockerCompose, service: &str, port: u16) -> Result<u16> {
-    Ok(compose
-        .service(service)
-        .unwrap()
-        .get_host_port_ipv4(port)
-        .await?)
-}
-
-fn assert_str_true(string: String) {
-    assert_eq!(string, "true");
-}
-
-async fn jaq(command: &'static str, object: &serde_json::Value) -> Result<String> {
-    Ok(duct_sh::sh(command)
-        .stdin_bytes(serde_json::to_string(object)?)
-        .read()?)
-}
-
-async fn jaq_dangerous(command: String, object: &serde_json::Value) -> Result<String> {
-    Ok(duct_sh::sh_dangerous(command)
-        .stdin_bytes(serde_json::to_string(object)?)
-        .read()?)
-}
+use crate::utils::{
+    assert_str_true, get_compose, get_env_var, get_service_port, jaq, jaq_dangerous,
+};
 
 #[tokio::test]
 async fn test_status_show_success_no_jaq() -> Result<()> {
@@ -125,34 +98,24 @@ async fn test_status_show_extensions() -> Result<()> {
 async fn test_gztr_storage_dir_exists() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let echo_result = String::from_utf8(
+    let mut gztr_storage_dir =
+        get_env_var(&compose, "ckan".to_string(), "APP_DIR".to_string()).await?;
+    gztr_storage_dir.push_str("/data/gztr");
+    let output = String::from_utf8(
         compose
             .service("ckan")
             .unwrap()
-            .exec(ExecCommand::new(["env"]))
+            .exec(ExecCommand::new(["ls", "-w", "1", "/app/data"]))
             .await?
             .stdout_to_vec()
             .await?,
     )?;
-    for line in echo_result.lines() {
-        if line.starts_with("APP_DIR") {
-            let app_dir: Vec<&str> = line.splitn(2, "=").collect();
-            let app_dir_path = app_dir.get(1).unwrap();
-            let mut gztr_storage_dir = String::from(*app_dir_path);
-            gztr_storage_dir.push_str("/data/gztr");
-            let output = String::from_utf8(
-                compose
-                    .service("ckan")
-                    .unwrap()
-                    .exec(ExecCommand::new(["ls", "-lsa", "/app/data"]))
-                    .await?
-                    .stdout_to_vec()
-                    .await?,
-            )?;
-            println!("{output}");
+    for line in output.lines() {
+        if line == "gztr" {
+            return Ok(());
         }
     }
-    Ok(())
+    bail!("Could not find gztr storage directory at {gztr_storage_dir}");
 }
 
 #[tokio::test]
@@ -169,8 +132,6 @@ async fn test_file_create_fail_no_auth() -> Result<()> {
     file.write_all(text.as_bytes())?;
     let path_buf = file.path().to_path_buf();
     println!("Temporary file path: {:?}", path_buf);
-    // let path_buf = current_dir()?.join("README.md");
-    // println!("File path: {:?}", path_buf);
     let response = ckan
         .file_create()
         .storage("gztr".to_string())
@@ -196,7 +157,28 @@ async fn test_file_create_fail_no_auth() -> Result<()> {
     Ok(())
 }
 
+#[tokio::test]
+async fn test_ckan_help_command_in_container() -> Result<()> {
+    let mut compose = get_compose().await?;
+    compose.up().await?;
+    let output = String::from_utf8(
+        compose
+            .service("ckan")
+            .unwrap()
+            .exec(ExecCommand::new([
+                "ckan",
+                "-c",
+                "/app/production.ini",
+                "--help",
+            ]))
+            .await?
+            .stdout_to_vec()
+            .await?,
+    )?;
+    assert!(output.starts_with("Usage: ckan"));
+
+    Ok(())
+}
+
 // TODO: file_create success by using newly generated CKAN token from sysadmin user (?)
 // Will probably need to execute a ckan command in the ckan service container
-
-// TODO: Ephemeral volume tests

@@ -48,22 +48,6 @@ class GZTRPlugin(plugins.SingletonPlugin):
             "gazetteer_validator": gztr_validators.gazetteer_validator,
         }
 
-    # IPackageController
-    def after_dataset_show(self, context, pkg_dict):
-        if not pkg_dict.get("extras"):
-            extras = (
-                model.Session.query(model.PackageExtra)
-                .filter_by(package_id=context["package"].id)
-                .all()
-            )
-            extras_dict = extras_list_dictize(extras, context)
-            if extras_dict:
-                for ed in extras_dict:
-                    if ed.get("key") == "gazetteer":
-                        pkg_dict["gazetteer"] = json.loads(ed.get("value"))
-
-            return pkg_dict
-
     def before_dataset_index(self, pkg_dict):
         # If dataset has spatial data, add simplified WKT geometry to SOLR index
         try:

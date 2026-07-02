@@ -31,6 +31,23 @@ cd /usr/lib/ckan/default/src
 </Step>
 <Step>
 
+## Set `ckan.search.solr_allowed_query_parsers` to `field` in your CKAN config
+
+First check if `ckan.search.solr_allowed_query_parsers` exists in your CKAN config file (e.g. `/etc/ckan/default/ckan.ini`). Update or add it with `field` as the value.
+
+```ini
+ckan.search.solr_allowed_query_parsers = field
+```
+
+This is necessary to ensure the public bounding box spatial search works. Otherwise you may get the following error:
+
+```console
+Dataset search error: ("Local parameters are not supported in param 'fq'.",)
+```
+
+</Step>
+<Step>
+
 ## Install ckanext-scheming
 
 The ckanext-gztr extension relies on [ckanext-scheming](https://github.com/ckan/ckanext-scheming) to add the interactive gazetteer to the new dataset form.
@@ -110,6 +127,8 @@ ckan.plugins = activity scheming_datasets gztr
 ```
 
 </Step>
+
+{/* TODO: SOLR JTS install step */}
 
 <Step>
 

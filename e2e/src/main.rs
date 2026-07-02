@@ -1,7 +1,7 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 
 use anyhow::{Result, bail};
-use cliclack::{intro, multiselect, outro};
+use cliclack::{confirm, intro, multiselect, outro};
 use std::{
     collections::HashSet,
     io::{BufRead, BufReader},
@@ -49,7 +49,35 @@ fn main() -> Result<()> {
 
     test_settings_builder = test_settings_builder.item("filter", "Filter for specific tests", "You'll query tests by name where any test name that contains your query will run. When disabled then we run all tests.");
 
+    // test_settings_builder = test_settings_builder.item("manual", "Run a manual long-lived instance of CKAN. 5 minutes max.", "Modify the ckan service port first. If you cancel early you'll need to clear the containers and volumes manually.");
+
+    let docker_ps_a_q_output = duct_sh::sh("docker ps -a -q").read()?;
+    let docker_volume_ls_output = duct_sh::sh("docker volume ls").read()?;
+    if !docker_ps_a_q_output.is_empty() || !docker_volume_ls_output.is_empty() {
+        test_settings_builder = test_settings_builder.item(
+            "clear",
+            "DANGEROUS: Clear all docker containers and volumes before running tests",
+            "DANGEROUS!",
+        );
+    }
+
     let test_settings = test_settings_builder.interact()?;
+
+    if test_settings.contains(&"clear") {
+        let confirm_clear = confirm(
+            "ARE YOU SURE you want to STOP AND CLEAR ALL CONTAINERS and CLEAR ALL VOLUMES?",
+        )
+        .interact()?;
+        if confirm_clear {
+            if !docker_ps_a_q_output.is_empty() {
+                duct_sh::sh_dangerous(format!("docker stop {docker_ps_a_q_output}")).run()?;
+                duct_sh::sh_dangerous(format!("docker rm ${docker_ps_a_q_output}")).run()?;
+            }
+            if !docker_volume_ls_output.is_empty() {
+                duct_sh::sh_dangerous("docker volume prune").run()?;
+            }
+        }
+    }
 
     let test_filter: String = if test_settings.contains(&"filter") {
         cliclack::input("Search for tests to run by name")
@@ -70,7 +98,7 @@ fn main() -> Result<()> {
     let docker_compose_dir_pathbuf = docker_compose_pathbuf.parent().unwrap();
     #[rustfmt::skip]
     let command = match test_settings {
-        t if t.multi_contains(vec!["nextest", "nocapture", "filter"]) => format!("cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter} --nocapture"),
+        t if t.contains(&"nextest") && t.contains(&"nocapture") && t.contains(&"filter") => format!("cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter} --nocapture"),
         t if t.multi_contains(vec!["nextest", "nocapture"]) => { "cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release --nocapture".to_string() },
         t if t.multi_contains(vec!["nextest", "filter"]) => { format!("cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter}") },
         t if t.multi_contains(vec!["nextest"]) => { "cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release".to_string() },
