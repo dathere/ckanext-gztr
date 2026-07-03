@@ -53,10 +53,14 @@ fn main() -> Result<()> {
 
     let docker_ps_a_q_output = duct_sh::sh("docker ps -a -q").read()?;
     let docker_volume_ls_output = duct_sh::sh("docker volume ls").read()?;
-    if !docker_ps_a_q_output.is_empty() || !docker_volume_ls_output.is_empty() {
+    let docker_network_ls_output = duct_sh::sh("docker network ls").read()?;
+    if !docker_ps_a_q_output.is_empty()
+        || !docker_volume_ls_output.is_empty()
+        || !docker_network_ls_output.is_empty()
+    {
         test_settings_builder = test_settings_builder.item(
             "clear",
-            "DANGEROUS: Clear all docker containers and volumes before running tests",
+            "DANGEROUS: Clear all docker containers, volumes, and networks before running tests",
             "DANGEROUS!",
         );
     }
@@ -65,16 +69,35 @@ fn main() -> Result<()> {
 
     if test_settings.contains(&"clear") {
         let confirm_clear = confirm(
-            "ARE YOU SURE you want to STOP AND CLEAR ALL CONTAINERS and CLEAR ALL VOLUMES?",
+            "ARE YOU SURE you want to STOP AND CLEAR ALL CONTAINERS and CLEAR ALL VOLUMES AND (CUSTOM) NETWORKS?",
         )
         .interact()?;
         if confirm_clear {
             if !docker_ps_a_q_output.is_empty() {
-                duct_sh::sh_dangerous(format!("docker stop {docker_ps_a_q_output}")).run()?;
-                duct_sh::sh_dangerous(format!("docker rm ${docker_ps_a_q_output}")).run()?;
+                cliclack::log::info("Stopping all containers.")?;
+                duct_sh::sh_dangerous(format!(
+                    "docker stop {}",
+                    docker_ps_a_q_output.replace("\n", " ")
+                ))
+                .run()?;
+                cliclack::log::success("Stopped all containers.")?;
+                cliclack::log::info("Removing all containers.")?;
+                duct_sh::sh_dangerous(format!(
+                    "docker rm {}",
+                    docker_ps_a_q_output.replace("\n", " ")
+                ))
+                .run()?;
+                cliclack::log::success("Removed all containers.")?;
             }
             if !docker_volume_ls_output.is_empty() {
-                duct_sh::sh_dangerous("docker volume prune").run()?;
+                cliclack::log::info("Removing all volumes.")?;
+                duct_sh::sh_dangerous("docker volume prune --all").run()?;
+                cliclack::log::success("Removed all volumes.")?;
+            }
+            if !docker_network_ls_output.is_empty() {
+                cliclack::log::info("Removing all custom networks.")?;
+                duct_sh::sh_dangerous("docker network prune").run()?;
+                cliclack::log::success("Removed all custom networks.")?;
             }
         }
     }

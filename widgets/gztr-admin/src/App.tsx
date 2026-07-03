@@ -115,6 +115,11 @@ function App() {
         featureGroups.push(categoryFeaturesGroup);
       }
       setFeatures(featureGroups);
+      const statewideSwitch = document.querySelector("#statewide-switch");
+      if (spatialFull.value.startsWith(`{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"GEO_ID":"0400000US35","STATE":"35","NAME":"New Mexico"`)) {
+        if (statewideSwitch)
+          statewideSwitch.setAttribute("checked", "true");
+      }
     })();
   }, []);
 
@@ -130,7 +135,7 @@ function App() {
     const placeKeywordsTextbox = document.querySelector(
       "#field-place_keywords",
     ) as HTMLInputElement;
-    if (statewideEnabled) {
+    if (statewideEnabled || spatialFullTextbox.value.startsWith(`{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"GEO_ID":"0400000US35","STATE":"35","NAME":"New Mexico"`)) {
       placeKeywordsTextbox.value = "New Mexico";
     } else {
       const placeKeywordsFeatures = extractFeaturesFromGeojson(spatialFull);
