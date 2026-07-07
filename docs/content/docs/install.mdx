@@ -89,6 +89,8 @@ If you already have a running CKAN instance with ckanext-scheming installed and 
 # Full GeoJSON as a FeatureCollection from user's selection in data publisher gazetteer
 - field_name: spatial_full
   label: Spatial Full
+  # This display_snippet should show the gazetteer on the dataset's landing page
+  display_snippet: gazetteer_preview.html
   form_snippet: text.html
   form_placeholder: Filled in automatically as you select areas above.
 # Simplified spatial_full geometry for indexing with Solr
