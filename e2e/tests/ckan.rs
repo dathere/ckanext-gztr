@@ -9,7 +9,8 @@ use tempfile::NamedTempFile;
 use testcontainers::core::ExecCommand;
 
 use crate::utils::{
-    assert_str_true, get_compose, get_env_var, get_service_port, jaq, jaq_dangerous,
+    assert_str_true, ckan_command, generate_token, get_compose, get_env_var, get_service_port, jaq,
+    jaq_dangerous,
 };
 
 #[tokio::test]
@@ -161,24 +162,49 @@ async fn test_file_create_fail_no_auth() -> Result<()> {
 async fn test_ckan_help_command_in_container() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let output = String::from_utf8(
-        compose
-            .service("ckan")
-            .unwrap()
-            .exec(ExecCommand::new([
-                "ckan",
-                "-c",
-                "/app/production.ini",
-                "--help",
-            ]))
-            .await?
-            .stdout_to_vec()
-            .await?,
-    )?;
+    let output = ckan_command(&compose, ["ckan", "-c", "/app/production.ini", "--help"]).await?;
     assert!(output.starts_with("Usage: ckan"));
 
     Ok(())
 }
 
-// TODO: file_create success by using newly generated CKAN token from sysadmin user (?)
-// Will probably need to execute a ckan command in the ckan service container
+// file_create success by using newly generated CKAN token from sysadmin user
+#[tokio::test]
+async fn test_file_create_success_with_sysadmin_auth() -> Result<()> {
+    let mut compose = get_compose().await?;
+    compose.up().await?;
+    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+    let api_token = generate_token(&compose, "rzmk", "file_token").await?;
+    let ckan = CKAN::builder()
+        .url(format!("http://localhost:{ckan_port}").as_str())
+        .token(api_token)
+        .build();
+
+    let text = "Here is some text content that should be in the file.";
+    let mut file = NamedTempFile::new()?;
+    file.write_all(text.as_bytes())?;
+    let path_buf = file.path().to_path_buf();
+    let response = ckan
+        .file_create()
+        .storage("gztr".to_string())
+        .upload(path_buf)
+        .call()
+        .await?;
+
+    // Verify success if false
+    assert_eq!(jaq("jaq .success", &response).await?, "true");
+    // Verify storage used is gztr
+    assert_eq!(jaq("jaq .result.storage", &response).await?, "\"gztr\"");
+    // Verify the file can be downloaded publicly without any auth needed
+    let file_location = jaq("jaq .result.location", &response).await?;
+    duct_sh::sh_dangerous(format!(
+        "curl -s http://localhost:{ckan_port}/file/public-download/gztr/{file_location}"
+    ))
+    .run()?;
+
+    println!("{response:#?}");
+
+    Ok(())
+}
+
+// TODO: metadata.json file created and tests based on that

@@ -25,6 +25,9 @@ pub fn assert_str_true(string: String) {
 }
 
 pub async fn jaq(command: &'static str, object: &serde_json::Value) -> Result<String> {
+    if !command.starts_with("jaq ") {
+        bail!("Command {command} must start with 'jaq '.");
+    }
     Ok(duct_sh::sh(command)
         .stdin_bytes(serde_json::to_string(object)?)
         .read()?)
@@ -58,4 +61,43 @@ pub async fn get_env_var(
         }
     }
     bail!("Could not find environment variable.");
+}
+
+pub async fn ckan_command(
+    compose: &DockerCompose,
+    cmd: impl IntoIterator<Item = impl Into<String>>,
+) -> Result<String> {
+    Ok(String::from_utf8(
+        compose
+            .service("ckan")
+            .unwrap()
+            .exec(ExecCommand::new(cmd))
+            .await?
+            .stdout_to_vec()
+            .await?,
+    )?)
+}
+
+pub async fn generate_token(
+    compose: &DockerCompose,
+    user: &str,
+    token_name: &str,
+) -> Result<String> {
+    Ok(ckan_command(
+        &compose,
+        [
+            "ckan",
+            "-c",
+            "/app/production.ini",
+            "user",
+            "token",
+            "add",
+            user,
+            token_name,
+            "-q",
+        ],
+    )
+    .await?
+    .trim()
+    .to_string())
 }
