@@ -61,6 +61,7 @@ dataset_fields:
     display_snippet: text.html
     form_attrs:
       data-module: place_keywords
+    form_placeholder: Filled in automatically as you select areas above.
 
 resource_fields:
   - field_name: url
