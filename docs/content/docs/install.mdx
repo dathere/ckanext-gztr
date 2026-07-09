@@ -8,11 +8,9 @@ icon: Download
 
 We assume you're familiar with setting up CKAN extensions.
 
-In this installation guide we'll use a CKAN source install set up for development on Ubuntu 24.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`. Our installation is based on [`ckan-devstaller`](https://ckan-devstaller.dathere.com).
+In this installation guide we'll use a CKAN source install set up for development on Ubuntu 24.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`.
 
-<Callout title="Just trying out the extension?" type="info">If setting up a new CKAN instance for experimenting we suggest using [ckan-devstaller](https://ckan-devstaller.dathere.com). Note that you should **not** use ckan-devstaller for production usage.</Callout>
-
-<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.11.4 and hasn't been verified to work for other versions.</Callout>
+<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.12 and hasn't been verified to work for other versions.</Callout>
 
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 
@@ -26,23 +24,6 @@ Ensure your terminal is running in your instance's virtual environment before co
 ```bash
 cd /usr/lib/ckan/default/src
 . ../bin/activate
-```
-
-</Step>
-<Step>
-
-## Set `ckan.search.solr_allowed_query_parsers` to `field` in your CKAN config
-
-First check if `ckan.search.solr_allowed_query_parsers` exists in your CKAN config file (e.g. `/etc/ckan/default/ckan.ini`). Update or add it with `field` as the value.
-
-```ini
-ckan.search.solr_allowed_query_parsers = field
-```
-
-This is necessary to ensure the public bounding box spatial search works. Otherwise you may get the following error:
-
-```console
-Dataset search error: ("Local parameters are not supported in param 'fq'.",)
 ```
 
 </Step>
@@ -64,17 +45,13 @@ Then in your CKAN config file (e.g., `/etc/ckan/default/ckan.ini`) for `ckan.plu
 ckan.plugins = activity scheming_datasets
 ```
 
-Also add the following lines in the `/etc/ckan/default/ckan.ini` file (e.g. right below the line with `ckan.plugins`) for displaying the gazetteer in the dataset form:
+Add the preset `ckanext.gztr:schemas/presets.yaml` to the end of your `scheming.presets` config value:
 
 ```ini
-# ckanext-scheming theme settings
 scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
-scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml
 ```
 
-<Callout type="warning" title="Duplicate options">You may already having `scheming.presets` in `/etc/ckan/default/ckan.ini` if you installed using [ckan-devstaller](https://ckan-devstaller.com), so update the existing value instead.</Callout>
-
-If you already have a running CKAN instance with ckanext-scheming installed and a custom schema YAML file then you'll want to add the following fields to your schema YAML file for the dataset publisher gazetteer to appear in the dataset metadata form:
+**If you already have a running CKAN instance with ckanext-scheming installed and a custom dataset schema** then you'll want to add the following fields to your schema YAML file for the dataset publisher gazetteer to appear in the dataset metadata form:
 
 ```yaml
 
@@ -105,14 +82,22 @@ If you already have a running CKAN instance with ckanext-scheming installed and 
   display_snippet: text.html
   form_attrs:
     data-module: place_keywords
+  form_placeholder: Filled in automatically as you select areas above.
 ```
+
+**If you do not have an existing dataset schema configured for your CKAN instance**, then you can add the following dataset schema to try out the gazetteer (e.g. right below the line with `ckan.plugins`) in the dataset metadata form:
+
+```ini
+scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml
+```
+
 
 </Step>
 <Step>
 
 ## Install ckanext-gztr
 
-Run the following in an activated virtual environment:
+Install ckanext-gztr and its dependencies in your activated virtual environment:
 
 ```bash
 cd /usr/lib/ckan/default/src
@@ -130,13 +115,214 @@ ckan.plugins = activity scheming_datasets gztr
 
 </Step>
 
-{/* TODO: SOLR JTS install step */}
+<Step>
+
+## Install JTS and update the Solr schema file
+
+### Brief overview of why we're going to install JTS and update `schema.xml`
+
+With ckanext-gztr, one of the main features for public usage is geospatial search on the `/dataset` page of a CKAN web app by drawing a bounding box over a region.
+
+![ckanext-gztr public dataset search demo](/media/ckanext-gztr-search-demo.gif)
+
+CKAN uses the open-source [Apache Solr](https://solr.apache.org/) for multi-modal search. With Apache Solr there are various ways to run a [spatial search](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html). ckanext-gztr uses [a similar approach to ckanext-spatial](https://docs.ckan.org/projects/ckanext-spatial/en/latest/spatial-search) for spatial search, attempting to run a geospatial intersection filter by intersecting the user's drawn bounding box against each dataset's simplified spatial geometry field which is indexed. This spatial field is a geometry, often a `Polygon` or `MultiPolygon`, and is necessary to have the dataset searchable by location by having it indexed in Solr.
+
+For example here is the filter used for geospatial search, where a dataset's `spatial_geom` field is indexed in Solr and then an `Intersects` operation is ran against `spatial_geom` and the bounds of the user's drawn bounding box:
+
+```js
+{{!field f=spatial_geom}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))
+```
+
+### Installation
+
+However to run this geospatial search against polygons we need to install the [JTS](https://github.com/locationtech/jts) library for Solr and to configure it properly.
+
+It may be a bit tricky to get JTS running with CKAN and Solr as intended. See the Solr documentation for the latest documentation on how to install JTS [here](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html#jts-and-polygons-flat).
+
+Of relevance is installing the JTS JAR file, putting it in a specific location as mentioned in the docs linked (e.g. `SOLR_INSTALL/server/solr-webapp/webapp/WEB-INF/lib/`).
+
+Now you'll need to update your Solr schema file. Find the relevant sections as shown in the top-level tags below and add the sub-level content to them:
+
+```xml
+<!-- ... -->
+
+<types>
+  <!-- ... -->
+  <!-- RPT field type for searching polygons with ckanext-gztr -->
+  <fieldType 
+      name="location_rpt" class="solr.SpatialRecursivePrefixTreeFieldType"
+      spatialContextFactory="JTS"
+      autoIndex="true"
+      validationRule="repairBuffer0"
+      distErrPct="0.025" 
+      maxDistErr="0.001"  
+      distanceUnits="kilometers">
+  </fieldType>
+</types>
+
+<fields>
+  <!-- ... -->
+  <!-- Allow ckanext-gztr to index simplified geometry and place keywords -->
+  <field name="spatial_geom"  type="location_rpt" indexed="true" stored="true" multiValued="true" />
+  <field name="place_keywords" type="string" indexed="true" stored="true" multiValued="true"/>
+  <!-- ... -->
+</fields>
+<!-- ... -->
+<!-- Allows for searching by place keywords in the dataset search page by ckanext-gztr -->
+<copyField source="place_keywords" dest="text" />
+```
+
+</Step>
+
+<Step>
+
+## Set `ckan.search.solr_allowed_query_parsers` to `field` in your CKAN config
+
+First check if `ckan.search.solr_allowed_query_parsers` exists in your CKAN config file (e.g. `/etc/ckan/default/ckan.ini`). Update or add it with `field` as the value.
+
+```ini
+ckan.search.solr_allowed_query_parsers = field
+```
+
+This is necessary to ensure the public bounding box spatial search works. Otherwise you may get the following error:
+
+```console
+Dataset search error: ("Local parameters are not supported in param 'fq'.",)
+```
+
+</Step>
+
+<Step>
+
+## Set up the `gztr` storage
+
+With CKAN 2.12 there are now [configurable storages](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages), which are objects that can store files in a local filesystem, cloud, database, or elsewhere. This allows you to customize where you want to store your GeoJSON files that are used throughout your installation of ckanext-gztr.
+
+Add the following lines to your CKAN configuration file and customize it as needed:
+
+```ini
+ckan.files.storage.gztr.type = ckan:fs
+ckan.files.storage.gztr.path = /var/ckan/storage/uploads/gztr
+ckan.files.storage.gztr.initialize = true # Creates the `gztr` directory if it doesn't exist
+ckan.files.storage.gztr.public = true # Makes all files in the `gztr` storage publicly available
+```
+
+The new `gztr` directory should be made in your filesystem at `/var/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoJSON files will be stored, along with a `config.json` file we'll set up soon.
+
+The files in this `gztr` storage will all be public so that the ckanext-gztr extension and public users can easily access the GeoJSON files used with cknaext-gztr. These files will be available at the path `/file/public-download/gztr/{location}`, where `location` is the location of the file within the `gztr` directory. For example if we store a file `config.json` in the `gztr` storage for the New Mexico Water Data Catalog then it will be made publicly available at `https://catalog.newmexicowaterdata.org/file/public-download/gztr/config.json`.
+
+</Step>
+
+<Step>
+
+## Prepare your GeoJSON files and a `config.json` file
+
+### GeoJSON files
+
+As a sysadmin you'll provide GeoJSON files that are used throughout ckanext-gztr such as for the public search gazetteer, the dataset publisher gazetteer, and the place keywords search functionality.
+
+The GeoJSON files must be in a specific format so that ckanext-gztr can properly use them. Here are the conditions followed by an example GeoJSON file:
+
+- A GeoJSON file must be a [`FeatureCollection`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.3) using WGS84 as its geographic coordinate reference system.
+- Each [`Feature`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.2) must have a `properties` entry where the dictionary includes a unique `id` (default key name, can be a different name specified in `config.json`) entry. The value of the `id` entry is **unique across all `Feature`s in the `FeatureCollection`**. Therefore we do not recommend using a label such as a name for the ID, but rather a unique string or number such as basing the `id` on an existing unique ID system for the `FeatureCollection`.
+- Each `Feature` must also have a `label` (default key name, can rename in `config.json`) entry in its `properties` dictionary where the value of `label` is a human-readable name for the `Feature`, such as a county name.
+
+Here we provide a valid example GeoJSON file `State.geojson` for New Mexico (we omit the value for `coordinates` as it would be too long):
+
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "id": 35,
+        "label": "New Mexico",
+        "geoconnex_pid": "https://geoconnex.us/ref/states/35"
+      },
+      "geometry": {
+        "type": "Polygon",
+        "coordinates": [...]
+      }
+    }
+  ]
+}
+```
+
+Notice that the ID is based on the [U.S. FIPS code system](https://transition.fcc.gov/oet/info/maps/census/fips/fips.txt) where the state of New Mexico's has a FIPS code of `35`. We also have the state name as the value for `label`, and an optional `geoconnex_pid` URI for the opt-in [Geoconnex](https://geoconnex.us) integration with ckanext-gztr which you can learn more about at the end of this page. If there were more states for this file then the `features` list would continue with more `Feature`s following a similar format and having a unique `id`.
+
+### `config.json`
+
+A crucial file for ensuring that ckanext-gztr discovers and uses the GeoJSON files properly is the `config.json` file. This file lists the GeoJSON files for ckanext-gztr to use along with other configuration values aside from those listed in the [Configuration docs](/docs/configuration).
+
+Currently the only top-level entry required for `config.json` is the `collections` entry, which is a list of dictionaries where each dictionary describes a `FeatureCollection` for usage with ckanext-gztr. Here's an example:
+
+```json
+{
+  "collections": [
+    {
+      "location": "State.geojson",
+      "name": "State",
+      "id_key": "id",
+      "label_key": "label"
+    },
+    {
+      "name": "Counties.geojson",
+      "label": "Counties"
+    },
+    {
+      "name": "Public_Water_Systems.geojson",
+      "label": "Public Water Systems"
+    }
+  ]
+}
+```
+
+Each collection must have a `location` entry and a `name` entry. The `id_key` and `label_key` entries are optional and situational.
+
+- The `location` entry is the location of the file as per `https://<domain>/file/public-download/gztr/{location}`.
+- The `name` entry is a human-readable name of the collection.
+- The `id_key` entry is the name of the unique ID field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `id`, however if the GeoJSON file uses a different key name then it can be specified here in `id_key`.
+- The `id_key` entry is the name of the label field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `label`, however if the GeoJSON file uses a different key name then it can be specified here in `label_key`.
+
+Once you complete the installation guide on this page then this file should be publicly available at `https://<domain>/file/public-download/gztr/config.json`.
+
+</Step>
+
+<Step>
+
+## Run CKAN and add your files to the `gztr` storage
+
+Once you have your GeoJSON files and `config.json` file prepared as described above, you'll want to create them in CKAN as registered files (these files will have their metadata appear in the Postgres database). Here is an example of uploading a GeoJSON file through the CKAN API using Python and the `requests` library (make sure you use a sysadmin's API token):
+
+```python
+import requests
+
+url = "http://localhost:5000/api/3/action/file_create"
+body = {
+  "upload": open('./State.geojson', 'rb'),
+  "name": "State.geojson",
+  "storage": "gztr"
+}
+response = requests.request("POST", url, data = body, headers = {
+  "Content-Type": "multipart/form-data", 
+  "Authorization": "3HA8BSOFM33N9MV30M4PG1LLZFADM2ZB"
+})
+
+print(response.text)
+```
+
+Verify that the new file appears at the public endpoint. For example if you're running a local CKAN instance on on port `5000`, open [https://localhost:5000/file/public-download/gztr/State.geojson](https://localhost:5000/file/public-download/gztr/State.geojson) in your browser to view or download the file.
+
+Upload all of your GeoJSON files you plan on using with ckanext-gztr and also upload the `config.json` file.
+
+</Step>
 
 <Step>
 
 ## Verify ckanext-gztr works as expected
 
-Now the interactive gazetteer should be available on the form for adding and editing a dataset along with a "Spatial" field which is used to save the selected features along with a public search map gazetteer.
+Now the interactive gazetteer should be available on the form for adding and editing a dataset along with a public search map gazetteer.
 
 For example you can run a local CKAN instance by running the following in your activated virtual environment:
 
@@ -145,9 +331,9 @@ cd /usr/lib/ckan/default/src/ckan
 ckan -c /etc/ckan/default/ckan.ini run
 ```
 
-Then you should have your local CKAN instance running which you can open in your web browser at [http://localhost:5000](http://localhost:5000). If you visit the Datasets page at [http://localhost:5000/dataset](http://localhost:5000/dataset) then you should see an interactive search gazetteer in the left column to search by bounding box intersections and a data publisher gazetteer in the new dataset form.
+Then you should have your local CKAN instance running which you can open in your web browser at [http://localhost:5000](http://localhost:5000). If you visit the Datasets page at [http://localhost:5000/dataset](http://localhost:5000/dataset) then you should see an interactive search gazetteer to search by bounding box intersections and a dataset publisher gazetteer in the new dataset form.
 
-If you visit [http://127.0.0.1:5001/api/3/action/status_show](http://127.0.0.1:5001/api/3/action/status_show) then there should be a JSON response where `gztr` is present in the `result.extensions` array.
+If you visit [http://localhost:5000/api/3/action/status_show](http://localhost:5000/api/3/action/status_show) then there should be a JSON response where `gztr` is present in the `result.extensions` array.
 
 </Step>
 
