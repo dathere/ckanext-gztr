@@ -207,4 +207,7 @@ async fn test_file_create_success_with_sysadmin_auth() -> Result<()> {
     Ok(())
 }
 
-// TODO: metadata.json file created and tests based on that
+// TODO: collections.json file created and tests based on that
+
+// TODO: Verify that I can modify a dataset field while not updating metadata_modified through the Postgres DB
+// This is to help with existing CKAN instances that use ckanext-gztr with the previous spatial_full format

@@ -3,22 +3,10 @@
 use anyhow::{Result, bail};
 use cliclack::{confirm, intro, multiselect, outro};
 use std::{
-    collections::HashSet,
     io::{BufRead, BufReader},
     path::PathBuf,
     str::FromStr,
 };
-
-trait VecExt {
-    fn multi_contains(&self, values: Vec<&str>) -> bool;
-}
-
-impl VecExt for Vec<&str> {
-    fn multi_contains(&self, values: Vec<&str>) -> bool {
-        let hs: HashSet<&&str> = HashSet::from_iter(self.iter().clone());
-        HashSet::from_iter(values.iter()).is_subset(&hs)
-    }
-}
 
 fn main() -> Result<()> {
     intro("ckanext-gztr E2E test suite")?;
@@ -122,12 +110,12 @@ fn main() -> Result<()> {
     #[rustfmt::skip]
     let command = match test_settings {
         t if t.contains(&"nextest") && t.contains(&"nocapture") && t.contains(&"filter") => format!("cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter} --nocapture"),
-        t if t.multi_contains(vec!["nextest", "nocapture"]) => { "cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release --nocapture".to_string() },
-        t if t.multi_contains(vec!["nextest", "filter"]) => { format!("cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter}") },
-        t if t.multi_contains(vec!["nextest"]) => { "cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release".to_string() },
-        t if t.multi_contains(vec!["nocapture", "filter"]) => format!("cargo test --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter} -- --nocapture"),
-        t if t.multi_contains(vec!["nocapture"]) => format!("cargo test --manifest-path=$CARGO_MANIFEST_PATH --release -- --nocapture"),
-        t if t.multi_contains(vec!["filter"]) => { format!("cargo test --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter}") }
+        t if t.contains(&"nextest") && t.contains(&"nocapture") => { "cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release --nocapture".to_string() },
+        t if t.contains(&"nextest") && t.contains(&"filter") => { format!("cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter}") },
+        t if t.contains(&"nextest") => { "cargo nextest run --manifest-path=$CARGO_MANIFEST_PATH --release".to_string() },
+        t if t.contains(&"nocapture") && t.contains(&"filter") => format!("cargo test --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter} -- --nocapture"),
+        t if t.contains(&"nocapture") => format!("cargo test --manifest-path=$CARGO_MANIFEST_PATH --release -- --nocapture"),
+        t if t.contains(&"filter") => { format!("cargo test --manifest-path=$CARGO_MANIFEST_PATH --release {test_filter}") }
         _ => "cargo test --manifest-path=$CARGO_MANIFEST_PATH --release".to_string(),
     };
 
