@@ -137,7 +137,7 @@ For example here is the filter used for geospatial search, where a dataset's `sp
 
 However to run this geospatial search against polygons we need to install the [JTS](https://github.com/locationtech/jts) library for Solr and to configure it properly.
 
-It may be a bit tricky to get JTS running with CKAN and Solr as intended. See the Solr documentation for the latest documentation on how to install JTS [here](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html#jts-and-polygons-flat).
+It may be a bit tricky to get JTS running with CKAN and Solr as intended. The CKAN development team [provides preconfigured Solr Docker images for CKAN](https://github.com/ckan/ckan-solr) which you can refer to as an example. For additional information see the Solr documentation for the latest documentation on how to install JTS [here](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html#jts-and-polygons-flat).
 
 Of relevance is installing the JTS JAR file, putting it in a specific location as mentioned in the docs linked (e.g. `SOLR_INSTALL/server/solr-webapp/webapp/WEB-INF/lib/`).
 
