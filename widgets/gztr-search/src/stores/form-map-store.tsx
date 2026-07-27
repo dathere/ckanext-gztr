@@ -1,7 +1,8 @@
 import type { Geoman } from "@geoman-io/maplibre-geoman-free";
-import { create } from "zustand";
-import type { FeatureCategory } from "@/components/category-combobox";
 import type { Map as GLMap } from "maplibre-gl";
+import { create } from "zustand";
+import type { FeatureCategory } from "@/App";
+
 interface FormMapState {
   searchMap: GLMap | undefined;
   setSearchMap: (searchMap: GLMap) => void;
@@ -22,6 +23,8 @@ interface FormMapState {
   // tempSpatialFull field used in ckanext-gztr for temporary state management and properties within the modal
   tempSpatialFull: any;
   setTempSpatialFull: (tempSpatialFull: any) => void;
+  categories: FeatureCategory[] | undefined;
+  setCategories: (categories: FeatureCategory[] | undefined) => void;
   currentCategory: FeatureCategory | undefined;
   setCurrentCategory: (currentCategory: FeatureCategory | undefined) => void;
   searchValue: string | undefined;
@@ -57,6 +60,8 @@ export const useFormMap = create<FormMapState>((set) => ({
   setSpatialFull: (spatialFull) => set(() => ({ spatialFull })),
   tempSpatialFull: undefined,
   setTempSpatialFull: (tempSpatialFull) => set(() => ({ tempSpatialFull })),
+  categories: undefined,
+  setCategories: (categories) => set(() => ({ categories })),
   currentCategory: undefined,
   setCurrentCategory: (currentCategory) => set(() => ({ currentCategory })),
   searchValue: undefined,

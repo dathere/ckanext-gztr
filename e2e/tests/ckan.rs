@@ -4,7 +4,7 @@ mod utils;
 
 use anyhow::{Result, bail};
 use ckanaction::CKAN;
-use std::io::Write;
+use std::{io::Write, path::PathBuf};
 use tempfile::NamedTempFile;
 use testcontainers::core::ExecCommand;
 
@@ -207,7 +207,56 @@ async fn test_file_create_success_with_sysadmin_auth() -> Result<()> {
     Ok(())
 }
 
-// TODO: collections.json file created and tests based on that
+// file_create success by using newly generated CKAN token from sysadmin user
+#[tokio::test]
+async fn test_file_create_success_demo_files() -> Result<()> {
+    let mut compose = get_compose().await?;
+    compose.up().await?;
+    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+    let api_token = generate_token(&compose, "rzmk", "file_token").await?;
+    let ckan = CKAN::builder()
+        .url(format!("http://localhost:{ckan_port}").as_str())
+        .token(api_token)
+        .build();
+
+    let path_buf = PathBuf::from("./assets/storage-demo/config.json");
+    let response = ckan
+        .file_create()
+        .storage("gztr".to_string())
+        .upload(path_buf)
+        .call()
+        .await?;
+
+    // Verify success if false
+    assert_eq!(jaq("jaq .success", &response).await?, "true");
+    // Verify storage used is gztr
+    assert_eq!(jaq("jaq .result.storage", &response).await?, "\"gztr\"");
+    // Verify the file can be downloaded publicly without any auth needed
+    let file_location = jaq("jaq .result.location", &response).await?;
+    duct_sh::sh_dangerous(format!(
+        "curl -s http://localhost:{ckan_port}/file/public-download/gztr/{file_location}"
+    ))
+    .run()?;
+
+    println!("{response:#?}");
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn test_playwright_basic() -> Result<()> {
+    let mut compose = get_compose().await?;
+    compose.up().await?;
+    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+
+    duct_sh::sh("pnpm test playwright/example.spec.ts")
+        .env("CKAN_PORT", ckan_port.to_string())
+        .run()?;
+
+    Ok(())
+}
+
+// TODO: GeoJSON files and config.json file created and tests based on them
 
 // TODO: Verify that I can modify a dataset field while not updating metadata_modified through the Postgres DB
 // This is to help with existing CKAN instances that use ckanext-gztr with the previous spatial_full format

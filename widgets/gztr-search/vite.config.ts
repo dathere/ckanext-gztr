@@ -16,7 +16,7 @@ export default defineConfig({
       output: {
         inlineDynamicImports: false,
         format: "iife",
-        dir: "/usr/lib/ckan/default/src/ckanext-gztr/ckanext/gztr/assets/gztr-search",
+        dir: "/home/rzmk/programming/ckanext-gztr/ckanext/gztr/assets/gztr-search",
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
         assetFileNames: `assets/[name].[ext]`,

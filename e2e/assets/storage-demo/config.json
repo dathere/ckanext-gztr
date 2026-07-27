@@ -1,0 +1,26 @@
+{
+	"collections": [
+		{
+			"location": "state.geojson",
+			"label": "New Mexico",
+			"description": "State of New Mexico",
+			"source": {
+				"description": "U.S. Census TIGER/Line Shapefiles",
+				"url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+			},
+			"quick_region_label": "statewide",
+			"label_key": "NAME"
+		},
+		{
+			"location": "nm_public_water_systems.geojson",
+			"label": "Public Water Systems",
+			"description": "State of New Mexico",
+			"id_key": "PublicSystemName",
+			"source": {
+				"description": "Public Water Systems from United States EPA Safe Drinking Water Information System",
+				"url": "https://reference.geoconnex.us/collections/pws"
+			},
+			"label_key": "PublicSystemName"
+		}
+	]
+}

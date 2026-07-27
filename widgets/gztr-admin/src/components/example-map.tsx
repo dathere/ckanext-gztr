@@ -4,19 +4,29 @@ import { useEffect } from "react";
 import { useFormMap } from "@/stores/form-map-store";
 
 const ExampleMap = () => {
-  const stateGeojson = useFormMap((state) => state.stateGeojson);
-  const setStateGeojson = useFormMap((state) => state.setStateGeojson);
-  const spatialFull = useFormMap((state) => state.spatialFull);
+  const collections = useFormMap((state) => state.collections);
+  const quickRegionGeoJSON = useFormMap((state) => state.quickRegionGeoJSON);
+  const setQuickRegionGeoJSON = useFormMap(
+    (state) => state.setQuickRegionGeoJSON,
+  );
+  const spatial = useFormMap((state) => state.spatial);
   const statewideEnabled = useFormMap((state) => state.statewideEnabled);
 
   useEffect(() => {
-    (async () => {
-      const data = await (
-        await fetch(`/data/gztr-features/NM_State.geojson`)
-      ).json();
-      setStateGeojson(data);
-    })();
-  }, []);
+    const quickRegionCategory = collections?.find(
+      (c) => c.properties.quick_region_label,
+    );
+    // TODO: If collections has the data then grab it from there
+    if (quickRegionCategory)
+      (async () => {
+        const data = await (
+          await fetch(
+            `/file/public-download/gztr/${quickRegionCategory.properties.location}`,
+          )
+        ).json();
+        setQuickRegionGeoJSON(data);
+      })();
+  }, [collections, setQuickRegionGeoJSON]);
 
   return (
     <GLMap
@@ -28,8 +38,8 @@ const ExampleMap = () => {
       style={{ width: "100%", height: 400, borderRadius: "1rem" }}
       mapStyle="https://tiles.openfreemap.org/styles/liberty"
     >
-      {spatialFull && (
-        <Source type="geojson" data={spatialFull}>
+      {spatial && (
+        <Source type="geojson" data={spatial}>
           <Layer
             type="fill"
             paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}
@@ -43,8 +53,8 @@ const ExampleMap = () => {
           />
         </Source>
       )}
-      {statewideEnabled && stateGeojson && (
-        <Source type="geojson" data={stateGeojson}>
+      {statewideEnabled && quickRegionGeoJSON && (
+        <Source type="geojson" data={quickRegionGeoJSON}>
           <Layer
             type="fill"
             paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}

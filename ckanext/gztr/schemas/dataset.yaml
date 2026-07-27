@@ -48,12 +48,14 @@ dataset_fields:
     output_validators: scheming_load_json
   - field_name: spatial_full
     label: Spatial Full
-    display_snippet: gazetteer_preview.html
+    # display_snippet: gazetteer_preview.html
+    display_snippet: null
     form_snippet: text.html
     form_placeholder: Filled in automatically as you select areas above.
   - field_name: spatial
-    label: Spatial
-    display_snippet: null
+    label: Geospatial region (simplified)
+    display_snippet: gazetteer_preview.html
+    # display_snippet: null
     form_snippet: text.html
     form_placeholder: Filled in automatically as you select areas above.
   - field_name: place_keywords

@@ -11,10 +11,10 @@ import "@/assets/maplibre-gl.css";
 import { useEffect, useRef, useState } from "react";
 import { useFormMap } from "@/stores/form-map-store";
 import "@/assets/maplibre-gl.css";
-import { MapPinIcon, XCircleIcon } from "lucide-react";
-import { categories } from "@/components/category-combobox";
-import { Button } from "@/components/ui/button";
 import { Geoman } from "@geoman-io/maplibre-geoman-free";
+import { MapPinIcon, XCircleIcon } from "lucide-react";
+import type { FeatureCategory } from "@/App";
+import { Button } from "@/components/ui/button";
 
 const SearchMap = () => {
   const popupRef = useRef<maplibregl.Popup>(undefined);
@@ -26,17 +26,31 @@ const SearchMap = () => {
   );
   const currentCategory = useFormMap((state) => state.currentCategory);
   const searchMap = useFormMap((state) => state.searchMap);
+  const categories = useFormMap((state) => state.categories);
+  const setCategories = useFormMap((state) => state.setCategories);
   const setSearchMap = useFormMap((state) => state.setSearchMap);
   const setGm = useFormMap((state) => state.setGm);
 
-  // TODO: somehow cache GeoJSON files
+  useEffect(() => {
+    (async () => {
+      const data: { collections: FeatureCategory[] } = await (
+        await fetch(`/file/public-download/gztr/config.json`)
+      ).json();
+      // Sort by label
+      const collections = data.collections.sort(
+        (a: FeatureCategory, b: FeatureCategory) =>
+          a.label < b.label ? -1 : 1,
+      );
+      setCategories(collections);
+    })();
+  }, []);
 
   useEffect(() => {
     (async () => {
-      if (currentCategory) {
+      if (currentCategory && categories) {
         if (popupRef.current) popupRef.current.remove();
         const data = await (
-          await fetch(`/data/gztr-features/${currentCategory.value}.geojson`)
+          await fetch(`/file/public-download/gztr/${currentCategory.location}`)
         ).json();
         setCurrentGeojson(data);
         if (searchMap) {
@@ -51,9 +65,9 @@ const SearchMap = () => {
               );
               const featureName =
                 renderedFeatures.at(0)?.properties[
-                  // @ts-expect-error
-                  categories.find((c) => c.label === currentCategory.label)
-                    .nameKey
+                  currentCategory.label_key
+                    ? currentCategory.label_key
+                    : "label"
                 ];
               setSelectedFeatureName(featureName);
               setLngLat([e.lngLat.lng, e.lngLat.lat]);
@@ -62,7 +76,7 @@ const SearchMap = () => {
         }
       }
     })();
-  }, [currentCategory]);
+  }, [currentCategory, categories]);
 
   return (
     <GLMap

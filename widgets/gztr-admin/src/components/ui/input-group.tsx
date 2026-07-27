@@ -11,7 +11,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
       data-slot="input-group"
       role="group"
       className={cn(
-        "tw:group/input-group tw:border-input tw:dark:bg-input/30 tw:relative tw:flex tw:w-full tw:items-center tw:rounded-md tw:border tw:shadow-xs tw:transition-[color,box-shadow] tw:outline-none",
+        "tw:group/input-group tw:relative tw:flex tw:w-full tw:items-center tw:rounded-md tw:border tw:border-input tw:shadow-xs tw:transition-[color,box-shadow] tw:outline-none tw:dark:bg-input/30",
         "tw:h-9 tw:min-w-0 tw:has-[>textarea]:h-auto",
 
         // Variants based on alignment.
@@ -21,10 +21,10 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
         "tw:has-[>[data-align=block-end]]:h-auto tw:has-[>[data-align=block-end]]:flex-col tw:has-[>[data-align=block-end]]:[&>input]:pt-3",
 
         // Focus state.
-        "tw:has-[[data-slot=input-group-control]:focus-visible]:border-ring tw:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50 tw:has-[[data-slot=input-group-control]:focus-visible]:ring-[3px]",
+        "tw:has-[[data-slot=input-group-control]:focus-visible]:border-ring tw:has-[[data-slot=input-group-control]:focus-visible]:ring-[3px] tw:has-[[data-slot=input-group-control]:focus-visible]:ring-ring/50",
 
         // Error state.
-        "tw:has-[[data-slot][aria-invalid=true]]:ring-destructive/20 tw:has-[[data-slot][aria-invalid=true]]:border-destructive tw:dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40",
+        "tw:has-[[data-slot][aria-invalid=true]]:border-destructive tw:has-[[data-slot][aria-invalid=true]]:ring-destructive/20 tw:dark:has-[[data-slot][aria-invalid=true]]:ring-destructive/40",
 
         className,
       )}
@@ -34,7 +34,7 @@ function InputGroup({ className, ...props }: React.ComponentProps<"div">) {
 }
 
 const inputGroupAddonVariants = cva(
-  "tw:text-muted-foreground tw:flex tw:h-auto tw:cursor-text tw:items-center tw:justify-center tw:gap-2 tw:py-1.5 tw:text-sm tw:font-medium tw:select-none tw:[&>svg:not([class*=size-])]:size-4 tw:[&>kbd]:rounded-[calc(var(--radius)-5px)] tw:group-data-[disabled=true]/input-group:opacity-50",
+  "tw:flex tw:h-auto tw:cursor-text tw:items-center tw:justify-center tw:gap-2 tw:py-1.5 tw:text-sm tw:font-medium tw:text-muted-foreground tw:select-none tw:group-data-[disabled=true]/input-group:opacity-50 tw:[&>kbd]:rounded-[calc(var(--radius)-5px)] tw:[&>svg:not([class*=size-])]:size-4",
   {
     variants: {
       align: {
@@ -43,9 +43,9 @@ const inputGroupAddonVariants = cva(
         "inline-end":
           "tw:order-last tw:pr-3 tw:has-[>button]:mr-[-0.45rem] tw:has-[>kbd]:mr-[-0.35rem]",
         "block-start":
-          "tw:order-first tw:w-full tw:justify-start tw:px-3 tw:pt-3 tw:[.border-b]:pb-3 tw:group-has-[>input]/input-group:pt-2.5",
+          "tw:order-first tw:w-full tw:justify-start tw:px-3 tw:pt-3 tw:group-has-[>input]/input-group:pt-2.5 tw:[.border-b]:pb-3",
         "block-end":
-          "tw:order-last tw:w-full tw:justify-start tw:px-3 tw:pb-3 tw:[.border-t]:pt-3 tw:group-has-[>input]/input-group:pb-2.5",
+          "tw:order-last tw:w-full tw:justify-start tw:px-3 tw:pb-3 tw:group-has-[>input]/input-group:pb-2.5 tw:[.border-t]:pt-3",
       },
     },
     defaultVariants: {
@@ -77,12 +77,12 @@ function InputGroupAddon({
 }
 
 const inputGroupButtonVariants = cva(
-  "tw:text-sm tw:shadow-none tw:flex tw:gap-2 tw:items-center",
+  "tw:flex tw:items-center tw:gap-2 tw:text-sm tw:shadow-none",
   {
     variants: {
       size: {
-        xs: "tw:h-6 tw:gap-1 tw:px-2 tw:rounded-[calc(var(--radius)-5px)] tw:[&>svg:not([class*=size-])]:size-3.5 tw:has-[>svg]:px-2",
-        sm: "tw:h-8 tw:px-2.5 tw:gap-1.5 tw:rounded-md tw:has-[>svg]:px-2.5",
+        xs: "tw:h-6 tw:gap-1 tw:rounded-[calc(var(--radius)-5px)] tw:px-2 tw:has-[>svg]:px-2 tw:[&>svg:not([class*=size-])]:size-3.5",
+        sm: "tw:h-8 tw:gap-1.5 tw:rounded-md tw:px-2.5 tw:has-[>svg]:px-2.5",
         "icon-xs":
           "tw:size-6 tw:rounded-[calc(var(--radius)-5px)] tw:p-0 tw:has-[>svg]:p-0",
         "icon-sm": "tw:size-8 tw:p-0 tw:has-[>svg]:p-0",
@@ -117,7 +117,7 @@ function InputGroupText({ className, ...props }: React.ComponentProps<"span">) {
   return (
     <span
       className={cn(
-        "tw:text-muted-foreground tw:flex tw:items-center tw:gap-2 tw:text-sm tw:[&_svg]:pointer-events-none tw:[&_svg:not([class*=size-])]:size-4",
+        "tw:flex tw:items-center tw:gap-2 tw:text-sm tw:text-muted-foreground tw:[&_svg]:pointer-events-none tw:[&_svg:not([class*=size-])]:size-4",
         className,
       )}
       {...props}

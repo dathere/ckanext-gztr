@@ -3,4 +3,4 @@ slow-timeout = { period = "120s", terminate-after = 2 }
 
 [[profile.default.overrides]]
 filter = "test(manual)"
-slow-timeout = { period = "240s", terminate-after = 2 }
+slow-timeout = { period = "1h", terminate-after = 2 }

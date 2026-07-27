@@ -1,13 +1,15 @@
 import type { Geoman } from "@geoman-io/maplibre-geoman-free";
+import type { Feature } from "maplibre-gl";
 import type { RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import { create } from "zustand";
-import type { FeatureCategory } from "@/components/category-combobox";
-import type {
-  MultiSelectGroup,
-  MultiSelectOption,
-  MultiSelectRef,
-} from "@/components/multi-select";
+import type { FeatureCollectionExt, FeatureCollectionProperties } from "@/App";
+import { produce } from "immer";
+
+// IMPORTANT NOTE: When working with deeply nested objects for state, use immer
+// See the following links for more info:
+// - https://zustand.docs.pmnd.rs/learn/guides/updating-state#deeply-nested-object
+// - https://dev.to/fazle-rabbi-dev/simplifying-state-management-with-zustand-updating-nested-objects-521g
 
 interface FormMapState {
   formMap: RefObject<MapRef> | undefined;
@@ -15,34 +17,30 @@ interface FormMapState {
   viewState: object;
   setViewState: (viewState: any) => void;
   // GeoJSON for currentCategory, showing category map layer
-  geojson: any;
-  setGeojson: (geojson: any) => void;
+  currentCollectionGeoJSON: any;
+  setCurrentCollectionGeoJSON: (geojson: any) => void;
   // Statewide extent GeoJSON
-  stateGeojson: any;
-  setStateGeojson: (stateGeojson: any) => void;
+  quickRegionGeoJSON: any;
+  setQuickRegionGeoJSON: (quickRegionGeoJSON: any) => void;
   // spatial field used in ckanext-spatial for indexing (simplified GeoJSON)
   spatial: any;
   setSpatial: (spatial: any) => void;
   // spatialFull field used in ckanext-gztr for state management and properties (full GeoJSON)
-  spatialFull: any;
-  setSpatialFull: (spatialFull: any) => void;
+  spatialFull: FeatureCollectionExt | undefined;
+  setSpatialFull: (spatialFull: FeatureCollectionExt | undefined) => void;
   // tempSpatialFull field used in ckanext-gztr for temporary state management and properties within the modal
-  tempSpatialFull: any;
-  setTempSpatialFull: (tempSpatialFull: any) => void;
-  currentCategory: FeatureCategory | undefined;
-  setCurrentCategory: (currentCategory: FeatureCategory) => void;
+  tempSpatialFull: FeatureCollectionExt | undefined;
+  setTempSpatialFull: (
+    tempSpatialFull: FeatureCollectionExt | undefined,
+  ) => void;
+  collections: FeatureCollectionExt[] | undefined;
+  setCollections: (collections: FeatureCollectionExt[] | undefined) => void;
+  currentCollection: FeatureCollectionProperties | undefined;
+  setCurrentCollection: (
+    currentCollection: FeatureCollectionProperties | undefined,
+  ) => void;
   searchValue: string | undefined;
   setSearchValue: (searchValue: string) => void;
-  features: MultiSelectOption[] | MultiSelectGroup[];
-  setFeatures: (features: MultiSelectOption[] | MultiSelectGroup[]) => void;
-  selectedFeatures: MultiSelectOption[] | MultiSelectGroup[];
-  setSelectedFeatures: (
-    selectedFeatures: MultiSelectOption[] | MultiSelectGroup[],
-  ) => void;
-  multiSelectRef: RefObject<MultiSelectRef | undefined> | undefined;
-  setMultiSelectRef: (
-    multiSelectRef: RefObject<MultiSelectRef | undefined>,
-  ) => void;
   statewideEnabled: boolean;
   setStatewideEnabled: (statewideEnabled: boolean) => void;
   addressSearchResults: any[];
@@ -62,26 +60,43 @@ export const useFormMap = create<FormMapState>((set) => ({
     zoom: 5,
   },
   setViewState: (viewState) => set(() => ({ viewState })),
-  geojson: undefined,
-  setGeojson: (geojson) => set(() => ({ geojson })),
-  stateGeojson: undefined,
-  setStateGeojson: (stateGeojson) => set(() => ({ stateGeojson })),
+  currentCollectionGeoJSON: undefined,
+  setCurrentCollectionGeoJSON: (currentCollectionGeoJSON) =>
+    set(() => ({ currentCollectionGeoJSON })),
+  quickRegionGeoJSON: undefined,
+  setQuickRegionGeoJSON: (quickRegionGeoJSON) =>
+    set(() => ({ quickRegionGeoJSON })),
   spatial: undefined,
-  setSpatial: (spatial) => set(() => ({ spatial })),
+  setSpatial: (spatial) =>
+    set(
+      produce((state) => {
+        state.spatial = spatial;
+      }),
+    ),
   spatialFull: undefined,
-  setSpatialFull: (spatialFull) => set(() => ({ spatialFull })),
+  setSpatialFull: (spatialFull) =>
+    set(
+      produce((state) => {
+        state.spatialFull = spatialFull;
+      }),
+    ),
   tempSpatialFull: undefined,
-  setTempSpatialFull: (tempSpatialFull) => set(() => ({ tempSpatialFull })),
-  currentCategory: undefined,
-  setCurrentCategory: (currentCategory) => set(() => ({ currentCategory })),
+  setTempSpatialFull: (tempSpatialFull) =>
+    set(
+      produce((state) => {
+        state.tempSpatialFull = tempSpatialFull;
+      }),
+    ),
+  collections: undefined,
+  setCollections: (collections) =>
+    set(() => {
+      return { collections };
+    }),
+  currentCollection: undefined,
+  setCurrentCollection: (currentCollection) =>
+    set(() => ({ currentCollection })),
   searchValue: undefined,
   setSearchValue: (searchValue) => set(() => ({ searchValue })),
-  features: [],
-  setFeatures: (features) => set(() => ({ features })),
-  selectedFeatures: [],
-  setSelectedFeatures: (selectedFeatures) => set(() => ({ selectedFeatures })),
-  multiSelectRef: undefined,
-  setMultiSelectRef: (multiSelectRef) => set(() => ({ multiSelectRef })),
   statewideEnabled: false,
   setStatewideEnabled: (statewideEnabled) => set(() => ({ statewideEnabled })),
   addressSearchResults: [],

@@ -15,14 +15,9 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import "./App.css";
-import { useEffect, useRef, useState } from "react";
-import { CategoryCombobox, categories } from "@/components/category-combobox";
+import type { Feature } from "maplibre-gl";
+import { useEffect, useState } from "react";
 import { FormMap } from "@/components/form-map";
-import {
-  MultiSelect,
-  type MultiSelectGroup,
-  type MultiSelectRef,
-} from "@/components/multi-select";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -34,9 +29,41 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
-import { extractFeaturesFromGeojson } from "@/lib/state-management";
-import { runAddressSearch, simplifyGeojson } from "@/lib/utils";
+import {
+  getPlaceKeywordsFromSpatialFull,
+  runAddressSearch,
+  simplifyGeojson,
+} from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
+import { FeatureCombobox } from "./components/feature-combobox";
+
+export type FeatureProperties = {
+  id?: string;
+  // Actual key is collections[i].properties.label_key or else default expectation is "label"
+  label?: string;
+};
+
+export type FeatureCollectionExt = {
+  type?: string;
+  features: Feature[];
+  properties: FeatureCollectionProperties;
+};
+
+export type FeatureCollectionProperties = {
+  // GeoJSON file name without .geojson (e.g. "State" or "NM_Counties"). Undefined when it is from user-"Drawn features".
+  location?: string;
+  // Human-readable name that shows up in the dropdown (e.g. "Counties" or "Public Water Systems")
+  label: string;
+  description: string;
+  source: {
+    description: string;
+    url?: string;
+  };
+  id_key?: string;
+  // Key in a `Feature`'s `properties` that has the human-readable label/name (e.g. "NAMELSAD")
+  label_key?: string;
+  quick_region_label?: string;
+};
 
 function App() {
   const [open, setOpen] = useState<boolean>();
@@ -44,24 +71,18 @@ function App() {
   const [statewideChecked, setStatewideChecked] = useState<boolean>();
   const [searching, setSearching] = useState<boolean>();
   const formMap = useFormMap((state) => state.formMap);
-  const currentCategory = useFormMap((state) => state.currentCategory);
-  const setCurrentCategory = useFormMap((state) => state.setCurrentCategory);
-  const features = useFormMap((state) => state.features);
-  const setFeatures = useFormMap((state) => state.setFeatures);
+  const collections = useFormMap((state) => state.collections);
+  const setCollections = useFormMap((state) => state.setCollections);
   const searchValue = useFormMap((state) => state.searchValue);
   const setSearchValue = useFormMap((state) => state.setSearchValue);
-  const selectedFeatures = useFormMap((state) => state.selectedFeatures);
-  const setSelectedFeatures = useFormMap((state) => state.setSelectedFeatures);
   const spatial = useFormMap((state) => state.spatial);
   const setSpatial = useFormMap((state) => state.setSpatial);
   const spatialFull = useFormMap((state) => state.spatialFull);
   const setSpatialFull = useFormMap((state) => state.setSpatialFull);
-  const stateGeojson = useFormMap((state) => state.stateGeojson);
+  const quickRegionGeoJSON = useFormMap((state) => state.quickRegionGeoJSON);
   const tempSpatialFull = useFormMap((state) => state.tempSpatialFull);
   const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
-  const mSRef = useRef<MultiSelectRef>(undefined);
   // const multiSelectRef = useFormMap((state) => state.multiSelectRef);
-  const setMultiSelectRef = useFormMap((state) => state.setMultiSelectRef);
   const statewideEnabled = useFormMap((state) => state.statewideEnabled);
   const setStatewideEnabled = useFormMap((state) => state.setStatewideEnabled);
   const addressSearchResults = useFormMap(
@@ -70,91 +91,106 @@ function App() {
   const setAddressSearchResults = useFormMap(
     (state) => state.setAddressSearchResults,
   );
+  const setCurrentCollection = useFormMap(
+    (state) => state.setCurrentCollection,
+  );
   const gm = useFormMap((state) => state.gm);
   const disableApplyButton = useFormMap((state) => state.disableApplyButton);
   const [fieldsAreInitialized, setFieldsAreInitialized] = useState(false);
+  const [demo, setDemo] = useState<string | undefined>(undefined);
 
-  useEffect(() => {
-    if (mSRef) setMultiSelectRef(mSRef);
-  }, [mSRef]);
-
+  // On first load of the widget (e.g. dataset publisher goes to Add Dataset or Edit Dataset page)
   useEffect(() => {
     (async () => {
-      const featureGroups: MultiSelectGroup[] = [];
-      // Store selected category's currentCategory GeoJSON data
-      for (const category of categories) {
-        const geojson = await (
-          await fetch(`/data/gztr-features/${category.value}.geojson`)
-        ).json();
-        // Store selected category's feature names in features variable
-        const categoryOptions: any[] = [];
-        for (const feature of geojson.features) {
-          const featureName = feature.properties[category.nameKey];
-          const featureData: any = {
-            value: featureName,
-            label: featureName,
-            geometry: feature.geometry,
-            category: category.label,
-          };
-          if ("pid" in feature.properties)
-            featureData.pid = feature.properties.pid;
-          categoryOptions.push(featureData);
-        }
-        const categoryFeaturesGroup: MultiSelectGroup = {
-          heading: category.label,
-          options: categoryOptions
-            .filter(
-              (o, index, arr) =>
-                arr.findIndex(
-                  (item) =>
-                    JSON.stringify(item.label) === JSON.stringify(o.label),
-                ) === index,
-            )
-            .sort((a, b) => (a.label < b.label ? -1 : 1)),
-        };
-        featureGroups.push(categoryFeaturesGroup);
-      }
-      setFeatures(featureGroups);
-      const statewideSwitch = document.querySelector("#statewide-switch");
-      if (spatialFull.value.startsWith(`{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"GEO_ID":"0400000US35","STATE":"35","NAME":"New Mexico"`)) {
-        if (statewideSwitch)
-          statewideSwitch.setAttribute("checked", "true");
-      }
+      // Download config.json and set FeatureCollectionProperties for collections
+      const data: { collections: FeatureCollectionProperties[] } = await (
+        await fetch(`/file/public-download/gztr/config.json`)
+      ).json();
+      // Sort collections by label
+      const collectionProperties = data.collections.sort(
+        (a: FeatureCollectionProperties, b: FeatureCollectionProperties) =>
+          a.label < b.label ? -1 : 1,
+      );
+      setCollections(
+        collectionProperties.map((c) => {
+          return { features: [], properties: c };
+        }),
+      );
     })();
   }, []);
+
+  useEffect(() => {
+    // Store features (with geometry) in collections
+    (async () => {
+      if (
+        collections &&
+        collections.length > 0 &&
+        collections[0].features?.length === 0
+      ) {
+        const newCollections = await Promise.all(
+          collections.map(async (c) => {
+            const newCollection = c;
+            const collectionGeoJSON: {
+              type: "FeatureCollection";
+              features: Feature[];
+            } = await (
+              await fetch(`/file/public-download/gztr/${c.properties.location}`)
+            ).json();
+            newCollection.features = collectionGeoJSON.features;
+            newCollection.features.forEach((f: Feature) => {
+              f.properties.collection = c;
+            });
+            return newCollection;
+          }),
+        );
+        setCollections(newCollections);
+      }
+    })();
+  }, [collections]);
+
+  useEffect(() => {
+    // Check quick region extent switch if a collection exists with quick_region_label
+    const statewideSwitch = document.querySelector("#statewide-switch");
+    if (
+      spatialFull?.features.length === 1
+      // && spatialFull.features.at(0)?.properties.collection.properties.location ===
+      // collections?.find((c) => c.properties.quick_region_label)?.properties
+      //   .location
+    ) {
+      if (statewideSwitch) statewideSwitch.setAttribute("checked", "true");
+    }
+  }, [spatialFull]);
 
   useEffect(() => {
     if (!fieldsAreInitialized) setFieldsAreInitialized(true);
     const spatialFullTextbox = document.querySelector(
       "#field-spatial_full",
     ) as HTMLInputElement;
-    if (fieldsAreInitialized)
+    if (fieldsAreInitialized && spatialFullTextbox)
       spatialFullTextbox.value = spatialFull ? JSON.stringify(spatialFull) : "";
-    else if (spatialFullTextbox.value)
-      setSpatialFull(JSON.parse(spatialFullTextbox.value));
+    else if (spatialFullTextbox?.value) {
+      setSpatialFull(JSON.parse(spatialFullTextbox?.value));
+    }
     const placeKeywordsTextbox = document.querySelector(
       "#field-place_keywords",
     ) as HTMLInputElement;
-    if (statewideEnabled || spatialFullTextbox.value.startsWith(`{"type":"FeatureCollection","features":[{"type":"Feature","properties":{"GEO_ID":"0400000US35","STATE":"35","NAME":"New Mexico"`)) {
-      placeKeywordsTextbox.value = "New Mexico";
+    if (statewideEnabled) {
+      if (placeKeywordsTextbox)
+        placeKeywordsTextbox.value =
+          collections?.find((c) => c.properties.quick_region_label)?.properties
+            .label ?? "";
     } else {
-      const placeKeywordsFeatures = extractFeaturesFromGeojson(spatialFull);
-      const placeKeywords = placeKeywordsFeatures
-        .filter((f) => f.category !== "Drawn features")
-        .map((f) =>
-          placeKeywordsFeatures.filter((g) => g.value === f.value).length > 1
-            ? `${f.value} (${f.category})`
-            : f.value,
-        )
-        .join(", ");
-      placeKeywordsTextbox.value = placeKeywords;
+      if (placeKeywordsTextbox)
+        placeKeywordsTextbox.value =
+          getPlaceKeywordsFromSpatialFull(spatialFull);
     }
     const spatialTextbox = document.querySelector(
       "#field-spatial",
     ) as HTMLInputElement;
-    if (fieldsAreInitialized)
+    if (fieldsAreInitialized && spatialTextbox)
       spatialTextbox.value = spatial ? JSON.stringify(spatial) : "";
-    else if (spatialTextbox.value) setSpatial(JSON.parse(spatialTextbox.value));
+    else if (spatialTextbox?.value)
+      setSpatial(JSON.parse(spatialTextbox.value));
   }, [spatial, spatialFull]);
 
   return (
@@ -162,16 +198,42 @@ function App() {
       <Dialog
         open={open}
         onOpenChange={(o) => {
+          // If dialog is being opened
           if (o) {
+            // TODO: Identify why spatialFull is undefined here.
+            // Set tempSpatialFull to the spatialFull value from the textbox field
+            // Also add geometry to each feature based on feature id and collection location
+            const spatialFullFeatures = spatialFull?.features;
+            if (spatialFullFeatures) {
+              const featuresWithGeometry = spatialFullFeatures.map((f) => {
+                const collection = collections?.find(
+                  (c) =>
+                    c.properties.location ===
+                    f.properties.collection.properties.location,
+                );
+                const identifiedFeature = collection?.features.find(
+                  (cf) =>
+                    cf.properties[
+                      cf.properties.collection.properties.id_key ?? "id"
+                    ] ===
+                    f.properties[
+                      f.properties.collection.properties.id_key ?? "id"
+                    ],
+                );
+                const geometry = identifiedFeature?.geometry;
+                if (geometry)
+                  // @ts-expect-error
+                  f.geometry = geometry;
+                return f;
+              });
+              spatialFull.features = featuresWithGeometry;
+            }
             setTempSpatialFull(spatialFull);
-            const existingFeatures = extractFeaturesFromGeojson(spatialFull);
-            setSelectedFeatures(existingFeatures);
           }
           // If dialog is being closed
+          // IMPORTANT: This else statement does not run when using the Apply button
           else {
             setTempSpatialFull(undefined);
-            const existingFeatures = extractFeaturesFromGeojson(spatialFull);
-            setSelectedFeatures(existingFeatures);
           }
           setOpen(o);
         }}
@@ -185,7 +247,8 @@ function App() {
               variant="outline"
               id="filter-click"
             >
-              {selectedFeatures.length > 0 ? "Edit" : "Add"} Location Data
+              {spatialFull && spatialFull.features.length > 0 ? "Edit" : "Add"}{" "}
+              Location Data
             </Button>
           </DialogTrigger>
           <DialogContent className="tw:sm:!max-w-[90%]">
@@ -263,26 +326,6 @@ function App() {
                     >
                       Edit drawn features
                     </Button>
-                    {/* <Button
-                      className="btn btn-danger"
-                      id="clear-filter-button"
-                      onClick={async () => {
-                        setTempSpatialFull(undefined);
-                        setSelectedFeatures([]);
-                        if (formMap) {
-                          const map = formMap.current.getMap();
-                          const featureSource = map.getSource("featureSource");
-                          const geojsonData =
-                            // @ts-expect-error
-                            await featureSource.getData();
-                          geojsonData.features = [];
-                          // @ts-expect-error
-                          featureSource.setData(geojsonData);
-                        }
-                      }}
-                    >
-                      Clear all features
-                    </Button> */}
                   </div>
                   <div className="tw:flex tw:gap-2">
                     <div
@@ -298,7 +341,7 @@ function App() {
                         type="text"
                         onKeyDown={async (e) => {
                           if (e.key === "Enter") {
-                            const map = formMap?.current.getMap();
+                            const map = formMap?.current?.getMap();
                             if (map) {
                               setSearching(true);
                               await runAddressSearch(
@@ -337,7 +380,7 @@ function App() {
                       className="btn btn-primary"
                       type="button"
                       onClick={async () => {
-                        const map = formMap?.current.getMap();
+                        const map = formMap?.current?.getMap();
                         if (map) {
                           setSearching(true);
                           await runAddressSearch(
@@ -379,7 +422,7 @@ function App() {
                               className="tw:w-full tw:justify-start"
                               onClick={() => {
                                 if (formMap) {
-                                  const map = formMap.current.getMap();
+                                  const map = formMap?.current?.getMap();
                                   map.fitBounds(
                                     [
                                       [address.lon, address.lat],
@@ -403,28 +446,10 @@ function App() {
               </div>
               <div className="tw:grid tw:grid-cols-6 tw:my-2 tw:gap-4">
                 <div className="tw:col-span-2 tw:flex tw:flex-col tw:gap-4">
-                  <CategoryCombobox
-                    currentCategory={currentCategory}
-                    // @ts-expect-error
-                    setCurrentCategory={setCurrentCategory}
-                  />
-                  <MultiSelect
-                    // ref={mSRef}
-                    className="tw:mt-2"
-                    placeholder="Select features for your dataset."
-                    options={features}
-                    // @ts-expect-error
-                    onValueChange={setSelectedFeatures}
-                    defaultValue={selectedFeatures}
-                    modalPopover={false}
-                    autoSize={true}
-                    maxCount={100}
-                    hideSelectAll={true}
-                    gm={gm}
-                  />
+                  <FeatureCombobox />
                 </div>
                 <div className="tw:col-span-4">
-                  <FormMap layerName={currentCategory?.value} />
+                  <FormMap />
                 </div>
               </div>
             </div>
@@ -435,7 +460,9 @@ function App() {
               <DialogClose>
                 <Button
                   onClick={(e) => {
-                    const confirmed = confirm("Are you sure you want to cancel? If you continue, any new selected features will not be saved.");
+                    const confirmed = confirm(
+                      "Are you sure you want to cancel? If you continue, any new selected features will not be saved.",
+                    );
                     if (!confirmed) {
                       e.preventDefault();
                       return;
@@ -451,13 +478,49 @@ function App() {
                 className="btn btn-success"
                 disabled={disableApplyButton}
                 onClick={() => {
-                  setSpatialFull(tempSpatialFull);
-                  setSpatial(simplifyGeojson(tempSpatialFull));
+                  if (tempSpatialFull) {
+                    if (tempSpatialFull.features.length > 0) {
+                      const bareFeatures = structuredClone(
+                        tempSpatialFull.features,
+                      ).map((f) => {
+                        // Deep clone to avoid deleting from original collections variable, not a reference
+                        f.properties.collection = {
+                          properties: f.properties.collection.properties,
+                        };
+                        return f;
+                      });
+                      const newSpatialFull = {
+                        type: "FeatureCollection",
+                        features: bareFeatures,
+                        properties: tempSpatialFull.properties,
+                      };
+                      setSpatial(simplifyGeojson(newSpatialFull));
+                      // Remove geometry from spatialFull, exampleMap uses spatial, geometry added to tempSpatialFull.features
+                      // Should not remove geometry from drawn features
+                      const featuresNoGeometries = structuredClone(
+                        newSpatialFull,
+                      ).features.map((f) => {
+                        if (
+                          !(
+                            f.properties.collection.properties.label ===
+                            "Drawn features"
+                          )
+                        )
+                          // @ts-expect-error
+                          delete f.geometry;
+                        return f;
+                      });
+                      newSpatialFull.features = featuresNoGeometries;
+                      setSpatialFull(newSpatialFull);
+                      setDemo("potato");
+                    } else {
+                      setSpatialFull(undefined);
+                      setSpatial(undefined);
+                    }
+                  }
                   setOpen(false);
                   setTempSpatialFull(undefined);
-                  setSelectedFeatures(
-                    extractFeaturesFromGeojson(tempSpatialFull),
-                  );
+                  setCurrentCollection(undefined);
                 }}
               >
                 {disableApplyButton
@@ -468,86 +531,87 @@ function App() {
           </DialogContent>
         </form>
       </Dialog>
-      <div className="form-check form-switch">
-        <AlertDialog
-          open={openStatewideAlert}
-          onOpenChange={setOpenStatewideAlert}
-        >
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-              <AlertDialogDescription>
-                This action cannot be undone. You currently have{" "}
-                {selectedFeatures.length} selected feature
-                {selectedFeatures.length > 1 ? "s" : ""}. If you continue, your
-                selected feature{selectedFeatures.length > 1 ? "s" : ""} will be
-                removed and the statewide extent will be selected instead.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel
-                className="btn btn-danger"
-                onClick={() => setOpenStatewideAlert(false)}
-              >
-                Cancel
-              </AlertDialogCancel>
-              <AlertDialogAction
-                className="btn btn-success"
-                onClick={() => {
-                  setStatewideEnabled(true);
-                  setOpenStatewideAlert(false);
-                  setSelectedFeatures([]);
-                  setStatewideChecked(true);
-                  setSpatialFull(stateGeojson);
-                  setSpatial(simplifyGeojson(stateGeojson));
-                }}
-              >
-                Continue
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-        <Input
-          className="form-check-input"
-          checked={statewideChecked}
-          type="checkbox"
-          id="statewide-switch"
-          onClick={(e) => {
-            // @ts-expect-error
-            const checked = e.target.checked;
-            if (selectedFeatures.length > 0 && !statewideEnabled) {
-              e.preventDefault();
-              setOpenStatewideAlert(true);
-            } else {
-              setStatewideEnabled(checked);
-              setStatewideChecked(checked);
-              if (checked) {
-                setSpatialFull(stateGeojson);
-                setSpatial(simplifyGeojson(stateGeojson));
-              } else {
-                setSpatialFull(undefined);
-                setSpatial(undefined);
-              }
-            }
-          }}
-        />
-        <Label className="form-check-label" htmlFor="statewide-switch">
-          Statewide Extent?
-        </Label>
-      </div>
-      <ExampleMap />
-      {/* <div className="tw:flex tw:flex-wrap tw:gap-2 tw:my-4">
-        <div className="tw:grid tw:w-full tw:max-w-md tw:items-center tw:gap-3">
-          <Label htmlFor="spatial">Spatial data</Label>
+      {quickRegionGeoJSON && (
+        <div className="form-check form-switch">
+          <AlertDialog
+            open={openStatewideAlert}
+            onOpenChange={setOpenStatewideAlert}
+          >
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone.{" "}
+                  {tempSpatialFull && tempSpatialFull.features.length > 0 && (
+                    <p>
+                      You currently have {tempSpatialFull.features.length}{" "}
+                      selected feature
+                      {tempSpatialFull.features.length > 1 ? "s" : ""}. If you
+                      continue, your selected feature
+                      {tempSpatialFull.features.length > 1 ? "s" : ""} will be
+                      removed and the statewide extent will be selected instead.
+                    </p>
+                  )}
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel
+                  className="btn btn-danger"
+                  onClick={() => setOpenStatewideAlert(false)}
+                >
+                  Cancel
+                </AlertDialogCancel>
+                <AlertDialogAction
+                  className="btn btn-success"
+                  onClick={() => {
+                    setStatewideEnabled(true);
+                    setOpenStatewideAlert(false);
+                    setStatewideChecked(true);
+                    if (quickRegionGeoJSON) {
+                      setSpatialFull(quickRegionGeoJSON);
+                      setSpatial(simplifyGeojson(quickRegionGeoJSON));
+                    }
+                  }}
+                >
+                  Continue
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
           <Input
-            type="text"
-            id="spatial"
-            value={JSON.stringify(spatial)}
-            disabled
-            placeholder="Filled in automatically as you select features above."
+            className="form-check-input"
+            checked={statewideChecked}
+            type="checkbox"
+            id="statewide-switch"
+            onClick={(e) => {
+              // @ts-expect-error
+              const checked = e.target.checked;
+              if (
+                tempSpatialFull &&
+                tempSpatialFull.features.length > 0 &&
+                !statewideEnabled
+              ) {
+                e.preventDefault();
+                setOpenStatewideAlert(true);
+              } else {
+                setStatewideEnabled(checked);
+                setStatewideChecked(checked);
+                if (checked && quickRegionGeoJSON) {
+                  setSpatialFull(quickRegionGeoJSON);
+                  setSpatial(simplifyGeojson(quickRegionGeoJSON));
+                } else {
+                  setSpatialFull(undefined);
+                  setSpatial(undefined);
+                }
+              }
+            }}
           />
+          <Label className="form-check-label" htmlFor="statewide-switch">
+            Statewide Extent?
+          </Label>
         </div>
-      </div> */}
+      )}
+      <ExampleMap />
     </div>
   );
 }

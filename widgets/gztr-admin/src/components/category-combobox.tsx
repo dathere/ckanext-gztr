@@ -1,5 +1,5 @@
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
-import { type Dispatch, type SetStateAction, useState } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Command,
@@ -15,74 +15,15 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
+import { useFormMap } from "@/stores/form-map-store";
 
-export type FeatureCategory = {
-  value: string;
-  label: string;
-  nameKey: string;
-};
-
-export const categories: FeatureCategory[] = [
-  {
-    value: "NM_Public_Water_Systems",
-    label: "Public Water Systems",
-    nameKey: "PublicSystemName",
-  },
-  {
-    value: "NM_Irrigation_Districts",
-    label: "Irrigation Districts",
-    nameKey: "District",
-  },
-  {
-    value: "NM_HUC8_Sub_Basins",
-    label: "HUC 8 Sub Basins",
-    nameKey: "SubBasinName",
-  },
-  {
-    value: "NM_Counties",
-    label: "Counties",
-    nameKey: "NAMELSAD",
-  },
-  {
-    value: "NM_AIANNH",
-    label: "Reservations/Pueblos/Tribal",
-    nameKey: "NAMELSAD",
-  },
-  {
-    value: "NM_Census_Designated_Places",
-    label: "Census Designated Places",
-    nameKey: "NAMELSAD",
-  },
-  {
-    value: "NM_Soil_Water_Conservation_Districts",
-    label: "Soil Water Conservation Districts",
-    nameKey: "NAME",
-  },
-  {
-    value: "NM_OSE_Districts",
-    label: "OSE Districts",
-    nameKey: "name",
-  },
-  {
-    value: "NM_OSE_Declared_Groundwater_Basins",
-    label: "OSE Declared Groundwater Basins",
-    nameKey: "Basin",
-  },
-  {
-    value: "USGS_Principle_Aquifers",
-    label: "USGS Principal Aquifers",
-    nameKey: "AquiferName",
-  },
-].sort((a, b) => (a.label < b.label ? -1 : 1));
-
-export function CategoryCombobox({
-  currentCategory,
-  setCurrentCategory,
-}: {
-  currentCategory: FeatureCategory | undefined;
-  setCurrentCategory: Dispatch<SetStateAction<FeatureCategory | undefined>>;
-}) {
+export function CategoryCombobox() {
   const [open, setOpen] = useState(false);
+  const currentCollection = useFormMap((state) => state.currentCollection);
+  const setCurrentCollection = useFormMap(
+    (state) => state.setCurrentCollection,
+  );
+  const collections = useFormMap((state) => state.collections);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -93,19 +34,20 @@ export function CategoryCombobox({
           aria-expanded={open}
           className="tw:w-full tw:justify-between"
         >
-          {currentCategory ? (
-            categories.find(
-              (category) => category.value === currentCategory.value,
-            )?.label
+          {collections && currentCollection ? (
+            collections.find(
+              (collection) =>
+                collection.properties.location === currentCollection.location,
+            )?.properties.label
           ) : (
             <span className="tw:text-sm tw:text-muted-foreground">
               Select a feature category to show on the map.
             </span>
           )}
           <div className="tw:flex tw:gap-1">
-            {currentCategory && (
+            {currentCollection && (
               <Button
-                onClick={() => setCurrentCategory(undefined)}
+                onClick={() => setCurrentCollection(undefined)}
                 className="p-0"
                 variant="ghost"
               >
@@ -124,32 +66,35 @@ export function CategoryCombobox({
           <CommandList>
             <CommandEmpty>No category found.</CommandEmpty>
             <CommandGroup>
-              {categories.map((category) => (
+              {collections?.map((collection) => (
                 <CommandItem
-                  key={category.value}
-                  value={category.value}
-                  onSelect={(currentValue) => {
-                    setCurrentCategory(
-                      currentValue === currentCategory?.value
-                        ? undefined
-                        : categories.find(
-                            (tempCategory) =>
-                              currentValue === tempCategory.value,
-                          ),
-                    );
-                    setOpen(false);
+                  key={collection.properties.location}
+                  value={collection.properties.location}
+                  onSelect={(currentLocation) => {
+                    if (currentCollection && setCurrentCollection)
+                      setCurrentCollection(
+                        currentLocation === currentCollection.location
+                          ? currentCollection
+                          : collections.find(
+                              (tempCollection) =>
+                                currentLocation ===
+                                tempCollection.properties.location,
+                            )?.properties,
+                      );
+                    else setOpen(false);
                   }}
                   className="cursor-pointer"
                 >
                   <CheckIcon
                     className={cn(
                       "tw:mr-2 tw:h-4 tw:w-4",
-                      currentCategory?.value === category.value
+                      currentCollection?.location ===
+                        collection.properties.location
                         ? "tw:opacity-100"
                         : "tw:opacity-0",
                     )}
                   />
-                  {category.label}
+                  {collection.properties.label}
                 </CommandItem>
               ))}
             </CommandGroup>

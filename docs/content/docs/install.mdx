@@ -224,8 +224,10 @@ As a sysadmin you'll provide GeoJSON files that are used throughout ckanext-gztr
 The GeoJSON files must be in a specific format so that ckanext-gztr can properly use them. Here are the conditions followed by an example GeoJSON file:
 
 - A GeoJSON file must be a [`FeatureCollection`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.3) using WGS84 as its geographic coordinate reference system.
-- Each [`Feature`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.2) must have a `properties` entry where the dictionary includes a unique `id` (default key name, can be a different name specified in `config.json`) entry. The value of the `id` entry is **unique across all `Feature`s in the `FeatureCollection`**. Therefore we do not recommend using a label such as a name for the ID, but rather a unique string or number such as basing the `id` on an existing unique ID system for the `FeatureCollection`.
+- Each [`Feature`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.2) must have a `properties` entry where the dictionary includes a **unique** `id` (default key name, can be a different name specified in `config.json`) entry. The value of the `id` entry is **unique across all `Feature`s in the `FeatureCollection`**. Therefore we do not recommend using a label such as a name for the ID, but rather a unique string or number such as basing the `id` on an existing unique ID system for the `FeatureCollection`.
 - Each `Feature` must also have a `label` (default key name, can rename in `config.json`) entry in its `properties` dictionary where the value of `label` is a human-readable name for the `Feature`, such as a county name.
+
+<Callout title="Unique ID is required!" type="warning">Make sure that each `Feature` in a `FeatureCollection` has a unique ID. This is required for ckanext-gztr to work properly. If you have multiple geospatial Polygon `Feature`s that are meant to be selected as one feature (e.g. a group of cities) then you may need to consolidate them into one `Feature` with a `MultiPolygon` geometry.</Callout>
 
 Here we provide a valid example GeoJSON file `State.geojson` for New Mexico (we omit the value for `coordinates` as it would be too long):
 
@@ -241,7 +243,7 @@ Here we provide a valid example GeoJSON file `State.geojson` for New Mexico (we 
         "geoconnex_pid": "https://geoconnex.us/ref/states/35"
       },
       "geometry": {
-        "type": "Polygon",
+        "type": "MultiPolygon",
         "coordinates": [...]
       }
     }
@@ -262,28 +264,47 @@ Currently the only top-level entry required for `config.json` is the `collection
   "collections": [
     {
       "location": "State.geojson",
-      "name": "State",
+      "label": "State",
+      "description": "State of New Mexico",
+      "source": {
+        "description": "U.S. Census TIGER/Line Shapefiles",
+        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+      },
       "id_key": "id",
-      "label_key": "label"
+      "label_key": "label",
+      "quick_region_label": "statewide"
     },
     {
-      "name": "Counties.geojson",
-      "label": "Counties"
+      "location": "Counties.geojson",
+      "label": "Counties",
+      "description": "Counties of New Mexico",
+      "source": {
+        "description": "U.S. Census TIGER/Line Shapefiles",
+        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+      }
     },
     {
-      "name": "Public_Water_Systems.geojson",
-      "label": "Public Water Systems"
+      "location": "Public_Water_Systems.geojson",
+      "label": "Public Water Systems",
+      "description": "Public water systems in and around New Mexico.",
+      "source": "United States EPA Safe Drinking Water Information System",
+      "id_key": "PWSID"
     }
   ]
 }
 ```
 
-Each collection must have a `location` entry and a `name` entry. The `id_key` and `label_key` entries are optional and situational.
+Each collection must have a `location` entry and a `name` entry. The other entries are optional and situational.
 
-- The `location` entry is the location of the file as per `https://<domain>/file/public-download/gztr/{location}`.
-- The `name` entry is a human-readable name of the collection.
-- The `id_key` entry is the name of the unique ID field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `id`, however if the GeoJSON file uses a different key name then it can be specified here in `id_key`.
-- The `id_key` entry is the name of the label field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `label`, however if the GeoJSON file uses a different key name then it can be specified here in `label_key`.
+| Entry key | Description | Optional |
+| --- | --- | --- |
+| `location` | The location of the file as per `https://<domain>/file/public-download/gztr/{location}`. | Not optional |
+| `label` | Human-readable name of the collection. | Not optional |
+| `description` | Human-readable description of the collection. | Not optional |
+| `source` | The origin(s) of where the GeoJSON data was sourced. The `description` key is required, and the `url` key is recommended. | Not optional |
+| `id_key` | The name of the unique ID field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `id`, however if the GeoJSON file uses a different key name then it can be specified here in `id_key`. | Optional |
+| `label_key` | The name of the label field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `label`, however if the GeoJSON file uses a different key name then it can be specified here in `label_key`. | Optional |
+| `quick_region_label` | This entry should only be set to a string for one collection (or none). This entry is a human-readable name for a collection with a single feature that can easily be toggled in the dataset metadata form without needing to open the interactive gazetteer. | Optional |
 
 Once you complete the installation guide on this page then this file should be publicly available at `https://<domain>/file/public-download/gztr/config.json`.
 

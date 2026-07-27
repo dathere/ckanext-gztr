@@ -2,6 +2,7 @@ import * as turf from "@turf/turf";
 import { type ClassValue, clsx } from "clsx";
 import type { Map as FormMap } from "maplibre-gl";
 import { twMerge } from "tailwind-merge";
+import type { FeatureCollectionExt } from "@/App";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -37,10 +38,10 @@ export const simplifyGeojson = (spatialFullGeoJSON: any) => {
     const featureCollection = turf.featureCollection(
       // @ts-expect-error
       features.map((f) => {
-        const featureType = f.geometry.type;
+        const featureType = f.type;
         let tolerance = 0.0001;
         let simplifiedData = turf.simplify(
-          featureType === "Polygon"
+          featureType === "Polygon" || f.geometry.type === "Polygon"
             ? turf.polygon(f.geometry.coordinates, f.properties)
             : turf.multiPolygon(f.geometry.coordinates, f.properties),
           { highQuality: true, tolerance },
@@ -48,7 +49,7 @@ export const simplifyGeojson = (spatialFullGeoJSON: any) => {
         while (JSON.stringify(simplifiedData).length > MAX_SIZE_FOR_SIMP) {
           tolerance += 0.001;
           simplifiedData = turf.simplify(
-            featureType === "Polygon"
+            featureType === "Polygon" || f.geometry.type === "Polygon"
               ? turf.polygon(f.geometry.coordinates, f.properties)
               : turf.multiPolygon(f.geometry.coordinates, f.properties),
             { highQuality: true, tolerance },
@@ -66,4 +67,19 @@ export const simplifyGeojson = (spatialFullGeoJSON: any) => {
   } catch (e) {
     console.error("Error while simplifying GeoJSON: ", String(e));
   }
+};
+
+export const getPlaceKeywordsFromSpatialFull = (
+  spatialFull: FeatureCollectionExt | undefined,
+): string => {
+  if (!spatialFull) return "";
+  return spatialFull.features
+    .filter(
+      (f) => f.properties.collection.properties.label !== "Drawn features",
+    )
+    .map(
+      (feature) =>
+        `${feature.properties[feature.properties.collection.properties.label_key ?? "label"]} (${feature.properties.collection.properties.label})`,
+    )
+    .join(", ");
 };

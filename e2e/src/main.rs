@@ -37,7 +37,7 @@ fn main() -> Result<()> {
 
     test_settings_builder = test_settings_builder.item("filter", "Filter for specific tests", "You'll query tests by name where any test name that contains your query will run. When disabled then we run all tests.");
 
-    // test_settings_builder = test_settings_builder.item("manual", "Run a manual long-lived instance of CKAN. 5 minutes max.", "Modify the ckan service port first. If you cancel early you'll need to clear the containers and volumes manually.");
+    // test_settings_builder = test_settings_builder.item("manual", "Run a manual long-lived instance of CKAN.", "Modify the ckan service port first. If you cancel early you'll need to clear the containers and volumes manually.");
 
     let docker_ps_a_q_output = duct_sh::sh("docker ps -a -q").read()?;
     let docker_volume_ls_output = duct_sh::sh("docker volume ls").read()?;
@@ -79,12 +79,12 @@ fn main() -> Result<()> {
             }
             if !docker_volume_ls_output.is_empty() {
                 cliclack::log::info("Removing all volumes.")?;
-                duct_sh::sh_dangerous("docker volume prune --all").run()?;
+                duct_sh::sh_dangerous("docker volume prune --all -f").run()?;
                 cliclack::log::success("Removed all volumes.")?;
             }
             if !docker_network_ls_output.is_empty() {
                 cliclack::log::info("Removing all custom networks.")?;
-                duct_sh::sh_dangerous("docker network prune").run()?;
+                duct_sh::sh_dangerous("docker network prune -f").run()?;
                 cliclack::log::success("Removed all custom networks.")?;
             }
         }
