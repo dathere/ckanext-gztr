@@ -127,7 +127,7 @@ With ckanext-gztr, one of the main features for public usage is geospatial searc
 
 CKAN uses the open-source [Apache Solr](https://solr.apache.org/) for multi-modal search. With Apache Solr there are various ways to run a [spatial search](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html). ckanext-gztr uses [a similar approach to ckanext-spatial](https://docs.ckan.org/projects/ckanext-spatial/en/latest/spatial-search) for spatial search, attempting to run a geospatial intersection filter by intersecting the user's drawn bounding box against each dataset's simplified spatial geometry field which is indexed. This spatial field is a geometry, often a `Polygon` or `MultiPolygon`, and is necessary to have the dataset searchable by location by having it indexed in Solr.
 
-For example here is the filter used for geospatial search, where a dataset's `spatial_geom` field is indexed in Solr and then an `Intersects` operation is ran against `spatial_geom` and the bounds of the user's drawn bounding box:
+The dataset's `spatial` field is transformed into WKT geometry using the [shapely](https://shapely.readthedocs.io/en/stable/) Python library and named as `spatial_geom` in Solr as an indexed field. Then a geospatial search query is ran through the following `Intersects` operation against `spatial_geom` and the bounds of the user's drawn bounding box (mimicing the filter used by ckanext-spatial):
 
 ```js
 {{!field f=spatial_geom}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))
@@ -139,7 +139,7 @@ However to run this geospatial search against polygons we need to install the [J
 
 It may be a bit tricky to get JTS running with CKAN and Solr as intended. The CKAN development team [provides preconfigured Solr Docker images for CKAN](https://github.com/ckan/ckan-solr) which you can refer to as an example. For additional information see the Solr documentation for the latest documentation on how to install JTS [here](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html#jts-and-polygons-flat).
 
-Of relevance is installing the JTS JAR file, putting it in a specific location as mentioned in the docs linked (e.g. `SOLR_INSTALL/server/solr-webapp/webapp/WEB-INF/lib/`).
+Of relevance is installing the JTS JAR file and placing it in a specific location as mentioned in the linked docs (e.g. `SOLR_INSTALL/server/solr-webapp/webapp/WEB-INF/lib/`).
 
 Now you'll need to update your Solr schema file. Find the relevant sections as shown in the top-level tags below and add the sub-level content to them:
 
@@ -209,7 +209,7 @@ ckan.files.storage.gztr.public = true # Makes all files in the `gztr` storage pu
 
 The new `gztr` directory should be made in your filesystem at `/var/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoJSON files will be stored, along with a `config.json` file we'll set up soon.
 
-The files in this `gztr` storage will all be public so that the ckanext-gztr extension and public users can easily access the GeoJSON files used with cknaext-gztr. These files will be available at the path `/file/public-download/gztr/{location}`, where `location` is the location of the file within the `gztr` directory. For example if we store a file `config.json` in the `gztr` storage for the New Mexico Water Data Catalog then it will be made publicly available at `https://catalog.newmexicowaterdata.org/file/public-download/gztr/config.json`.
+The files in this `gztr` storage will all be public so that the ckanext-gztr extension and public users can easily access the GeoJSON files used with ckanext-gztr. These files will be available at the path `/file/public-download/gztr/{location}`, where `location` is the location of the file within the `gztr` directory. For example if we store a file `config.json` in the `gztr` storage for the New Mexico Water Data Catalog then it will be made publicly available at `https://catalog.newmexicowaterdata.org/file/public-download/gztr/config.json`.
 
 </Step>
 
@@ -294,7 +294,7 @@ Currently the only top-level entry required for `config.json` is the `collection
 }
 ```
 
-Each collection must have a `location` entry and a `name` entry. The other entries are optional and situational.
+Each collection must have a `location` entry and a `name` entry. The other entries are optional and situational. We provide an explanation of each entry in the table below:
 
 | Entry key | Description | Optional |
 | --- | --- | --- |
@@ -314,28 +314,23 @@ Once you complete the installation guide on this page then this file should be p
 
 ## Run CKAN and add your files to the `gztr` storage
 
-Once you have your GeoJSON files and `config.json` file prepared as described above, you'll want to create them in CKAN as registered files (these files will have their metadata appear in the Postgres database). Here is an example of uploading a GeoJSON file through the CKAN API using Python and the `requests` library (make sure you use a sysadmin's API token):
+Once you have your GeoJSON files prepared as described above, you'll want to create them in CKAN as registered files (these files will have their metadata appear in the Postgres database). Here is an example of uploading a GeoJSON file through the CKAN API using `curl` in a Bash shell (make sure you use a sysadmin's API token):
 
-```python
-import requests
-
-url = "http://localhost:5000/api/3/action/file_create"
-body = {
-  "upload": open('./State.geojson', 'rb'),
-  "name": "State.geojson",
-  "storage": "gztr"
-}
-response = requests.request("POST", url, data = body, headers = {
-  "Content-Type": "multipart/form-data", 
-  "Authorization": "3HA8BSOFM33N9MV30M4PG1LLZFADM2ZB"
-})
-
-print(response.text)
+```bash
+read -p 'CKAN sysadmin API Token: ' api_token
+curl -H "Authorization: $api_token" -X POST -F upload=@./State.geojson -F storage=gztr http://localhost:5000/api/3/action/file_create
 ```
 
-Verify that the new file appears at the public endpoint. For example if you're running a local CKAN instance on on port `5000`, open [https://localhost:5000/file/public-download/gztr/State.geojson](https://localhost:5000/file/public-download/gztr/State.geojson) in your browser to view or download the file.
+Verify that the new file appears at the public endpoint. For example if you're running a local CKAN instance on on port `5000`, open [https://localhost:5000/file/public-download/gztr/state.geojson](https://localhost:5000/file/public-download/gztr/state.geojson) in your browser to view or download the file. Notice that the URL ends in `state.geojson`, not `State.geojson`.
 
-Upload all of your GeoJSON files you plan on using with ckanext-gztr and also upload the `config.json` file.
+<Callout title="The location can often change!" type="warning">When we uploaded `State.geojson`, the `location` value is now in lowercase as `state.geojson` as provided in the response of the `curl` request. Make sure you verify using the correct `location` value for `config.json`!</Callout>
+
+Upload all of your GeoJSON files you plan on using with ckanext-gztr. Then when you're done with uploading your files, you'll want to get the `location` value provided by CKAN for each GeoJSON file and update your `config.json` file accordingly. Then upload the `config.json` file.
+
+```bash
+read -p 'CKAN sysadmin API Token: ' api_token
+curl -H "Authorization: $api_token" -X POST -F upload=@./config.json -F storage=gztr http://localhost:5000/api/3/action/file_create
+```
 
 </Step>
 
