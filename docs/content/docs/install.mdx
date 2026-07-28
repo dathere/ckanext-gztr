@@ -63,17 +63,18 @@ scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.ya
   display_snippet: null
   validators: ignore_missing gazetteer_validator
   output_validators: scheming_load_json
-# Full GeoJSON as a FeatureCollection from user's selection in data publisher gazetteer
+# Full GeoJSON (without geometries) as a FeatureCollection from user's selection in data publisher gazetteer
 - field_name: spatial_full
   label: Spatial Full
-  # This display_snippet should show the gazetteer on the dataset's landing page
-  display_snippet: gazetteer_preview.html
+  # This display_snippet hides the spatial_full GeoJSON value from the dataset landing page
+  display_snippet: null
   form_snippet: text.html
   form_placeholder: Filled in automatically as you select areas above.
 # Simplified spatial_full geometry for indexing with Solr
 - field_name: spatial
-  label: Spatial
-  display_snippet: null
+  label: Geospatial region (simplified)
+  # This display_snippet should show a gazetteer of the simplified GeoJSON geometry on the dataset's landing page
+  display_snippet: gazetteer_preview.html
   form_snippet: text.html
   form_placeholder: Filled in automatically as you select areas above.
 # Place keywords as a comma-separated string
