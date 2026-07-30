@@ -6,7 +6,6 @@ from shapely.geometry import shape
 import ckan.plugins as plugins
 import ckan.model as model
 import ckan.plugins.toolkit as toolkit
-from ckan.lib.dictization.model_dictize import extras_list_dictize
 
 import ckanext.gztr.helpers as gztr_helpers
 import ckanext.gztr.validators as gztr_validators

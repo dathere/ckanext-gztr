@@ -1,0 +1,10 @@
+{% ckan_extends %}
+
+{% block add_button %}
+  {% set enable_druf = h.asbool(config.get('ckanext.datapusher_plus.enable_druf', 'false')) %}
+  {% if enable_druf and pkg_dict is defined and pkg_dict and not pkg_dict.resources %}
+    <button class="btn btn-primary" name="save" value="go-dataset" type="submit">{{ _('Save & Fill Metadata') }}</button>
+  {% else %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}
