@@ -8,6 +8,7 @@ import ckan.model as model
 import ckan.plugins.toolkit as toolkit
 
 import ckanext.gztr.helpers as gztr_helpers
+import ckanext.gztr.storage as gztr_storage
 import ckanext.gztr.validators as gztr_validators
 
 import logging
@@ -20,6 +21,7 @@ class GZTRPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IValidators)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
+    plugins.implements(plugins.IFiles, inherit=True)
 
     # IConfigurer
     def update_config(self, config_):
@@ -37,6 +39,13 @@ class GZTRPlugin(plugins.SingletonPlugin):
             "gztr_scheming_groups_choices": gztr_helpers.scheming_groups_choices,
             "dynamic_help_text": gztr_helpers.dynamic_help_text,
         }
+
+    # IFiles
+    def files_get_storage_adapters(self):
+        if gztr_storage.S3Storage is None:
+            return {}
+
+        return {"gztr:s3": gztr_storage.S3Storage}
 
     # IValidators
     def get_validators(self):
