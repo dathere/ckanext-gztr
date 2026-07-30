@@ -83,6 +83,13 @@ scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.ya
   form_attrs:
     data-module: place_keywords
   form_placeholder: Filled in automatically as you select areas above.
+# Where DataPusher Plus stores its metadata suggestions. Only needed if you
+# use the DataPusher Plus integration described later on this page.
+- field_name: dpp_suggestions
+  label: DPP Suggestions
+  preset: json_object
+  form_snippet: null
+  display_snippet: null
 ```
 
 **If you do not have an existing dataset schema configured for your CKAN instance**, then you can add the following dataset schema to try out the gazetteer (e.g. right below the line with `ckan.plugins`) in the dataset metadata form:
@@ -103,9 +110,12 @@ Install ckanext-gztr and its dependencies in your activated virtual environment:
 cd /usr/lib/ckan/default/src
 git clone https://github.com/dathere/ckanext-gztr.git
 cd ckanext-gztr
+pip install -U "setuptools>=77"
 pip install -e .
 pip install -r requirements.txt
 ```
+
+<Callout title="Why upgrade setuptools?" type="info">`pyproject.toml` declares its license as a [PEP 639](https://peps.python.org/pep-0639/) license expression (`license = "AGPL-3.0-or-later"`), a bare string that setuptools only accepts from version 77 onwards. A CKAN source install on Ubuntu 24.04 ships an older setuptools, so `pip install -e .` fails with an `invalid pyproject.toml config` error for `project.license` until you upgrade. You can skip this step if you let pip build in an isolated environment, since `pyproject.toml` already requires `setuptools>=77` to build.</Callout>
 
 Then add `gztr` to your `ckan.plugins` in your `/etc/ckan/default/ckan.ini` file:
 
@@ -130,7 +140,7 @@ CKAN uses the open-source [Apache Solr](https://solr.apache.org/) for multi-moda
 The dataset's `spatial` field is transformed into WKT geometry using the [shapely](https://shapely.readthedocs.io/en/stable/) Python library and named as `spatial_geom` in Solr as an indexed field. Then a geospatial search query is ran through the following `Intersects` operation against `spatial_geom` and the bounds of the user's drawn bounding box (mimicing the filter used by ckanext-spatial):
 
 ```js
-{{!field f=spatial_geom}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))
+{!field f=spatial_geom}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))
 ```
 
 ### Installation
@@ -211,6 +221,34 @@ The new `gztr` directory should be made in your filesystem at `/var/ckan/storage
 
 The files in this `gztr` storage will all be public so that the ckanext-gztr extension and public users can easily access the GeoJSON files used with ckanext-gztr. These files will be available at the path `/file/public-download/gztr/{location}`, where `location` is the location of the file within the `gztr` directory. For example if we store a file `config.json` in the `gztr` storage for the New Mexico Water Data Catalog then it will be made publicly available at `https://catalog.newmexicowaterdata.org/file/public-download/gztr/config.json`.
 
+### Storing the files in S3
+
+A local filesystem is not always durable. On Kubernetes, for example, `ckan.storage_path` is often an ephemeral volume, so anything uploaded to a `ckan:fs` storage disappears when the pod restarts and the gazetteer goes back to showing no features. For those deployments ckanext-gztr provides a `gztr:s3` storage that keeps the files in any S3-compatible bucket.
+
+Install the extra dependency:
+
+```bash
+pip install "ckanext-gztr[s3]"
+```
+
+Then configure the storage with `gztr:s3` instead of `ckan:fs`:
+
+```ini
+ckan.files.storage.gztr.type = gztr:s3
+ckan.files.storage.gztr.bucket = my-bucket
+ckan.files.storage.gztr.path = gztr # Key prefix within the bucket
+ckan.files.storage.gztr.region = us-east-1
+ckan.files.storage.gztr.key = <AWS access key>
+ckan.files.storage.gztr.secret = <AWS secret key>
+ckan.files.storage.gztr.public = true
+```
+
+Set `ckan.files.storage.gztr.initialize = true` only if you want CKAN to create the bucket when it is missing, which requires credentials permitted to do so. Add `ckan.files.storage.gztr.endpoint` to point at an S3-compatible service other than AWS.
+
+The `path` entry is a key prefix rather than a directory, so with the configuration above `config.json` is stored as the object `gztr/config.json`. Because the objects are read by their location, you can also place the files in the bucket directly, for example with `aws s3 cp`, instead of uploading them through CKAN.
+
+<Callout title="Why not use ckan:s3 directly?" type="info">The `gztr:s3` storage builds on the `ckan:s3` storage from [ckanext-file-keeper-cloud](https://github.com/ckan/ckanext-file-keeper-cloud), and differs from it in one respect: it serves file content through CKAN rather than redirecting to a presigned URL on the bucket's own domain. The gazetteer widgets read these files with `fetch()`, so a cross-origin redirect would require a CORS policy on the bucket. Serving from CKAN's own origin avoids that, and keeps the behaviour the same as a `ckan:fs` storage.</Callout>
+
 </Step>
 
 <Step>
@@ -287,14 +325,16 @@ Currently the only top-level entry required for `config.json` is the `collection
       "location": "Public_Water_Systems.geojson",
       "label": "Public Water Systems",
       "description": "Public water systems in and around New Mexico.",
-      "source": "United States EPA Safe Drinking Water Information System",
+      "source": {
+        "description": "United States EPA Safe Drinking Water Information System"
+      },
       "id_key": "PWSID"
     }
   ]
 }
 ```
 
-Each collection must have a `location` entry and a `name` entry. The other entries are optional and situational. We provide an explanation of each entry in the table below:
+Each collection must have a `location` entry and a `label` entry. The other entries are optional and situational. We provide an explanation of each entry in the table below:
 
 | Entry key | Description | Optional |
 | --- | --- | --- |
@@ -321,7 +361,7 @@ read -p 'CKAN sysadmin API Token: ' api_token
 curl -H "Authorization: $api_token" -X POST -F upload=@./State.geojson -F storage=gztr http://localhost:5000/api/3/action/file_create
 ```
 
-Verify that the new file appears at the public endpoint. For example if you're running a local CKAN instance on on port `5000`, open [https://localhost:5000/file/public-download/gztr/state.geojson](https://localhost:5000/file/public-download/gztr/state.geojson) in your browser to view or download the file. Notice that the URL ends in `state.geojson`, not `State.geojson`.
+Verify that the new file appears at the public endpoint. For example if you're running a local CKAN instance on on port `5000`, open [http://localhost:5000/file/public-download/gztr/state.geojson](http://localhost:5000/file/public-download/gztr/state.geojson) in your browser to view or download the file. Notice that the URL ends in `state.geojson`, not `State.geojson`.
 
 <Callout title="The location can often change!" type="warning">When we uploaded `State.geojson`, the `location` value is now in lowercase as `state.geojson` as provided in the response of the `curl` request. Make sure you verify using the correct `location` value for `config.json`!</Callout>
 
@@ -350,6 +390,55 @@ ckan -c /etc/ckan/default/ckan.ini run
 Then you should have your local CKAN instance running which you can open in your web browser at [http://localhost:5000](http://localhost:5000). If you visit the Datasets page at [http://localhost:5000/dataset](http://localhost:5000/dataset) then you should see an interactive search gazetteer to search by bounding box intersections and a dataset publisher gazetteer in the new dataset form.
 
 If you visit [http://localhost:5000/api/3/action/status_show](http://localhost:5000/api/3/action/status_show) then there should be a JSON response where `gztr` is present in the `result.extensions` array.
+
+</Step>
+
+<Step>
+
+## Optional: metadata suggestions with DataPusher Plus
+
+The dataset schema shipped with ckanext-gztr opts several fields into [DataPusher Plus](https://github.com/dathere/datapusher-plus) (DP+) metadata suggestions. When a publisher uploads a resource, DP+ profiles the file and offers one-click suggestions for fields such as Description, Spatial Description, Coordinate System, Update Frequency and Primary Key Field. This step is entirely optional — the gazetteer works without it.
+
+Suggestions come from two independent sources:
+
+- **DRUF formulae** (`suggestion_formula` in the schema) are Jinja2 templates evaluated against the profiling statistics DP+ collects. These need no AI service.
+- **AI suggestions** (`ai_suggestion: true` in the schema) come from `qsv describegpt`, which calls an OpenAI-compatible LLM endpoint.
+
+Both write into the `dpp_suggestions` field, so your dataset schema must declare it (the schema at `ckanext.gztr:schemas/dataset.yaml` already does):
+
+```yaml
+- field_name: dpp_suggestions
+  label: DPP Suggestions
+  preset: json_object
+  form_snippet: null
+  display_snippet: null
+```
+
+Install DP+ following [its own installation guide](https://github.com/dathere/datapusher-plus), then add `datapusher_plus` to `ckan.plugins` and set the following in your CKAN config file:
+
+```ini
+ckanext.datapusher_plus.enable_druf = true
+ckanext.datapusher_plus.enable_form_redirect = true
+ckan.datastore.sqlsearch.enabled = true
+```
+
+`enable_druf` turns on the resource-upload-first flow, where a publisher uploads their data before filling in metadata so that suggestions are ready by the time the metadata form opens. ckanext-gztr overrides the resource form in that flow to offer a **Save & Fill Metadata** button. `ckan.datastore.sqlsearch.enabled` is required by the Update Frequency formula, which queries the DataStore to infer how often the data is updated.
+
+To also enable AI suggestions, set:
+
+```ini
+ckanext.datapusher_plus.enable_ai_suggestions = true
+```
+
+The LLM endpoint itself is configured for `qsv` rather than for CKAN, so export these environment variables in the same environment that runs the DP+ worker:
+
+```bash
+export QSV_LLM_BASE_URL="https://openrouter.ai/api/v1"
+export QSV_LLM_MODEL="google/gemini-2.5-flash"
+export QSV_LLM_APIKEY="<your API key>"
+```
+
+<Callout title="AI suggestions need an endpoint" type="warning">If `enable_ai_suggestions` is `true` but no LLM endpoint is configured, the AI suggestion buttons still render on the form and simply never produce a value. The DRUF formula suggestions are unaffected.</Callout>
 
 </Step>
 
