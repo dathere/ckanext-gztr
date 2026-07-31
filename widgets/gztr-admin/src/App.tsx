@@ -97,7 +97,6 @@ function App() {
   const gm = useFormMap((state) => state.gm);
   const disableApplyButton = useFormMap((state) => state.disableApplyButton);
   const [fieldsAreInitialized, setFieldsAreInitialized] = useState(false);
-  const [demo, setDemo] = useState<string | undefined>(undefined);
 
   // On first load of the widget (e.g. dataset publisher goes to Add Dataset or Edit Dataset page)
   useEffect(() => {
@@ -512,7 +511,6 @@ function App() {
                       });
                       newSpatialFull.features = featuresNoGeometries;
                       setSpatialFull(newSpatialFull);
-                      setDemo("potato");
                     } else {
                       setSpatialFull(undefined);
                       setSpatial(undefined);
