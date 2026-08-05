@@ -9,6 +9,7 @@ export const source = loader({
   source: docs.toFumadocsSource(),
   icon(icon) {
     if (!icon) return;
+    if (icon.toLowerCase() === "census") return createElement("img", { "src": "/media/us_census_logo.svg", "width": "48px", "height": "48px", "style": { "filter": "invert(48%) sepia(13%) saturate(7434%) hue-rotate(217deg) brightness(101%) contrast(103%)" } });
     if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
   },
 });

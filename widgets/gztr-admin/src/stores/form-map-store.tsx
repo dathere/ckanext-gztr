@@ -1,5 +1,4 @@
 import type { Geoman } from "@geoman-io/maplibre-geoman-free";
-import type { Feature } from "maplibre-gl";
 import type { RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
 import { create } from "zustand";

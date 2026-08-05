@@ -1,15 +1,16 @@
 {
-    "pages": [
-        "---Introduction---",
-        "index",
-        "features",
-        "install",
-        "configuration",
-        "update",
-        "software-architecture",
-        "---Further reading---",
-        "tutorials",
-        "--- ---",
-        "[Privacy Policy](https://dathere.com/privacy-policy/)"
-    ]
+  "pages": [
+    "---Introduction---",
+    "index",
+    "features",
+    "install",
+    "geospatial-data",
+    "configuration",
+    "geoconnex-integration",
+    "update",
+    "software-architecture",
+    "contributing",
+    "--- ---",
+    "[Privacy Policy](https://dathere.com/privacy-policy/)"
+  ]
 }

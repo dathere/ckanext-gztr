@@ -4,20 +4,32 @@ description: Learn how to install ckanext-gztr to your CKAN instance.
 icon: Download
 ---
 
-# Installation and Setup
+{/* TODO: Quickstart page or section where user can spin up an environment for exploring */}
 
-We assume you're familiar with setting up CKAN extensions.
+## Installation and setup
+
+<Callout title="Prerequisite knowledge" type="info">
+In this installation guide, we assume you are already familiar with setting up CKAN extensions on a CKAN instance.
+
+The following resources can be helpful for additional info as a reference. We recommend first try going through this page's installation guide for your CKAN instance, and then refer to these documentation sources as needed:
+
+- [CKAN - Extending guide](https://docs.ckan.org/en/latest/extensions/index.html)
+- [Modernization of CKAN extension](https://extension-modernization.readthedocs.io/en/latest/)
+
+</Callout>
 
 In this installation guide we'll use a CKAN source install set up for development on Ubuntu 24.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`.
 
-<Callout title="Where have we tried ckanext-gztr?" type="info">The ckanext-gztr extension has worked on CKAN 2.12 and hasn't been verified to work for other versions.</Callout>
+You can also adapt the installation steps for your setup, such as modifying your Docker Compose or Kubernetes and Helm setup.
+
+<Callout title="Minimum CKAN version 2.12" type="info">The ckanext-gztr CKAN extension **requires CKAN version 2.12 or above**.</Callout>
 
 import { Step, Steps } from 'fumadocs-ui/components/steps';
 
 <Steps>
 <Step>
 
-## Activate your virtual environment and change directory to `/usr/lib/ckan/default/src`
+## Activate your virtual environment and navigate to your CKAN extensions installation directory
 
 Ensure your terminal is running in your instance's virtual environment before continuing and that you're in the `/usr/lib/ckan/default/src` directory so that we may install extensions here.
 
@@ -45,11 +57,15 @@ Then in your CKAN config file (e.g., `/etc/ckan/default/ckan.ini`) for `ckan.plu
 ckan.plugins = activity scheming_datasets
 ```
 
+<Callout title="What is scheming_datasets?" type="info">Adding `scheming_datasets` to your `ckan.plugins` value enables ckanext-scheming features for datasets. In particular ckanext-gztr can expose the [dataset publisher gazetteer](http://localhost:3000/docs/features#dataset-publisher-gazetteer) through this.</Callout>
+
 Add the preset `ckanext.gztr:schemas/presets.yaml` to the end of your `scheming.presets` config value:
 
 ```ini
 scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
 ```
+
+<Callout title="What is a scheming preset?" type="info">[Presets](https://github.com/ckan/ckanext-scheming#preset) are sets of default values for certain field keys. What this allows for is using custom-defined HTML snippets such as the dataset publisher gazetteer in the dataset metadata form when publishing a CKAN dataset.</Callout>
 
 **If you already have a running CKAN instance with ckanext-scheming installed and a custom dataset schema** then you'll want to add the following fields to your schema YAML file for the dataset publisher gazetteer to appear in the dataset metadata form:
 
@@ -98,6 +114,7 @@ scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.ya
 scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml
 ```
 
+<Callout title="Customize for your use case!" type="warning">The `dataset.yaml` file however may not fit your use case, so ensure you use a separate schema as needed.</Callout>
 
 </Step>
 <Step>
@@ -147,11 +164,22 @@ The dataset's `spatial` field is transformed into WKT geometry using the [shapel
 
 However to run this geospatial search against polygons we need to install the [JTS](https://github.com/locationtech/jts) library for Solr and to configure it properly.
 
-It may be a bit tricky to get JTS running with CKAN and Solr as intended. The CKAN development team [provides preconfigured Solr Docker images for CKAN](https://github.com/ckan/ckan-solr) which you can refer to as an example. For additional information see the Solr documentation for the latest documentation on how to install JTS [here](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html#jts-and-polygons-flat).
+It may be a bit tricky to get JTS running with CKAN and Solr as intended. The CKAN development team [provides preconfigured Solr Docker images for CKAN](https://github.com/ckan/ckan-solr) which you can refer to as an example.
 
-Of relevance is installing the JTS JAR file and placing it in a specific location as mentioned in the linked docs (e.g. `SOLR_INSTALL/server/solr-webapp/webapp/WEB-INF/lib/`).
+To install JTS, follow the steps listed in the following admonition.
 
-Now you'll need to update your Solr schema file. Find the relevant sections as shown in the top-level tags below and add the sub-level content to them:
+<Callout title="Complete these steps in particular!" type="info">
+
+**Follow [the Solr docs here](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html#jts-and-polygons-flat)**, including these steps in particular:
+
+1. **Install the JTS JAR file**
+2. **Place the installed JTS JAR file in a specific location as mentioned in the linked docs** (e.g. `$SOLR_INSTALL/server/solr-webapp/webapp/WEB-INF/lib/` where `$SOLR_INSTALL` in the [official CKAN Solr spatial images](https://github.com/ckan/ckan-solr) is `/opt/solr/`).
+
+</Callout>
+
+For additional information see the Solr documentation for the latest documentation on how to install JTS [here](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html#jts-and-polygons-flat).
+
+**Now you'll need to update your Solr schema file**. Find the relevant sections as shown in the top-level tags below and add the sub-level content to them:
 
 ```xml
 <!-- ... -->
@@ -219,6 +247,8 @@ ckan.files.storage.gztr.public = true # Makes all files in the `gztr` storage pu
 
 The new `gztr` directory should be made in your filesystem at `/var/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoJSON files will be stored, along with a `config.json` file we'll set up soon.
 
+<Callout title="Using S3 instead of the filesystem" type="info">If you prefer to use a cloud storage service that is S3-compatible, you can learn how to set up the `gztr` storage with an S3-compatible cloud storage adapter on the [CKAN file storages documentation](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) (you may need to scroll down a bit) which uses the [ckanext-file-keeper-cloud](https://github.com/ckan/ckanext-file-keeper-cloud) CKAN extension.</Callout>
+
 The files in this `gztr` storage will all be public so that the ckanext-gztr extension and public users can easily access the GeoJSON files used with ckanext-gztr. These files will be available at the path `/file/public-download/gztr/{location}`, where `location` is the location of the file within the `gztr` directory. For example if we store a file `config.json` in the `gztr` storage for the New Mexico Water Data Catalog then it will be made publicly available at `https://catalog.newmexicowaterdata.org/file/public-download/gztr/config.json`.
 
 ### Storing the files in S3
@@ -267,7 +297,7 @@ The GeoJSON files must be in a specific format so that ckanext-gztr can properly
 
 <Callout title="Unique ID is required!" type="warning">Make sure that each `Feature` in a `FeatureCollection` has a unique ID. This is required for ckanext-gztr to work properly. If you have multiple geospatial Polygon `Feature`s that are meant to be selected as one feature (e.g. a group of cities) then you may need to consolidate them into one `Feature` with a `MultiPolygon` geometry.</Callout>
 
-Here we provide a valid example GeoJSON file `State.geojson` for New Mexico (we omit the value for `coordinates` as it would be too long):
+Here we provide an example GeoJSON file `State.geojson` for New Mexico (we omit the value for `coordinates` as it would be too long):
 
 ```json
 {
@@ -289,7 +319,7 @@ Here we provide a valid example GeoJSON file `State.geojson` for New Mexico (we 
 }
 ```
 
-Notice that the ID is based on the [U.S. FIPS code system](https://transition.fcc.gov/oet/info/maps/census/fips/fips.txt) where the state of New Mexico's has a FIPS code of `35`. We also have the state name as the value for `label`, and an optional `geoconnex_pid` URI for the opt-in [Geoconnex](https://geoconnex.us) integration with ckanext-gztr which you can learn more about at the end of this page. If there were more states for this file then the `features` list would continue with more `Feature`s following a similar format and having a unique `id`.
+Notice that the ID is based on the [U.S. FIPS code system](https://transition.fcc.gov/oet/info/maps/census/fips/fips.txt) where the state of New Mexico's has a FIPS code of `35`. We also have the state name as the value for `label`, and an optional `geoconnex_pid` URI for the opt-in [Geoconnex integration](/docs/geoconnex-integration). If there were more states for this file then the `features` list would continue with more `Feature`s following a similar format and having a unique `id`.
 
 ### `config.json`
 
@@ -336,12 +366,12 @@ Currently the only top-level entry required for `config.json` is the `collection
 
 Each collection must have a `location` entry and a `label` entry. The other entries are optional and situational. We provide an explanation of each entry in the table below:
 
-| Entry key | Description | Optional |
+| Entry key | Description | Required? |
 | --- | --- | --- |
-| `location` | The location of the file as per `https://<domain>/file/public-download/gztr/{location}`. | Not optional |
-| `label` | Human-readable name of the collection. | Not optional |
-| `description` | Human-readable description of the collection. | Not optional |
-| `source` | The origin(s) of where the GeoJSON data was sourced. The `description` key is required, and the `url` key is recommended. | Not optional |
+| `location` | The location of the file as per `https://<domain>/file/public-download/gztr/{location}`. | Required |
+| `label` | Human-readable name of the collection. | Required |
+| `description` | Human-readable description of the collection. | Required |
+| `source` | The origin(s) of where the GeoJSON data was sourced. The `description` key is required, and the `url` key is recommended. | Required |
 | `id_key` | The name of the unique ID field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `id`, however if the GeoJSON file uses a different key name then it can be specified here in `id_key`. | Optional |
 | `label_key` | The name of the label field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `label`, however if the GeoJSON file uses a different key name then it can be specified here in `label_key`. | Optional |
 | `quick_region_label` | This entry should only be set to a string for one collection (or none). This entry is a human-readable name for a collection with a single feature that can easily be toggled in the dataset metadata form without needing to open the interactive gazetteer. | Optional |
