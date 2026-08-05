@@ -6,16 +6,16 @@ icon: Sparkles
 
 ## Brief overview of the primary purpose of ckanext-gztr
 
-The current primary purpose of ckanext-gztr is to provide geospatial and mapping capabilities for CKAN instances to associate datasets with geospatial features. This association allows for enhanced geospatial capabilities related to CKAN such as geospatial mapping and search in addition to existing text-based metadata updates and search that CKAN provides by default.
+The current primary purpose of ckanext-gztr is to provide geospatial and mapping capabilities for CKAN instances **to associate datasets with geospatial features**. This association allows for enhanced geospatial capabilities related to CKAN such as geospatial mapping and search in addition to existing text-based metadata updates and search that CKAN provides by default. There is also [an opt-in Geoconnex integration](/docs/geoconnex-integration) for contributing your water data to the Geoconnex global knowledge graph.
 
-## Why's this important?
+## Why is it important to define the purpose?
 
-The purpose helps organize what's expected for the ckanext-gztr CKAN extension to include. For features that do not exist within ckanext-gztr, they can be requested on the [Issues page](https://github.com/dathere/ckanext-gztr/issues) or found in **alternative extensions** such as:
+The purpose helps organize **what's expected** for the ckanext-gztr CKAN extension to include. For features that do not exist within ckanext-gztr, they can be requested on the [issues page on GitHub](https://github.com/dathere/ckanext-gztr/issues) or found in **alternative extensions** such as:
 
 - [ckanext-spatial](https://docs.ckan.org/projects/ckanext-spatial/en/latest/) - Official CKAN extension for adding geospatial capabilities to CKAN
 - [ckanext-geoview](https://github.com/ckan/ckanext-geoview) - Official extension to display geospatial files and services in CKAN
 
-Now let's explore common features to expect from ckanext-gztr!
+Now let's explore the features for your CKAN instance added by ckanext-gztr!
 
 ## Public dataset search gazetteer
 
@@ -56,7 +56,7 @@ Here's a closer look at a single dataset search result:
 
 The minimap can help with visually identifying datasets that have specific geospatial features as a public user.
 
-A minimap can also be added on dataset-specific pages (e.g. when clicking on a dataset in the search results). For example here is a dataset-specific page, where there is a minimap in the metadata section at the bottom:
+A minimap can also be added on dataset landing pages (e.g. when clicking on a dataset in the search results). For example here is a dataset's  landing page, where there is a minimap in the metadata section at the bottom:
 
 ![ckanext-gztr individual dataset page](/media/individual-dataset-page.png)
 
@@ -67,11 +67,23 @@ When a sysadmin of a CKAN instance provides preset feature categories for associ
 For example if a dataset publisher selects the "Counties" feature category and then selects "County A" and "County B", then the Place Keywords field would look like the following:
 
 ```
-County A, County B
+County A (Counties), County B (Counties)
 ```
 
-Place Keywords search can be enabled by the sysadmin of the CKAN instance which adds this Place Keywords metadata field to the Solr search index. This means that public users can then run a search query on the datasets page with a query such as "county a" and a case-insensitive filter would be added to include datasets that have this place keyword in their metadata in the dataset search results.
+Place Keywords search can be enabled by the sysadmin of the CKAN instance which adds this Place Keywords metadata field to the Solr search index. This means that **public users can then run a search query** on the datasets page with a query such as "county a" and a case-insensitive filter would be added to include datasets that have this place keyword in their metadata in the dataset search results.
+
+## Geospatial Action API endpoints
+
+TODO
 
 ## Geoconnex integration
 
-For CKAN instances storing water data, there are opt-in Geoconnex features that can be enabled. Read the [Geoconnex integration](/docs/geoconnex-integration) section to learn more.
+![Geoconnex banner](/media/geoconnex.png)
+
+For CKAN instances storing **water data**, you can **sync your water data** with the Geoconnex global water data knowledge graph.
+
+Read the [Geoconnex integration](/docs/geoconnex-integration) section to learn more.
+
+## Get started with ckanext-gztr for your CKAN instance
+
+Ready to add geospatial capabilities to your CKAN instance? Get started by [installing ckanext-gztr](/docs/install).
