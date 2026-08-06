@@ -1,0 +1,19 @@
+{% ckan_extends %}
+
+{# The schema uses a custom "description" field instead of the core "notes"
+   field, so render it as markdown here (above "Data and Resources") rather than
+   as a row in the additional info table - the table skips it because the field
+   sets display_snippet: null in the schema.
+
+   This hooks into package_description rather than package_notes because
+   scheming/package/read.html overrides package_notes and is loaded before this
+   template in the search path, which makes it the child template. #}
+{% block package_description %}
+  {{ super() }}
+  {# pkg is the Package model object, custom schema fields are on pkg_dict #}
+  {% if pkg_dict.description %}
+    <div class="notes embedded-content">
+      {{ h.render_markdown(pkg_dict.description) }}
+    </div>
+  {% endif %}
+{% endblock %}

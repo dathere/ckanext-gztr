@@ -23,6 +23,9 @@ dataset_fields:
   - field_name: description
     label: Description
     form_snippet: markdown.html
+    # Rendered as markdown on the dataset page above "Data and Resources"
+    # (see templates/package/read.html), not in the additional info table.
+    display_snippet: null
     form_placeholder: Some useful notes about the data
     suggestion_formula: 'Dataset contains {{ dpp.dataset_stats.RECORD_COUNT }} records with the following columns: {{ dpps.keys() | join(", ") }}.'
     ai_suggestion: true

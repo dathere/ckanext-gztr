@@ -1,0 +1,16 @@
+{% ckan_extends %}
+
+{# Show the "Add Dataset" button next to "Manage" in the page header instead of
+   letting it render on its own above the search form (see
+   package/snippets/search_results.html). #}
+{% block content_action %}
+  {% set can_add_dataset = h.check_access('package_create') %}
+  {% if can_add_dataset or h.check_access('organization_update', {'id': group_dict.id}) %}
+    <div class="d-flex align-items-center gap-2">
+      {% if can_add_dataset %}
+        {% snippet 'snippets/add_dataset.html', dataset_type=dataset_type, group=group_dict.id %}
+      {% endif %}
+      {{ super() }}
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,10 @@
+{% ckan_extends %}
+
+{# On organization/group read pages the "Add Dataset" button is rendered in the
+   page header next to "Manage" (see organization/read_base.html), so drop the
+   duplicate one that sits above the search form. #}
+{% block page_primary_action %}
+  {% if request.blueprint not in ('organization', 'group') %}
+    {{ super() }}
+  {% endif %}
+{% endblock %}

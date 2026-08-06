@@ -25,7 +25,9 @@ Example:
   {% set package = h.add_tracking_to_dataset( package ) %}
 {% endif %}
 
-{% set pkgnotes = h.markdown_extract(package.notes, extract_length=truncate) %}
+{# The schema stores the dataset description in a custom "description" field,
+   so fall back to "notes" only for packages that still use the core field. #}
+{% set pkgnotes = h.markdown_extract(package.description or package.notes, extract_length=truncate) %}
 
 {% set package_url = h.url_for(package.type ~ '.read', id=package.name) %}
 
