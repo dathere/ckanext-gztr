@@ -1,9 +1,9 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: Would need to look into this trivial issue */
 "use client";
 
+import { cva } from "class-variance-authority";
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { cn } from "@/lib/cn";
 import {
   BlocksIcon,
   GitMergeIcon,
@@ -22,18 +22,18 @@ import Link from "next/link";
 import { type HTMLProps, type ReactNode, useEffect, useState } from "react";
 import { Pre } from "@/components/codeblock";
 import { Button, buttonVariants } from "@/components/ui/button";
-import SelectFeaturesDemo from "./select-features-demo.gif";
-import SearchDemo from "./search-demo.gif";
-import { cva } from "class-variance-authority";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Carousel,
+  type CarouselApi,
   CarouselContent,
   CarouselItem,
   CarouselNext,
   CarouselPrevious,
-  type CarouselApi,
 } from "@/components/ui/carousel";
+import { cn } from "@/lib/cn";
+import SearchDemo from "./search-demo.gif";
+import SelectFeaturesDemo from "./select-features-demo.gif";
 
 export default function HomePage() {
   const gridColor =
@@ -124,7 +124,15 @@ function Hero() {
           CKAN
         </Link>{" "}
         extension that lets you associate features on an interactive map for
-        each dataset, perform geospatial search, expose a <Link href="https://stacspec.org" className="text-blue-400">STAC</Link> API, and <Link href="/docs/features" className="text-blue-400">more</Link>.
+        each dataset, perform geospatial search, expose a{" "}
+        <Link href="https://stacspec.org" className="text-blue-400">
+          STAC
+        </Link>{" "}
+        API, and{" "}
+        <Link href="/docs/features" className="text-blue-400">
+          more
+        </Link>
+        .
       </p>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
         Provided by{" "}
@@ -186,8 +194,8 @@ function Hero() {
 }
 
 function FeaturesCarousel() {
-  const [api, setApi] = useState<CarouselApi>()
-  const [current, setCurrent] = useState(0)
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
   const features = [
     {
       src: "/media/nmwdc-data-publisher-gazetteer-demo.mp4",
@@ -202,31 +210,31 @@ function FeaturesCarousel() {
     {
       src: "/media/datasets-page.png",
       type: "image",
-      name: "Minimaps"
+      name: "Minimaps",
     },
     {
       src: "/media/gztr_collection_create_flow.excalidraw.png",
       type: "image",
-      name: "Interact with STAC API"
+      name: "Interact with STAC API",
     },
     {
       src: "/media/geoconnex-diagram.png",
       type: "image",
-      name: "Integrate with Geoconnex"
-    }
+      name: "Integrate with Geoconnex",
+    },
   ];
 
   useEffect(() => {
     if (!api) {
-      return
+      return;
     }
 
-    setCurrent(api.selectedScrollSnap() + 1)
+    setCurrent(api.selectedScrollSnap() + 1);
 
     api.on("select", () => {
-      setCurrent(api.selectedScrollSnap() + 1)
-    })
-  }, [api])
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
 
   return (
     <div className="mx-auto max-w-[75%] md:max-w-[90%] mt-8">
@@ -236,21 +244,41 @@ function FeaturesCarousel() {
             <CarouselItem key={index}>
               <Card className="border-none shadow-none">
                 <CardContent className="flex justify-center p-0">
-                  <div className="flex flex-col justify-center">{feature.type === "video" ? <video key={index} className={cn(
-                      "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0"
-                    )} style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src={feature.src} /> :
-                  <Image
-                    key={index}
-                    src={feature.src}
-                    alt="preview"
-                    priority
-                    width={500}
-                    height={500}
-                    className={cn(
-                      "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0"
+                  <div className="flex flex-col justify-center">
+                    {feature.type === "video" ? (
+                      <video
+                        key={index}
+                        className={cn(
+                          "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0",
+                        )}
+                        style={{ borderRadius: "1rem" }}
+                        autoPlay
+                        muted
+                        loop
+                        controls={false}
+                        src={feature.src}
+                      />
+                    ) : (
+                      <Image
+                        key={index}
+                        src={feature.src}
+                        alt="preview"
+                        priority
+                        width={500}
+                        height={500}
+                        className={cn(
+                          "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0",
+                        )}
+                      />
                     )}
-                  />}
-                  <Button className="cursor-pointer dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current mt-2 md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1" onClick={() => {api?.scrollNext()}}>{feature.name}</Button>
+                    <Button
+                      className="cursor-pointer dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current mt-2 md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1"
+                      onClick={() => {
+                        api?.scrollNext();
+                      }}
+                    >
+                      {feature.name}
+                    </Button>
                   </div>
                 </CardContent>
               </Card>
@@ -264,7 +292,7 @@ function FeaturesCarousel() {
         {features.name}
       </div> */}
     </div>
-  )
+  );
 }
 
 function Why() {

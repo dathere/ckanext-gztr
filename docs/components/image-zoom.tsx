@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { Image, type ImageProps } from 'fumadocs-core/framework';
-import { type ImgHTMLAttributes } from 'react';
-import '../styles/image-zoom.css';
-import Zoom, { type UncontrolledProps } from 'react-medium-image-zoom';
+import { Image, type ImageProps } from "fumadocs-core/framework";
+import type { ImgHTMLAttributes } from "react";
+import "../styles/image-zoom.css";
+import Zoom, { type UncontrolledProps } from "react-medium-image-zoom";
 
 export type ImageZoomProps = ImageProps & {
   /**
@@ -17,17 +17,17 @@ export type ImageZoomProps = ImageProps & {
   rmiz?: UncontrolledProps;
 };
 
-function getImageSrc(src: ImageProps['src']): string {
-  if (typeof src === 'string') return src;
+function getImageSrc(src: ImageProps["src"]): string {
+  if (typeof src === "string") return src;
 
-  if (typeof src === 'object') {
+  if (typeof src === "object") {
     // Next.js
-    if ('default' in src)
+    if ("default" in src)
       return (src as { default: { src: string } }).default.src;
     return src.src;
   }
 
-  return '';
+  return "";
 }
 
 export function ImageZoom({
