@@ -19,12 +19,21 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { type HTMLProps, type ReactNode, useState } from "react";
+import { type HTMLProps, type ReactNode, useEffect, useState } from "react";
 import { Pre } from "@/components/codeblock";
-import { buttonVariants } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import SelectFeaturesDemo from "./select-features-demo.gif";
 import SearchDemo from "./search-demo.gif";
 import { cva } from "class-variance-authority";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+  type CarouselApi,
+} from "@/components/ui/carousel";
 
 export default function HomePage() {
   const gridColor =
@@ -81,7 +90,6 @@ export default function HomePage() {
 }
 
 function Hero() {
-  const { Card, Cards } = defaultMdxComponents;
   return (
     <div className="relative z-2 flex flex-col border-x border-t bg-fd-background/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden overflow-hidden">
       <div
@@ -116,7 +124,7 @@ function Hero() {
           CKAN
         </Link>{" "}
         extension that lets you associate features on an interactive map for
-        each dataset and also provides spatial search by drawing a bounding box.
+        each dataset, perform geospatial search, expose a <Link href="https://stacspec.org" className="text-blue-400">STAC</Link> API, and <Link href="/docs/features" className="text-blue-400">more</Link>.
       </p>
       <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
         Provided by{" "}
@@ -124,8 +132,9 @@ function Hero() {
           datHere
         </Link>
         .
+        {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
       </p>
-      <div className="inline-flex items-center gap-3 max-md:mx-auto">
+      <div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
         <Link
           href="/docs"
           className={cn(
@@ -169,58 +178,93 @@ function Hero() {
           View the source code of ckanext-gztr on GitHub
         </Card>
       </Cards> */}
-      <PreviewImages />
+      <FeaturesCarousel />
+      {/* TODO: More sections, e.g. problems solved, software architecture, portals using extension, learn/collaborate, etc. */}
+      {/* Refer to stacspec.org and Apache SedonaDB for examples of home pages */}
     </div>
   );
 }
 
-function PreviewImages() {
-  const [active, setActive] = useState(0);
-  const previews = [
+function FeaturesCarousel() {
+  const [api, setApi] = useState<CarouselApi>()
+  const [current, setCurrent] = useState(0)
+  const features = [
     {
-      image: SelectFeaturesDemo,
+      src: "/media/nmwdc-data-publisher-gazetteer-demo.mp4",
+      type: "video",
       name: "Select map features",
     },
     {
-      image: SearchDemo,
+      src: "/media/nmwdc-public-gazetteer-search-demo.mp4",
+      type: "video",
       name: "Search by bounding box",
     },
+    {
+      src: "/media/datasets-page.png",
+      type: "image",
+      name: "Minimaps"
+    },
+    {
+      src: "/media/gztr_collection_create_flow.excalidraw.png",
+      type: "image",
+      name: "Interact with STAC API"
+    },
+    {
+      src: "/media/geoconnex-diagram.png",
+      type: "image",
+      name: "Integrate with Geoconnex"
+    }
   ];
 
+  useEffect(() => {
+    if (!api) {
+      return
+    }
+
+    setCurrent(api.selectedScrollSnap() + 1)
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1)
+    })
+  }, [api])
+
   return (
-    <div className="p-8 min-w-[600px] md:min-w-[800px] overflow-hidden xl:-mx-12 dark:[mask-image:linear-gradient(to_top,transparent,white_40px)]">
-      <div className="absolute flex flex-row left-1/2 -translate-1/2 bottom-4 z-2 p-1 rounded-full bg-fd-card border shadow-xl dark:shadow-fd-background">
-        <div
-          role="none"
-          className="absolute bg-fd-primary rounded-full w-48 h-9 transition-transform z-[-1]"
-          style={{
-            transform: `translateX(calc(var(--spacing) * 48 * ${active}))`,
-          }}
-        />
-        {previews.map((item, i) => (
-          <button
-            key={i}
-            className={cn(previewButtonVariants({ active: active === i }))}
-            onClick={() => setActive(i)}
-          >
-            {item.name}
-          </button>
-        ))}
-      </div>
-      {previews.map((item, i) => (
-        <Image
-          key={i}
-          src={item.image}
-          alt="preview"
-          priority
-          className={cn(
-            "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0",
-            active !== i && "hidden",
-          )}
-        />
-      ))}
+    <div className="mx-auto max-w-[75%] md:max-w-[90%] mt-8">
+      <Carousel setApi={setApi} opts={{ loop: true }} className="w-full">
+        <CarouselContent>
+          {features.map((feature, index) => (
+            <CarouselItem key={index}>
+              <Card className="border-none shadow-none">
+                <CardContent className="flex justify-center p-0">
+                  <div className="flex flex-col justify-center">{feature.type === "video" ? <video key={index} className={cn(
+                      "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0"
+                    )} style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src={feature.src} /> :
+                  <Image
+                    key={index}
+                    src={feature.src}
+                    alt="preview"
+                    priority
+                    width={500}
+                    height={500}
+                    className={cn(
+                      "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0"
+                    )}
+                  />}
+                  <Button className="cursor-pointer dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current mt-2 md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1" onClick={() => {api?.scrollNext()}}>{feature.name}</Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+        <CarouselPrevious className="cursor-pointer" />
+        <CarouselNext className="cursor-pointer" />
+      </Carousel>
+      {/* <div className="py-2 text-center text-sm text-muted-foreground">
+        {features.name}
+      </div> */}
     </div>
-  );
+  )
 }
 
 function Why() {

@@ -4,9 +4,11 @@ description: Learn about the various features available in the ckanext-gztr CKAN
 icon: Sparkles
 ---
 
+![Features banner](/media/banners/features.png)
+
 ## Brief overview of the primary purpose of ckanext-gztr
 
-The current primary purpose of ckanext-gztr is to provide geospatial and mapping capabilities for CKAN instances **to associate datasets with geospatial features**. This association allows for enhanced geospatial capabilities related to CKAN such as geospatial mapping and search in addition to existing text-based metadata updates and search that CKAN provides by default. There is also [an opt-in Geoconnex integration](/docs/geoconnex-integration) for contributing your water data to the Geoconnex global knowledge graph.
+The current primary purpose of ckanext-gztr is to provide geospatial and mapping capabilities for CKAN instances **to associate datasets with geospatial features**. This association allows for enhanced geospatial capabilities related to CKAN such as geospatial mapping and search in addition to existing text-based metadata updates and search that CKAN provides by default. There is also a STAC API for your geospatial collections and [an opt-in Geoconnex integration](/docs/geoconnex-integration) for contributing your water data to the Geoconnex global knowledge graph.
 
 ## Why is it important to define the purpose?
 
@@ -17,11 +19,13 @@ The purpose helps organize **what's expected** for the ckanext-gztr CKAN extensi
 
 Now let's explore the features for your CKAN instance added by ckanext-gztr!
 
+<Callout title="Note">Demo GIFs and graphics may not look exactly the same as the current implementation of ckanext-gztr.</Callout>
+
 ## Public dataset search gazetteer
 
 Commonly, CKAN data catalogs have a search box where users may type their query for datasets they'd like to find. However, this can be cumbersome when it comes to geographic data, when there is no visual method to search and identify relevant regions. The public gazetteer helps resolve this issue by providing an interactive map where users can draw a bounding box to search for datasets that have geospatial features which intersect with their drawn bounding box.
 
-![ckanext-gztr public dataset search demo](/media/ckanext-gztr-search-demo.gif)
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-public-gazetteer-search-demo.mp4" />
 
 Here are things you can do with the public search gazetteer:
 
@@ -37,7 +41,7 @@ Here are things you can do with the public search gazetteer:
 
 Similar to the public gazetteer, the data curator gazetteer provides data curators a visual and interactive way to specify a dataset's relevant geographic features. Users can either select pre-loaded features or draw custom polygons. The selection is then saved and can be searched from the public dataset search page, either by drawing a bounding box using the public gazetteer or by searching a pre-loaded location's name, which is indexed as a “place keyword”.
 
-![ckanext-gztr data publisher demo](/media/ckanext-gztr-data-publisher-demo.gif)
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-data-publisher-gazetteer-demo.mp4" />
 
 - Selecting a named place using the category and place selectors.
 - Jumping to a selected place and drawing/editing a custom polygon.
@@ -60,27 +64,43 @@ A minimap can also be added on dataset landing pages (e.g. when clicking on a da
 
 ![ckanext-gztr individual dataset page](/media/individual-dataset-page.png)
 
-## Place Keywords metadata and search
+## Place keywords search
 
-When a sysadmin of a CKAN instance provides preset feature categories for associating datasets with geospatial features, a field can be specified as "Place Keywords", which represent the name of each feature as a keyword and is saved as a comma-separated metadata field for the dataset.
+When a sysadmin of a CKAN instance provides preset feature categories for associating datasets with geospatial features, users can query by the feature names (if configured by the sysadmin).
 
-For example if a dataset publisher selects the "Counties" feature category and then selects "County A" and "County B", then the Place Keywords field would look like the following:
+For example if a dataset publisher selects the "Counties" geospatial feature collection and then selects "County A" and "County B", then the the user can search for those counties by name in the default CKAN dataset search page.
 
-```
-County A (Counties), County B (Counties)
-```
+## STAC API
 
-Place Keywords search can be enabled by the sysadmin of the CKAN instance which adds this Place Keywords metadata field to the Solr search index. This means that **public users can then run a search query** on the datasets page with a query such as "county a" and a case-insensitive filter would be added to include datasets that have this place keyword in their metadata in the dataset search results.
+![STAC logo](/media/stac_logo.png)
 
-## Geospatial Action API endpoints
+ckanext-gztr is being built with the [SpatioTemporal Assets Catalog (STAC) specification](https://stacspec.org) in mind regarding its geospatial data organization. This allows for better interoperability such as being able to explore your CKAN instance's geospatial collections through the [STAC Browser](https://browser.moregeo.it/) while also supporting long-term extension usage and customizability.
 
-TODO
+| Endpoint | Summary |
+| --- | --- |
+| `/gztr/stac` | Returns the STAC Catalog (`catalog.json` in the `gztr` storage) as JSON |
+| `/gztr/stac/collections` | Returns a list of STAC Collection metadata as JSON |
+| `/gztr/stac/collections/{collection_id}` | Returns a specific STAC Collection's metadata as JSON  |
+| `/gztr/stac/collections/{collection_id}/items` | Returns an `ItemCollection` (based on GeoJSON `FeatureCollection`) for a specific STAC Collection as GeoJSON |
+| `/gztr/stac/collections/{collection_id}/items/{item_id}` | Returns an `Item` (based on GeoJSON `Feature`) for a specific STAC Item as GeoJSON |
+
+Currently the STAC API `/search` endpoint and validation are not implemented with ckanext-gztr.
+
+{/* TODO: Example users can explore */}
+
+<Callout title="Note">ckanext-gztr and datHere are not affiliated with the STAC specification maintainers.</Callout>
+
+## Convenience Action API endpoint `gztr_collection_create`
+
+![gztr_collection_create flow](/media/gztr_collection_create_flow.excalidraw.png)
+
+The custom `/api/3/action/gztr_collection_create` CKAN Action API endpoint is provided for convenience and is used as documented in the installation section. This endpoint is based on the CKAN `/api/3/action/file_create` CKAN API Action but also adds a conversion step as it expects a GeoJSON file storing a `FeatureCollection` as input and then converts the data to GeoParquet and stores it in the `gztr` storage.
 
 ## Geoconnex integration
 
 ![Geoconnex banner](/media/geoconnex.png)
 
-For CKAN instances storing **water data**, you can **sync your water data** with the Geoconnex global water data knowledge graph.
+For CKAN instances storing **water data**, you can **sync your water data** with the Geoconnex knowledge graph.
 
 Read the [Geoconnex integration](/docs/geoconnex-integration) section to learn more.
 
