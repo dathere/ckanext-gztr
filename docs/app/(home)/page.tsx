@@ -5,6 +5,8 @@ import { cva } from "class-variance-authority";
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 import defaultMdxComponents from "fumadocs-ui/mdx";
 import {
+  ArrowLeftCircleIcon,
+  ArrowRightCircleIcon,
   BlocksIcon,
   GitMergeIcon,
   HomeIcon,
@@ -32,8 +34,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/cn";
-import SearchDemo from "./search-demo.gif";
-import SelectFeaturesDemo from "./select-features-demo.gif";
 
 export default function HomePage() {
   const gridColor =
@@ -56,6 +56,7 @@ export default function HomePage() {
         >
           <div className="relative mb-4">
             <Hero />
+            <LogoCloud02 />
             {/* <Why /> */}
           </div>
         </div>
@@ -88,6 +89,9 @@ export default function HomePage() {
     </>
   );
 }
+
+import LogoCloud02 from "@/components/blocks/logo-cloud-02";
+import { Backlight } from "@/components/ui/backlight";
 
 function Hero() {
   return (
@@ -143,14 +147,16 @@ function Hero() {
         {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
       </p>
       <div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
-        <Link
-          href="/docs"
-          className={cn(
-            buttonVariants({ size: "lg", className: "rounded-full" }),
-          )}
-        >
-          Get Started
-        </Link>
+        <Backlight blur={5}>
+          <Link
+            href="/docs"
+            className={cn(
+              buttonVariants({ size: "lg", className: "rounded-full" }),
+            )}
+          >
+            Get Started
+          </Link>
+        </Backlight>
         <Link
           href="https://github.com/dathere/ckanext-gztr"
           className={cn(
@@ -237,7 +243,7 @@ function FeaturesCarousel() {
   }, [api]);
 
   return (
-    <div className="mx-auto max-w-[75%] md:max-w-[90%] mt-8">
+    <div className="mx-auto max-w-[75%] md:max-w-[90%] my-8">
       <Carousel setApi={setApi} opts={{ loop: true }} className="w-full">
         <CarouselContent>
           {features.map((feature, index) => (
@@ -271,22 +277,35 @@ function FeaturesCarousel() {
                         )}
                       />
                     )}
-                    <Button
-                      className="cursor-pointer dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current mt-2 md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1"
-                      onClick={() => {
-                        api?.scrollNext();
-                      }}
-                    >
-                      {feature.name}
-                    </Button>
+                    <div className="flex mt-8">
+                      <Button
+                        className="w-fit h-fit p-0 rounded-full cursor-pointer"
+                        variant="ghost"
+                        onClick={() => {
+                          api?.scrollPrev();
+                        }}
+                      >
+                        <ArrowLeftCircleIcon />
+                      </Button>
+                      <Button className="dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1">
+                        {feature.name}
+                      </Button>
+                      <Button
+                        className="w-fit h-fit p-0 rounded-full cursor-pointer"
+                        variant="ghost"
+                        onClick={() => {
+                          api?.scrollNext();
+                        }}
+                      >
+                        <ArrowRightCircleIcon />
+                      </Button>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
             </CarouselItem>
           ))}
         </CarouselContent>
-        <CarouselPrevious className="cursor-pointer" />
-        <CarouselNext className="cursor-pointer" />
       </Carousel>
       {/* <div className="py-2 text-center text-sm text-muted-foreground">
         {features.name}

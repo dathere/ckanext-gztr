@@ -4,8 +4,11 @@ description: Learn how to install ckanext-gztr to your CKAN instance.
 icon: Download
 ---
 
-![Install banner](/media/banners/install.png)
+import { Backlight } from "@/components/ui/backlight"
 
+<Backlight>![Install banner](/media/banners/install.png)</Backlight>
+
+{/* TODO: Quickstart installation tutorial for demo on local device */}
 {/* TODO: Quickstart page or section where user can spin up an environment for exploring */}
 
 ## Installation and setup
@@ -57,7 +60,7 @@ cd /usr/lib/ckan/default/src
 
 The ckanext-gztr extension relies on [ckanext-scheming](https://github.com/ckan/ckanext-scheming) to add the interactive gazetteer to the new dataset form.
 
-<Callout title="Not using ckanext-scheming?">Technically ckanext-gztr can be used without ckanext-scheming, however it is likely that you may already be using ckanext-scheming and this tutorial assumes so.</Callout>
+<Callout title="Not using ckanext-scheming?">Technically ckanext-gztr can be used without ckanext-scheming, however it is likely that you may already be using ckanext-scheming and we recommend doing so.</Callout>
 
 Run the following in `/usr/lib/ckan/default/src` to install the ckanext-scheming extension:
 
@@ -110,7 +113,7 @@ CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json ckanext.gztr:schemas/pres
   form_placeholder: Filled in automatically as you select areas above.
 ```
 
-**If you do not have an existing dataset schema configured for your CKAN instance**, then you can add the following dataset schema to try out the gazetteer (e.g. right below the line with `ckan.plugins`) in the dataset metadata form:
+**If you do not have an existing dataset schema configured for your CKAN instance**, then you can add the following demo dataset schema to try out the gazetteer (e.g. right below the line with `ckan.plugins`) in the dataset metadata form:
 
 ```ini tab="INI"
 scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml
@@ -252,12 +255,14 @@ Add the following lines to your CKAN configuration file and customize it as need
 ckan.files.storage.gztr.type = ckan:fs
 ckan.files.storage.gztr.path = /var/ckan/storage/uploads/gztr
 ckan.files.storage.gztr.initialize = true # Creates the `gztr` directory if it doesn't exist
+# ckan.files.storage.gztr.public = true # Optional, makes the files publicly downloadable. May not need this since the STAC API should be used instead.
 ```
 
 ```dotenv tab="ckanext-envvars"
 CKAN__FILES__STORAGE__GZTR__TYPE=ckan:fs
 CKAN__FILES__STORAGE__GZTR__PATH=/var/lib/ckan/storage/uploads/gztr
 CKAN__FILES__STORAGE__GZTR__INITIALIZE=true
+# CKAN__FILES__STORAGE__GZTR__PUBLIC = true # Optional, makes the files publicly downloadable. May not need this since the STAC API should be used instead.
 ```
 
 The new `gztr` directory should be made in your filesystem at `/var/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoParquet files will be stored, along with the `catalog.json` and `collections.json` files we'll set up soon.
@@ -371,108 +376,27 @@ Now **copy the `location` stem** that is returned after uploading because we wil
 
 {/* | `quick_region_label` | This entry should only be set to a string for one collection (or none). This entry is a human-readable name for a collection with a single feature that can easily be toggled in the dataset metadata form without needing to open the interactive gazetteer. | Optional | */}
 
-### STAC Catalog (`catalog.json`)
+### STAC Catalog (`catalog.json`) and STAC Collections (`collections.json`)
 
-You'll need to define a `catalog.json` file which is a top-level description of your the geospatial data available from your CKAN instance using STAC. Here is a truncated example of a [STAC Catalog](https://github.com/radiantearth/stac-spec/blob/master/catalog-spec/catalog-spec.md) defined in the `catalog.json` file for the New Mexico Water Data Catalog.
+We need to define metadata about the geospatial data that is being stored by the CKAN instance and exposed through the STAC API. You'll need to define a [STAC Catalog](https://github.com/radiantearth/stac-spec/blob/master/catalog-spec/catalog-spec.md) as a `catalog.json` file which is a top-level description of your the geospatial data available from your CKAN instance using STAC. You'll also need to define a file `collections.json` that defines the [STAC Collections](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) available from your STAC API.
 
-```json
-{
-  "id": "nmwdc",
-  "stac_version": "1.1.0",
-  "type": "Catalog",
-  "title": "New Mexico Water Data Catalog STAC API",
-  "description": "Geospatial collections and features used for dataset publishing and search by the New Mexico Water Data Catalog, organized through the SpatioTemporal Asset Catalogs (STAC) specification.",
-  "links": [
-    {
-      "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
-      "rel": "self",
-      "type": "application/json"
-    },
-    {
-      "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
-      "rel": "root",
-      "type": "application/json"
-    },
-    {
-      "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
-      "rel": "collections",
-      "type": "application/json"
-    },
-    {
-      // [!code word:public_water_systems]
-      "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
-      "rel": "child",
-      "type": "application/json",
-      "title": "Public Water Systems"
-    }
-  ]
-}
-```
+We provide truncated examples in the clickable accordions below.
 
-Notice that the returned ID value `public_water_systems` is used as one of the `child` links as a STAC Collection at the end in the `href` URL value. If we were using the HUC8 Sub basins file from the previous example, then the value would be `nm_huc8_sub_basins`.
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
-### STAC Collections (`collections.json`)
-
-Next you'll need to define your geospatial collections as a [STAC Collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) in a `collections.json` file. Here's a truncated example for NMWDC:
-
-```json
-[
+<Accordions type="single">
+  <Accordion title="STAC Catalog `catalog.json` example">
+  ```json
   {
-    // [!code word:public_water_systems]
-    "id": "public_water_systems",
-    "type": "Collection",
+    "id": "nmwdc",
     "stac_version": "1.1.0",
-    "title": "Public Water Systems",
-    "description": "Public Water Systems as defined by the U.S. Environmental Protection Agency (EPA) which intersect with New Mexico.",
-    "providers": [
-      {
-        "name": "U.S. Environmental Protection Agency (EPA)",
-        "description": "Independent agency of the United States government focused on environmental protection concerns.",
-        "roles": [
-          "producer"
-        ],
-        "url": "https://epa.gov"
-      },
-      {
-        "name": "Geoconnex",
-        "description": "Geoconex Reference API hosting the public water systems geospatial data. The public water systems for New Mexico are a subset of the data hosted by Geoconnex.",
-        "roles": [
-          "host"
-        ],
-        "url": "https://reference.geoconnex.us/collections/pws"
-      }
-    ],
-    "extent": {
-      "spatial": {
-        "bbox": [
-          [
-            -180.0,
-            -90.0,
-            180.0,
-            90.0
-          ]
-        ]
-      },
-      "temporal": {
-        "interval": [
-          [
-            null,
-            null
-          ]
-        ]
-      }
-    },
-    "license": "proprietary",
+    "type": "Catalog",
+    "title": "New Mexico Water Data Catalog STAC API",
+    "description": "Geospatial collections and features used for dataset publishing and search by the New Mexico Water Data Catalog, organized through the SpatioTemporal Asset Catalogs (STAC) specification.",
     "links": [
       {
-        // [!code word:public_water_systems]
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
         "rel": "self",
-        "type": "application/json"
-      },
-      {
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
-        "rel": "parent",
         "type": "application/json"
       },
       {
@@ -481,17 +405,117 @@ Next you'll need to define your geospatial collections as a [STAC Collection](ht
         "type": "application/json"
       },
       {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+        "rel": "collections",
+        "type": "application/json"
+      },
+      {
         // [!code word:public_water_systems]
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems/items",
-        "rel": "items",
-        "type": "application/geo+json"
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+        "rel": "child",
+        "type": "application/json",
+        "title": "Public Water Systems"
       }
     ]
   }
-]
-```
+  ```
 
-Notice that the `id` value `public_water_systems` for the Public Water Systems collection is from the previous upload step. If we were using the HUC8 Sub basins file from a previous example, then the value would be `nm_huc8_sub_basins`.
+  Notice that the returned ID value `public_water_systems` is used as one of the `child` links as a STAC Collection at the end in the `href` URL value. If we were using the HUC8 Sub basins file from the previous example, then the value would be `nm_huc8_sub_basins`.
+  </Accordion>
+  <Accordion title="STAC Collections `collections.json` example">
+  Next you'll need to define your geospatial collections as a [STAC Collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) in a `collections.json` file as a list of dictionaries, where each dictionary is the metadata for a single STAC Collection. Here's a truncated example for NMWDC:
+
+  ```json
+  [
+    {
+      // [!code word:public_water_systems]
+      "id": "public_water_systems",
+      "type": "Collection",
+      "stac_version": "1.1.0",
+      "title": "Public Water Systems",
+      "description": "Public Water Systems as defined by the U.S. Environmental Protection Agency (EPA) which intersect with New Mexico.",
+      "providers": [
+        {
+          "name": "U.S. Environmental Protection Agency (EPA)",
+          "description": "Independent agency of the United States government focused on environmental protection concerns.",
+          "roles": [
+            "producer"
+          ],
+          "url": "https://epa.gov"
+        },
+        {
+          "name": "Geoconnex",
+          "description": "Geoconex Reference API hosting the public water systems geospatial data. The public water systems for New Mexico are a subset of the data hosted by Geoconnex.",
+          "roles": [
+            "host"
+          ],
+          "url": "https://reference.geoconnex.us/collections/pws"
+        }
+      ],
+      "extent": {
+        "spatial": {
+          "bbox": [
+            [
+              -180.0,
+              -90.0,
+              180.0,
+              90.0
+            ]
+          ]
+        },
+        "temporal": {
+          "interval": [
+            [
+              null,
+              null
+            ]
+          ]
+        }
+      },
+      "license": "proprietary",
+      "links": [
+        {
+          // [!code word:public_water_systems]
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+          "rel": "self",
+          "type": "application/json"
+        },
+        {
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+          "rel": "parent",
+          "type": "application/json"
+        },
+        {
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+          "rel": "root",
+          "type": "application/json"
+        },
+        {
+          // [!code word:public_water_systems]
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems/items",
+          "rel": "items",
+          "type": "application/geo+json"
+        }
+      ]
+    }
+  ]
+  ```
+
+  Notice that the `id` value `public_water_systems` for the Public Water Systems collection is from the previous upload step. If we were using the HUC8 Sub basins file from a previous example, then the value would be `nm_huc8_sub_basins`.
+  </Accordion>
+</Accordions>
+
+You should refer to the [STAC Catalog specification](https://github.com/radiantearth/stac-spec/blob/master/catalog-spec/catalog-spec.md) and the [STAC Collection specification](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) to guide your creation of the data for `catalog.json` and `collection.json`. You may also refer to the [STAC best practices file](https://github.com/radiantearth/stac-spec/blob/master/best-practices.md).
+
+For the `catalog.json` file we also provide a form below that generates basic STAC Catalog JSON that you can start with for your `catalog.json` file. For `collections.json` refer to example above and the specification.
+
+Note that the generator below only works for a single STAC Collection, so you'll want to add more STAC Collections manually.
+
+import { StacCatalogGenerator } from "@/components/stac-catalog-generator";
+
+<StacCatalogGenerator />
+
+Remember to also set up a `collections.json` file.
 
 ### Upload `catalog.json` and `collections.json` to the `gztr` storage
 
@@ -534,19 +558,19 @@ import { BlocksIcon, DropletIcon, EarthIcon,WrenchIcon } from 'lucide-react';
 
 ## What next?
 
-There's plenty more to explore with ckanext-gztr. In particular you'll want to **customize your configuration** such as setting the default map location and zoom.
+There's plenty more to explore with ckanext-gztr. In particular you'll want to **customize your configuration** such as setting the default map location, zoom, and your basemaps. We also recommend "watching" [the GitHub repository](https://github.com/dathere/ckanext-gztr) to ensure you get notified when a new release is made and learn steps for updating your extension.
 
 <Cards>
   <Card icon={<WrenchIcon fill="#bde0fe" />} href="/docs/configuration" title="Configuration">
     Customize ckanext-gztr with configuration options.
   </Card>
-  <Card icon={<EarthIcon fill="#ffb703" />} href="/docs/geospatial-data" title="Geospatial data">
+  <Card icon={<EarthIcon />} href="/docs/geospatial-data" title="Geospatial data">
     Learn how geospatial data is organized along with tutorials to ingest data from various data sources.
   </Card>
-  <Card icon={<DropletIcon fill="#81b29a" />} href="/docs/geoconnex-integration" title="Geoconnex integration">
+  <Card icon={<DropletIcon fill="#bde0fe" />} href="/docs/geoconnex-integration" title="Geoconnex integration">
     Learn how to sync your water data with Geoconnex.
   </Card>
-  <Card icon={<BlocksIcon fill="#bde0fe" />} href="/docs/software-architecture" title="Software architecture">
+  <Card icon={<BlocksIcon fill="#81b29a" />} href="/docs/software-architecture" title="Software architecture">
     Learn about how ckanext-gztr is innovatively organized.
   </Card>
 </Cards>

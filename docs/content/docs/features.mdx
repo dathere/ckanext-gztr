@@ -4,15 +4,11 @@ description: Learn about the various features available in the ckanext-gztr CKAN
 icon: Sparkles
 ---
 
-![Features banner](/media/banners/features.png)
+import { Backlight } from "@/components/ui/backlight"
 
-## Brief overview of the primary purpose of ckanext-gztr
+<Backlight>![Features banner](/media/banners/features.png)</Backlight>
 
-The current primary purpose of ckanext-gztr is to provide geospatial and mapping capabilities for CKAN instances **to associate datasets with geospatial features**. This association allows for enhanced geospatial capabilities related to CKAN such as geospatial mapping and search in addition to existing text-based metadata updates and search that CKAN provides by default. There is also a STAC API for your geospatial collections and [an opt-in Geoconnex integration](/docs/geoconnex-integration) for contributing your water data to the Geoconnex global knowledge graph.
-
-## Why is it important to define the purpose?
-
-The purpose helps organize **what's expected** for the ckanext-gztr CKAN extension to include. For features that do not exist within ckanext-gztr, they can be requested on the [issues page on GitHub](https://github.com/dathere/ckanext-gztr/issues) or found in **alternative extensions** such as:
+For features that do not exist within ckanext-gztr, please request a feature by [adding an issue on GitHub](https://github.com/dathere/ckanext-gztr/issues) or explore **alternative extensions** such as:
 
 - [ckanext-spatial](https://docs.ckan.org/projects/ckanext-spatial/en/latest/) - Official CKAN extension for adding geospatial capabilities to CKAN
 - [ckanext-geoview](https://github.com/ckan/ckanext-geoview) - Official extension to display geospatial files and services in CKAN
@@ -74,7 +70,9 @@ For example if a dataset publisher selects the "Counties" geospatial feature col
 
 ![STAC logo](/media/stac_logo.png)
 
-ckanext-gztr is being built with the [SpatioTemporal Assets Catalog (STAC) specification](https://stacspec.org) in mind regarding its geospatial data organization. This allows for better interoperability such as being able to explore your CKAN instance's geospatial collections through the [STAC Browser](https://browser.moregeo.it/) while also supporting long-term extension usage and customizability.
+ckanext-gztr is being built with the [SpatioTemporal Assets Catalog (STAC) (suite of) specification(s)](https://stacspec.org) in mind regarding its geospatial data organization. This allows for better interoperability such as being able to explore your CKAN instance's geospatial collections through the [STAC Browser](https://browser.moregeo.it/) while also supporting long-term extension usage and customizability.
+
+One of the benefits of this implementation is exposing a STAC API for your geospatial collections. Here are a summary of the endpoints that are made publicly available for your CKAN instance once ckanext-gztr is installed:
 
 | Endpoint | Summary |
 | --- | --- |
@@ -86,7 +84,7 @@ ckanext-gztr is being built with the [SpatioTemporal Assets Catalog (STAC) speci
 
 Currently the STAC API `/search` endpoint and validation are not implemented with ckanext-gztr.
 
-{/* TODO: Example users can explore */}
+{/* TODO: Example users can explore, and GIF "browse your geospatial collections by pointing to your STAC API" */}
 
 <Callout title="Note">ckanext-gztr and datHere are not affiliated with the STAC specification maintainers.</Callout>
 

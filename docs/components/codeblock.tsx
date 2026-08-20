@@ -132,7 +132,6 @@ export function CodeBlock({
           "text-[13px] py-3.5 overflow-auto max-h-[600px] fd-scroll-container",
           viewportProps.className,
         )}
-        // @ts-expect-error
         style={
           {
             // space for toolbar
