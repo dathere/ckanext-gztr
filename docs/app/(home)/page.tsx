@@ -34,6 +34,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/cn";
+import { BlurFade } from "@/components/ui/blur-fade"
 
 export default function HomePage() {
   const gridColor =
@@ -56,7 +57,7 @@ export default function HomePage() {
         >
           <div className="relative mb-4">
             <Hero />
-            <LogoCloud02 />
+            <BlurFade delay={1} inView><LogoCloud02 /></BlurFade>
             {/* <Why /> */}
           </div>
         </div>
@@ -92,6 +93,36 @@ export default function HomePage() {
 
 import LogoCloud02 from "@/components/blocks/logo-cloud-02";
 import { Backlight } from "@/components/ui/backlight";
+import confetti from "canvas-confetti";
+
+const sideConfetti = () => {
+  const end = Date.now() + 1 * 1000
+
+  const frame = () => {
+    if (Date.now() > end) return
+
+    confetti({
+      particleCount: 2,
+      angle: 60,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 0, y: 0.5 },
+      // colors: colors,
+    })
+    confetti({
+      particleCount: 2,
+      angle: 120,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 1, y: 0.5 },
+      // colors: colors,
+    })
+
+    requestAnimationFrame(frame)
+  }
+
+  frame()
+}
 
 function Hero() {
   return (
@@ -114,15 +145,14 @@ function Hero() {
             "repeating-linear-gradient(65deg, var(--color-purple-300), var(--color-purple-300) 12px, color-mix(in oklab, var(--color-blue-600) 30%, transparent) 20px, transparent 200px)",
         }}
       />
-      <h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1>
+      <BlurFade><h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1></BlurFade>
       <h1 className="mb-8 max-w-[800px] text-4xl font-medium max-md:hidden">
         <span className="text-5xl">
-          ckanext-gztr <MapPinnedIcon className="inline-block w-10 h-10 pb-1" />
+          <BlurFade>ckanext-gztr <MapPinnedIcon className="inline-block w-10 h-10 pb-1" /></BlurFade>
         </span>
-        <br />
-        Interactive gazetteer maps for your datasets.
+        <BlurFade delay={0.5}>Interactive gazetteer maps for your datasets.</BlurFade>
       </h1>
-      <p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
+      <BlurFade delay={1}><p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
         ckanext-gztr is a{" "}
         <Link href="https://ckan.org" className="text-blue-400">
           CKAN
@@ -137,24 +167,25 @@ function Hero() {
           more
         </Link>
         .
-      </p>
-      <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
+      </p></BlurFade>
+      <BlurFade delay={1.25}><p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
         Provided by{" "}
         <Link className="text-fd-info" href="https://dathere.com">
           datHere
         </Link>
         .
         {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
-      </p>
-      <div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
+      </p></BlurFade>
+      <BlurFade delay={1.5}><div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
         <Backlight blur={5}>
           <Link
             href="/docs"
             className={cn(
               buttonVariants({ size: "lg", className: "rounded-full" }),
             )}
+            onClick={() => sideConfetti()}
           >
-            Get Started
+            Get started
           </Link>
         </Backlight>
         <Link
@@ -167,9 +198,10 @@ function Hero() {
             }),
           )}
         >
-          Source Code
+          Source code
         </Link>
       </div>
+      </BlurFade>
       {/* <Cards>
         <Card icon={<ZapIcon />} href="/docs/builder" title="Quick start">
           Install ckanext-gztr on your CKAN instance
