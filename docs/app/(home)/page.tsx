@@ -150,7 +150,7 @@ function Hero() {
       <BlurFade>
         <h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1>
       </BlurFade>
-      <h1 className="mb-8 max-w-[800px] text-4xl font-medium max-md:hidden">
+      <h1 className="mb-4 max-w-[800px] text-4xl font-medium max-md:hidden">
         <span className="text-5xl">
           <BlurFade>
             ckanext-gztr{" "}
@@ -167,8 +167,8 @@ function Hero() {
           <Link href="https://ckan.org" className="text-blue-400">
             CKAN
           </Link>{" "}
-          extension that lets you associate features on an interactive map for
-          each dataset, perform geospatial search, expose a{" "}
+          extension that lets you associate geospatial features on an interactive map for
+          datasets, perform spatial search, expose a{" "}
           <Link href="https://stacspec.org" className="text-blue-400">
             STAC
           </Link>{" "}
@@ -179,18 +179,18 @@ function Hero() {
           .
         </p>
       </BlurFade>
-      <BlurFade delay={1.25}>
+      {/* <BlurFade delay={1.25}>
         <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
           Provided by{" "}
           <Link className="text-fd-info" href="https://dathere.com">
             datHere
           </Link>
           .
-          {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
+          . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Solutions</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>.
         </p>
-      </BlurFade>
+      </BlurFade> */}
       <BlurFade delay={1.5}>
-        <div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
+        <div className="inline-flex items-center gap-3 max-md:mx-auto my-4 md:mb-0">
           <Backlight blur={5}>
             <Link
               href="/docs"
@@ -323,7 +323,7 @@ function FeaturesCarousel() {
                         )}
                       />
                     )}
-                    <div className="flex mt-8">
+                    <div className="flex w-fit gap-4 mx-auto items-center justify-center mt-8">
                       <Button
                         className="w-fit h-fit p-0 rounded-full cursor-pointer"
                         variant="ghost"
@@ -331,9 +331,9 @@ function FeaturesCarousel() {
                           api?.scrollPrev();
                         }}
                       >
-                        <ArrowLeftCircleIcon />
+                        <ArrowLeftCircleIcon className="stroke-primary" />
                       </Button>
-                      <Button className="dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1">
+                      <Button className="dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current md:text-lg w-fit mx-auto border-1 rounded-xl bg-sky-100 dark:bg-sky-800 p-4">
                         {feature.name}
                       </Button>
                       <Button
@@ -343,7 +343,7 @@ function FeaturesCarousel() {
                           api?.scrollNext();
                         }}
                       >
-                        <ArrowRightCircleIcon />
+                        <ArrowRightCircleIcon className="stroke-primary" />
                       </Button>
                     </div>
                   </div>

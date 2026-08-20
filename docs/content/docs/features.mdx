@@ -72,15 +72,15 @@ For example if a dataset publisher selects the "Counties" geospatial feature col
 
 ckanext-gztr is being built with the [SpatioTemporal Assets Catalog (STAC) (suite of) specification(s)](https://stacspec.org) in mind regarding its geospatial data organization. This allows for better interoperability such as being able to explore your CKAN instance's geospatial collections through the [STAC Browser](https://browser.moregeo.it/) while also supporting long-term extension usage and customizability.
 
-One of the benefits of this implementation is exposing a STAC API for your geospatial collections. Here are a summary of the endpoints that are made publicly available for your CKAN instance once ckanext-gztr is installed:
+One of the benefits of this implementation is exposing a STAC API for your geospatial collections. Here is a summary of the endpoints that are made publicly available for your CKAN instance once ckanext-gztr is installed:
 
 | Endpoint | Summary |
 | --- | --- |
 | `/gztr/stac` | Returns the STAC Catalog (`catalog.json` in the `gztr` storage) as JSON |
 | `/gztr/stac/collections` | Returns a list of STAC Collection metadata as JSON |
 | `/gztr/stac/collections/{collection_id}` | Returns a specific STAC Collection's metadata as JSON  |
-| `/gztr/stac/collections/{collection_id}/items` | Returns an `ItemCollection` (based on GeoJSON `FeatureCollection`) for a specific STAC Collection as GeoJSON |
-| `/gztr/stac/collections/{collection_id}/items/{item_id}` | Returns an `Item` (based on GeoJSON `Feature`) for a specific STAC Item as GeoJSON |
+| `/gztr/stac/collections/{collection_id}/items` | Returns a STAC `ItemCollection` (based on GeoJSON `FeatureCollection`) for a specific STAC Collection as GeoJSON |
+| `/gztr/stac/collections/{collection_id}/items/{item_id}` | Returns a STAC `Item` (based on GeoJSON `Feature`) for a specific STAC Item as GeoJSON |
 
 Currently the STAC API `/search` endpoint and validation are not implemented with ckanext-gztr.
 

@@ -10,7 +10,7 @@ const logos = [
   },
   {
     name: "Center for Geospatial Solutions",
-    src: "/media/logos/CGS_logo.webp",
+    src: "/media/logos/CGS-Logo.webp",
     href: "https://cgsearth.org",
   },
   {
@@ -20,8 +20,13 @@ const logos = [
   },
   {
     name: "Lincoln Institute of Land Policy",
-    src: "/media/logos/lilp-logo.webp",
+    src: "/media/logos/lilp-logo.svg",
     href: "https://www.lincolninst.edu/",
+  },
+  {
+    name: "U.S. Geological Survey",
+    src: "/media/logos/USGS_logo_green.png",
+    href: "https://usgs.gov",
   },
 ];
 
@@ -34,8 +39,24 @@ export default function LogoCloud02() {
         <h2 className="text-center font-semibold text-2xl tracking-tight text-foreground sm:text-3xl">
           Built as a collaborative effort.
         </h2>
-        <div className="mt-12 flex w-fit p-4 mx-auto gap-8 overflow-hidden rounded-2xl">
-          {logos.map((logo) => (
+        <div className="mt-12 grid grid-cols-3 w-fit p-4 mx-auto gap-8 items-center rounded-2xl">
+          {logos.slice(0,3).map((logo) => (
+            <Backlight key={logo.name} blur={theme === "dark" ? 5 : 0}>
+              <Link
+                href={logo.href}
+                className="flex flex-col h-full items-center my-auto mx-auto bg-card bg-blue-200 dark:bg-blue-300 p-4 rounded-xl"
+              >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logo.src}
+                    alt={logo.name}
+                    className="h-16"
+                  />
+              </Link>
+            </Backlight>
+          ))}
+          <div className="flex justify-center gap-8 col-span-3">
+            {logos.slice(3,6).map((logo) => (
             <Backlight key={logo.name} blur={theme === "dark" ? 5 : 0}>
               <Link
                 href={logo.href}
@@ -52,6 +73,7 @@ export default function LogoCloud02() {
               </Link>
             </Backlight>
           ))}
+          </div>
         </div>
       </div>
     </section>
