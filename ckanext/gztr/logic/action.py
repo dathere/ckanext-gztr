@@ -21,6 +21,33 @@ from . import schema
 
 log = logging.getLogger(__name__)
 
+def _resolve_feature_ref(feature: dict[str, Any], collection_ids: list[str]) -> tuple[str | None, str | None]:
+    """Work out which STAC Collection and Item a spatial_full feature refers to.
+
+    Current features carry a top-level ``collection`` (the Collection id) and ``id``. Datasets
+    saved by earlier versions of the gazetteer instead nest the whole legacy config.json entry
+    under ``properties.collection``, identified by its ``location`` (e.g. "nm_counties.geojson"
+    -> collection id "nm_counties"). Those features have no geometry of their own, so without
+    this mapping they stay geometry-less and every consumer -- the dataset card thumbnail, the
+    landing page preview -- ends up with an empty GeoJSON layer.
+    """
+    collection = feature.get("collection")
+    feature_id = feature.get("id")
+
+    if collection is None:
+        legacy = (feature.get("properties") or {}).get("collection")
+        if isinstance(legacy, dict):
+            location = (legacy.get("properties") or legacy).get("location")
+            if location:
+                collection = Path(location).stem
+
+    if collection is not None and collection not in collection_ids and collection != "Drawn features":
+        return None, None
+
+    # stac_item_show compares the id as a quoted SQL literal, so it must be a string.
+    return collection, None if feature_id is None else str(feature_id)
+
+
 @tk.validate_action_data(schema.spatial_full_with_geometry)
 def gztr_spatial_full_with_geometry(context: types.Context, data_dict: dict[str, Any]) -> dict[str, Any]:
     """Provide the spatial_full value from a CKAN dataset's metadata to attempt filling null geometry values for features that have installed geospatial collections.
@@ -32,12 +59,18 @@ def gztr_spatial_full_with_geometry(context: types.Context, data_dict: dict[str,
         spatial_full = data_dict.get("spatial_full")
         if spatial_full:
             collections = gztr_json_file_as_dict("collections.json")
+            collection_ids = [c.get("id") for c in collections if c.get("id") is not None]
             for feature in spatial_full["features"]:
-                if feature.get("collection") != "Drawn features" and feature.get("geometry") is None and feature.get("collection") in [collection.get("id") for collection in collections if collection.get("id") is not None]:
-                    feature["geometry"] = stac_item_show(feature.get("collection"), feature.get("id")).get_json().get("geometry")
+                if feature.get("geometry") is not None:
+                    continue
+                collection_id, feature_id = _resolve_feature_ref(feature, collection_ids)
+                if collection_id is None or collection_id == "Drawn features" or feature_id is None:
+                    continue
+                feature["geometry"] = stac_item_show(collection_id, feature_id).get_json().get("geometry")
         return json.dumps(spatial_full)
     except Exception:
         log.exception("Error while running gztr_spatial_full_with_geometry.")
+        return None
 
 # @tk.validate_action_data(schema.feature_batch_show)
 # def gztr_feature_batch_item_show(context: types.Context, data_dict: dict[str, Any]) -> dict[str, Any]:

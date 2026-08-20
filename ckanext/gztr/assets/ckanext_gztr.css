@@ -16,6 +16,18 @@
 
 */
 
+/* Dataset search result map thumbnail */
+
+/*
+  snippets/package_item.html puts this next to the dataset content in a flex row. It is empty
+  at layout time (Leaflet fills it with absolutely positioned panes), so its min-content width
+  is 0 and the default flex-shrink lets the sibling content collapse it to zero width -- the
+  map initialises but is never visible. Pin the track size so it cannot be shrunk away.
+*/
+.dataset-item-map {
+  flex: 0 0 125px;
+}
+
 /* DRUF Progress Bar */
 
 /*
