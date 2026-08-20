@@ -47,23 +47,24 @@ dataset_fields:
     validators: ignore_missing gazetteer_validator
     output_validators: scheming_load_json
   - field_name: spatial_full
-    label: Spatial Full
-    # display_snippet: gazetteer_preview.html
-    display_snippet: null
-    form_snippet: text.html
-    form_placeholder: Filled in automatically as you select areas above.
-  - field_name: spatial
-    label: Geospatial region (simplified)
+    label: Geospatial metadata
     display_snippet: gazetteer_preview.html
     # display_snippet: null
+    # TODO: Custom form snippet that has a useful expandable JSON viewer?
     form_snippet: text.html
     form_placeholder: Filled in automatically as you select areas above.
-  - field_name: place_keywords
-    label: Place Keywords
-    display_snippet: text.html
-    form_attrs:
-      data-module: place_keywords
-    form_placeholder: Filled in automatically as you select areas above.
+  # - field_name: spatial
+  #   label: Geospatial region (simplified)
+  #   display_snippet: gazetteer_preview.html
+  #   # display_snippet: null
+  #   form_snippet: text.html
+  #   form_placeholder: Filled in automatically as you select areas above.
+  # - field_name: place_keywords
+  #   label: Place Keywords
+  #   display_snippet: text.html
+  #   form_attrs:
+  #     data-module: place_keywords
+  #   form_placeholder: Filled in automatically as you select areas above.
 
 resource_fields:
   - field_name: url

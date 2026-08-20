@@ -2,7 +2,7 @@
 
 {% block search_input %}
     {% if (h.current_url()[0:9] == "/dataset/" and (h.current_url()[9:] == "" or h.current_url()[9:].startswith("?"))) or (h.current_url()[0:8] == "/dataset" and (h.current_url()[8:] == "" or h.current_url()[8:].startswith("?"))) %}
-        <div style="margin-bottom: 1rem;" id="gztr-search-widget-root"></div>
+        <div data-config="{{ h.gztr_get_public_config() }}" style="margin-bottom: 1rem;" id="gztr-search-widget-root"></div>
     {% endif %}
     {{ super() }}
     {% if request.args.get('ext_bbox') %}

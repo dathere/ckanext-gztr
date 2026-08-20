@@ -1,0 +1,24 @@
+{
+  "id": "nmwdc",
+  "stac_version": "1.1.0",
+  "type": "Catalog",
+  "title": "New Mexico Water Data Catalog STAC API",
+  "description": "Geospatial collections and features used for dataset publishing and search by the New Mexico Water Data Catalog, organized through the SpatioTemporal Asset Catalogs (STAC) specification.",
+  "links": [
+    {
+      "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+      "rel": "self",
+      "type": "application/json"
+    },
+    {
+      "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+      "rel": "root",
+      "type": "application/json"
+    },
+    {
+      "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+      "rel": "data",
+      "type": "application/json"
+    }
+  ]
+}

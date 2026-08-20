@@ -180,6 +180,7 @@ async fn test_file_create_success_with_sysadmin_auth() -> Result<()> {
         .token(api_token)
         .build();
 
+    // Create a new text file and uplad it to the gztr storage
     let text = "Here is some text content that should be in the file.";
     let mut file = NamedTempFile::new()?;
     file.write_all(text.as_bytes())?;
@@ -219,6 +220,7 @@ async fn test_file_create_success_demo_files() -> Result<()> {
         .token(api_token)
         .build();
 
+    // Upload a config.json file as a CKAN file to the gztr storage
     let path_buf = PathBuf::from("./assets/storage-demo/config.json");
     let response = ckan
         .file_create()
@@ -256,7 +258,4 @@ async fn test_playwright_basic() -> Result<()> {
     Ok(())
 }
 
-// TODO: GeoJSON files and config.json file created and tests based on them
-
-// TODO: Verify that I can modify a dataset field while not updating metadata_modified through the Postgres DB
-// This is to help with existing CKAN instances that use ckanext-gztr with the previous spatial_full format
+// TODO: Test with S3 storage

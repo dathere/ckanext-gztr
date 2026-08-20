@@ -1,9 +1,10 @@
 import type { Geoman } from "@geoman-io/maplibre-geoman-free";
+import { produce } from "immer";
 import type { RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
+import type { StacCollection } from "stac-ts";
 import { create } from "zustand";
-import type { FeatureCollectionExt, FeatureCollectionProperties } from "@/App";
-import { produce } from "immer";
+import type { ItemCollection } from "@/App";
 
 // IMPORTANT NOTE: When working with deeply nested objects for state, use immer
 // See the following links for more info:
@@ -25,18 +26,18 @@ interface FormMapState {
   spatial: any;
   setSpatial: (spatial: any) => void;
   // spatialFull field used in ckanext-gztr for state management and properties (full GeoJSON)
-  spatialFull: FeatureCollectionExt | undefined;
-  setSpatialFull: (spatialFull: FeatureCollectionExt | undefined) => void;
+  spatialFull: ItemCollection | undefined;
+  setSpatialFull: (spatialFull: ItemCollection | undefined) => void;
   // tempSpatialFull field used in ckanext-gztr for temporary state management and properties within the modal
-  tempSpatialFull: FeatureCollectionExt | undefined;
-  setTempSpatialFull: (
-    tempSpatialFull: FeatureCollectionExt | undefined,
-  ) => void;
-  collections: FeatureCollectionExt[] | undefined;
-  setCollections: (collections: FeatureCollectionExt[] | undefined) => void;
-  currentCollection: FeatureCollectionProperties | undefined;
-  setCurrentCollection: (
-    currentCollection: FeatureCollectionProperties | undefined,
+  tempSpatialFull: ItemCollection | undefined;
+  setTempSpatialFull: (tempSpatialFull: ItemCollection | undefined) => void;
+  stacCollections: StacCollection[] | undefined;
+  setStacCollections: (stacCollections: StacCollection[] | undefined) => void;
+  itemCollections: ItemCollection[] | undefined;
+  setItemCollections: (itemCollections: ItemCollection[] | undefined) => void;
+  currentStacCollection: StacCollection | undefined;
+  setCurrentStacCollection: (
+    currentStacCollection: StacCollection | undefined,
   ) => void;
   searchValue: string | undefined;
   setSearchValue: (searchValue: string) => void;
@@ -86,14 +87,16 @@ export const useFormMap = create<FormMapState>((set) => ({
         state.tempSpatialFull = tempSpatialFull;
       }),
     ),
-  collections: undefined,
-  setCollections: (collections) =>
+  stacCollections: undefined,
+  setStacCollections: (stacCollections) => set(() => ({ stacCollections })),
+  itemCollections: undefined,
+  setItemCollections: (itemCollections) =>
     set(() => {
-      return { collections };
+      return { itemCollections };
     }),
-  currentCollection: undefined,
-  setCurrentCollection: (currentCollection) =>
-    set(() => ({ currentCollection })),
+  currentStacCollection: undefined,
+  setCurrentStacCollection: (currentStacCollection) =>
+    set(() => ({ currentStacCollection })),
   searchValue: undefined,
   setSearchValue: (searchValue) => set(() => ({ searchValue })),
   statewideEnabled: false,

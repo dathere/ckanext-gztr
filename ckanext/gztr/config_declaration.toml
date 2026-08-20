@@ -1,0 +1,40 @@
+version = 1
+
+[[groups]]
+annotation = "ckanext-gztr configuration"
+options = [
+  # Default configuration
+  {
+    key = "ckanext.gztr.default_latitude",
+    editable = true,
+    default = 34.0,
+    description = """
+Default map latitude for public search gazetteer and dataset publisher gazetteer.
+"""
+  },
+  {
+    key = "ckanext.gztr.default_longitude",
+    editable = true,
+    default = -106.018066,
+    description = """
+Default map longitude for public search gazetteer and dataset publisher gazetteer.
+"""
+  },
+  {
+    key = "ckanext.gztr.default_zoom",
+    editable = true,
+    type = "int",
+    default = 5,
+    description = """
+Default zoom for public search gazetteer and dataset publisher gazetteer.
+"""
+  },
+  {
+    key = "ckanext.gztr.map_tile_server",
+    editable = true,
+    default = "https://tiles.openfreemap.org/styles/liberty",
+    description = """
+URL to vector map tile server whose tiles are rendered as a basemap on the gazetteers.
+"""
+  }
+]

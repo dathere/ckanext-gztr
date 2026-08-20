@@ -1,7 +1,7 @@
 {
   "collections": [
     {
-      "location": "state.geojson",
+      "location": "state.parquet",
       "label": "New Mexico",
       "description": "State of New Mexico",
       "source": {
@@ -12,7 +12,7 @@
       "label_key": "NAME"
     },
     {
-      "location": "nm_public_water_systems.geojson",
+      "location": "nm_public_water_systems.parquet",
       "label": "Public Water Systems",
       "description": "Public water systems intersecting the state of New Mexico",
       "id_key": "PublicSystemName",

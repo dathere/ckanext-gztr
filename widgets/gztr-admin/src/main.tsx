@@ -3,8 +3,14 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import App from "./App.tsx";
 
-createRoot(document.getElementById("gazetteer-widget-root")!).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
+const datasetPublisherGazetteerWidgetRoot = document.getElementById(
+  "gazetteer-widget-root",
 );
+
+if (datasetPublisherGazetteerWidgetRoot) {
+  createRoot(datasetPublisherGazetteerWidgetRoot).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+}

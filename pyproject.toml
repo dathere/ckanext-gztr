@@ -10,7 +10,7 @@ readme = "README.md"
 authors = [
     { name = "datHere", email = "support@dathere.com" }
 ]
-license = "AGPL"
+license = { "text" = "AGPL-3.0-only" }
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Programming Language :: Python :: 3",
@@ -19,6 +19,9 @@ classifiers = [
 keywords = [ "CKAN", "extension"]
 dependencies = [
     "shapely",
+    "apache-sedona[db]",
+    "geopandas",
+    "tomli>=2.4.1",
 ]
 requires-python = ">=3.10"
 
@@ -35,3 +38,11 @@ ckan = "ckan.lib.extract:extract_ckan"
 
 [tool.setuptools.packages]
 find = {}
+
+[tool.uv.sources]
+ckan = { git = "https://github.com/ckan/ckan.git", branch = "dev-v2.12" }
+
+[dependency-groups]
+dev = [
+    "ckan",
+]

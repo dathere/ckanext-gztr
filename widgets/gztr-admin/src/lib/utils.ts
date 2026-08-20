@@ -2,7 +2,7 @@ import * as turf from "@turf/turf";
 import { type ClassValue, clsx } from "clsx";
 import type { Map as FormMap } from "maplibre-gl";
 import { twMerge } from "tailwind-merge";
-import type { FeatureCollectionExt } from "@/App";
+import type { ItemCollection } from "@/App";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -18,6 +18,7 @@ export const runAddressSearch = async (
     const result = await (
       await fetch(nominatimEndpoint, {
         headers: {
+          // TODO: User-Agent based on CKAN instance config
           "User-Agent": "New Mexico Water Data Hub",
         },
         signal: AbortSignal.timeout(5000),
@@ -70,16 +71,14 @@ export const simplifyGeojson = (spatialFullGeoJSON: any) => {
 };
 
 export const getPlaceKeywordsFromSpatialFull = (
-  spatialFull: FeatureCollectionExt | undefined,
+  spatialFull: ItemCollection | undefined,
 ): string => {
   if (!spatialFull) return "";
   return spatialFull.features
-    .filter(
-      (f) => f.properties.collection.properties.label !== "Drawn features",
-    )
+    .filter((f) => f.properties.collection_location !== "Drawn features")
     .map(
       (feature) =>
-        `${feature.properties[feature.properties.collection.properties.label_key ?? "label"]} (${feature.properties.collection.properties.label})`,
+        `${feature.properties.title} (${feature.properties.collection})`,
     )
     .join(", ");
 };

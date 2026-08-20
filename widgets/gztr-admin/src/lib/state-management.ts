@@ -2,7 +2,8 @@ import type { GeoJsonShapeFeature } from "@geoman-io/maplibre-geoman-free";
 import type { Feature, Map as MapLibreMap } from "maplibre-gl";
 import type { RefObject } from "react";
 import type { MapRef } from "react-map-gl/maplibre";
-import type { FeatureCollectionExt, FeatureCollectionProperties } from "@/App";
+import type { StacCollection } from "stac-ts";
+import type { ItemCollection } from "@/App";
 
 export const extractDrawnFeaturesFromGeojson = (spatialFull: Feature[]) => {
   if (!spatialFull) return [];
@@ -11,10 +12,11 @@ export const extractDrawnFeaturesFromGeojson = (spatialFull: Feature[]) => {
 
 export const toggleOptionInSource = async (
   name: string,
-  category: string,
+  collection_id: string,
   formMap: RefObject<MapRef> | undefined,
-  collections: FeatureCollectionExt[],
-  tempSpatialFull: FeatureCollectionExt,
+  stacCollections: StacCollection[],
+  itemCollections: ItemCollection[],
+  tempSpatialFull: ItemCollection,
   drawnGeoJSON?: GeoJsonShapeFeature,
 ) => {
   if (formMap) {
@@ -26,23 +28,20 @@ export const toggleOptionInSource = async (
       const geojsonData: GeoJSON = await existingSource.getData();
       // Check if feature exist, if so remove, otherwise add
       const foundFeatureIndex = tempSpatialFull?.features.findIndex(
-        (f) =>
-          f.properties.label === name &&
-          f.properties.collection?.properties.label === category,
+        (f) => f.properties.title === name && f.collection === collection_id,
       );
       if (foundFeatureIndex > -1) {
         tempSpatialFull?.features.splice(foundFeatureIndex, 1);
         // @ts-expect-error
         existingSource.setData(tempSpatialFull);
       } else {
-        if (!(category === "Drawn features")) {
-          const collection = collections?.find(
-            (c) => c.properties.label === category,
+        if (!(collection_id === "Drawn features")) {
+          const collection = stacCollections?.find(
+            (c) => c.collection_id === collection_id,
           );
-          const collectionLabelKey = collection?.properties.label_key;
-          const newFeature = collection?.features.find(
-            (f) => f.properties[collectionLabelKey ?? "label"] === name,
-          );
+          const newFeature = itemCollections
+            .find((iC) => iC.collection_id === collection?.id)
+            ?.features.find((f) => f.properties.title === name);
           geojsonData.features.push(newFeature);
           // @ts-expect-error
           existingSource.setData(geojsonData);
@@ -50,15 +49,8 @@ export const toggleOptionInSource = async (
           const newDrawnGeojson = drawnGeoJSON;
           if (newDrawnGeojson) {
             newDrawnGeojson.properties.label = name;
-            newDrawnGeojson.properties.collection = {};
             // @ts-expect-error
-            newDrawnGeojson.properties.collection.properties = {
-                label: "Drawn features",
-                description: "Features drawn by the user using ckanext-gztr.",
-                source: {
-                  description: "CKAN instance",
-                },
-              };
+            newDrawnGeojson.collection = "Drawn features";
             geojsonData.features.push(newDrawnGeojson);
           }
           // @ts-expect-error
@@ -71,7 +63,6 @@ export const toggleOptionInSource = async (
 
 export const zoomToFeatureBounds = async (
   featureId: string,
-  currentCollectionProperties: FeatureCollectionProperties,
   formMap: RefObject<MapRef> | undefined,
   selectedFeatures?: any[],
 ) => {
@@ -88,8 +79,7 @@ export const zoomToFeatureBounds = async (
     // @ts-expect-error
     const features = (await allFeaturesSource.getData()).features;
     const featureGeojson = features.find(
-      (f: any) =>
-        f.properties[currentCollectionProperties.id_key ?? "id"] === featureId,
+      (f: any) => f.properties.id === featureId,
     );
     map.addSource(featureId, {
       type: "geojson",

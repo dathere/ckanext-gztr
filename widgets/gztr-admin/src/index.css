@@ -118,4 +118,19 @@
   body {
     @apply tw:bg-background tw:text-foreground;
   }
+  .maplibregl-popup-tip {
+    @apply tw:hidden!;
+  }
+  .maplibregl-ctrl-attrib {
+    @apply tw:bg-background! tw:text-muted-foreground! tw:border-border! tw:rounded-md! tw:border! tw:shadow-sm!;
+  }
+  .maplibregl-ctrl-attrib a {
+    @apply tw:text-muted-foreground!;
+  }
+  .maplibregl-ctrl-attrib a:hover {
+    @apply tw:text-foreground!;
+  }
+  .maplibregl-ctrl-attrib-button {
+    @apply tw:bg-transparent! tw:dark:invert;
+  }
 }

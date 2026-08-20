@@ -5,7 +5,7 @@ use anyhow::Result;
 use std::time::Duration;
 
 #[tokio::test]
-#[ignore = "Too long, enable manually."]
+// #[ignore = "Too long, enable manually."]
 async fn test_manual() -> Result<()> {
 
     cliclack::log::info("Starting Docker Compose. This usually takes about 100 seconds...")?;

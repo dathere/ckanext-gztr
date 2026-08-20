@@ -13,10 +13,10 @@ import { useFormMap } from "@/stores/form-map-store";
 import "@/assets/maplibre-gl.css";
 import { Geoman } from "@geoman-io/maplibre-geoman-free";
 import { MapPinIcon, XCircleIcon } from "lucide-react";
-import type { FeatureCategory } from "@/App";
+import type { StacCollection } from "stac-ts";
 import { Button } from "@/components/ui/button";
 
-const SearchMap = () => {
+const SearchMap = ({ config }: any) => {
   const popupRef = useRef<maplibregl.Popup>(undefined);
   const [currentGeojson, setCurrentGeojson] = useState();
   const [selectedFeatureName, setSelectedFeatureName] = useState<string>();
@@ -24,34 +24,34 @@ const SearchMap = () => {
   const searchResultMarkerLngLat = useFormMap(
     (state) => state.searchResultMarkerLngLat,
   );
-  const currentCategory = useFormMap((state) => state.currentCategory);
+  const currentCollection = useFormMap((state) => state.currentCollection);
   const searchMap = useFormMap((state) => state.searchMap);
-  const categories = useFormMap((state) => state.categories);
-  const setCategories = useFormMap((state) => state.setCategories);
+  const collections = useFormMap((state) => state.collections);
+  const setCollections = useFormMap((state) => state.setCollections);
   const setSearchMap = useFormMap((state) => state.setSearchMap);
   const setGm = useFormMap((state) => state.setGm);
 
   useEffect(() => {
     (async () => {
-      const data: { collections: FeatureCategory[] } = await (
-        await fetch(`/file/public-download/gztr/config.json`)
+      const data: StacCollection[] = await (
+        await fetch(`/gztr/stac/collections`)
       ).json();
-      // Sort by label
-      const collections = data.collections.sort(
-        (a: FeatureCategory, b: FeatureCategory) =>
-          a.label < b.label ? -1 : 1,
-      );
-      setCategories(collections);
+      // TODO: Sort by title
+      const collections = data;
+      setCollections(collections);
     })();
   }, []);
 
   useEffect(() => {
     (async () => {
-      if (currentCategory && categories) {
+      if (currentCollection && collections) {
         if (popupRef.current) popupRef.current.remove();
-        const data = await (
-          await fetch(`/file/public-download/gztr/${currentCategory.location}`)
-        ).json();
+        // Get FeatureCollection of the specified collection
+        const data = (
+          await (
+            await fetch(`/gztr/stac/collections/${currentCollection.id}/items`)
+          ).json()
+        );
         setCurrentGeojson(data);
         if (searchMap) {
           // Add popups for each GeoJSON feature with details and select button
@@ -63,12 +63,8 @@ const SearchMap = () => {
                   layers: ["featuresFill"],
                 },
               );
-              const featureName =
-                renderedFeatures.at(0)?.properties[
-                  currentCategory.label_key
-                    ? currentCategory.label_key
-                    : "label"
-                ];
+              // Get the Item's (Feature's) title from its properties
+              const featureName = renderedFeatures.at(0)?.properties.title;
               setSelectedFeatureName(featureName);
               setLngLat([e.lngLat.lng, e.lngLat.lat]);
               if (popupRef.current) popupRef.current.addTo(searchMap);
@@ -76,7 +72,7 @@ const SearchMap = () => {
         }
       }
     })();
-  }, [currentCategory, categories]);
+  }, [currentCollection, collections]);
 
   return (
     <GLMap
@@ -106,16 +102,16 @@ const SearchMap = () => {
         });
       }}
       initialViewState={{
-        latitude: 34.0,
-        longitude: -106.018066,
-        zoom: 5,
+        latitude: config["ckanext.gztr.default_latitude"] ?? 34.0,
+        longitude: config["ckanext.gztr.default_longitude"] ?? -106.018066,
+        zoom: config["ckanext.gztr.default_zoom"] ?? 5,
       }}
       style={{ width: "100%", height: 400, borderRadius: "1rem" }}
-      mapStyle="https://tiles.openfreemap.org/styles/liberty"
+      mapStyle={config["ckanext.gztr.map_tile_server"] ?? "https://tiles.openfreemap.org/styles/liberty"}
     >
       <NavigationControl position="top-left" />
       <ScaleControl />
-      {currentCategory && currentGeojson && (
+      {currentCollection && currentGeojson && (
         <Source type="geojson" data={currentGeojson}>
           <Layer
             id="featuresFill"

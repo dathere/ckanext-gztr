@@ -11,7 +11,17 @@ const createMapImage = async () => {
   const datasetMaps = document.querySelectorAll(".dataset-item-map");
 
   for (const [index, mapElement] of datasetMaps.entries()) {
-    const spatialSimp = JSON.parse(mapElement.getAttribute("data-package"));
+    const spatialFull = mapElement.getAttribute("data-package");
+    const spatialFullWithGeometry = (await (await fetch("/api/3/action/gztr_spatial_full_with_geometry", {
+      method: "POST",
+      body: JSON.stringify({ "spatial_full": JSON.parse(spatialFull) }),
+      headers: {
+        "Content-Type": "application/json"
+      }
+    })).json()).result;
+
+    console.log("OLD", spatialFull);
+    console.log("NEW", spatialFullWithGeometry);
 
     mapElement.style.width = `${width}px`;
     mapElement.style.height = `${height}px`;
@@ -33,7 +43,7 @@ const createMapImage = async () => {
       }).addTo(map)
     }
 
-    const geoJSONLayer = L.geoJSON(spatialSimp).addTo(map);
+    const geoJSONLayer = L.geoJSON(JSON.parse(spatialFullWithGeometry)).addTo(map);
 
     map.fitBounds(geoJSONLayer.getBounds());
 

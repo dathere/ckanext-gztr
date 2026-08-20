@@ -16,7 +16,7 @@ export default defineConfig({
       output: {
         inlineDynamicImports: false,
         format: "iife",
-        dir: "/home/rzmk/programming/ckanext-gztr/ckanext/gztr/assets/gztr-react",
+        dir: "/home/rzmk/programming/gw/ckan-docker/src/ckanext-gztr/ckanext/gztr/assets/gztr-react",
         entryFileNames: `assets/[name].js`,
         chunkFileNames: `assets/[name].js`,
         assetFileNames: `assets/[name].[ext]`,

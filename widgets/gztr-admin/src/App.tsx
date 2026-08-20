@@ -17,6 +17,8 @@ import { Label } from "@/components/ui/label";
 import "./App.css";
 import type { Feature } from "maplibre-gl";
 import { useEffect, useState } from "react";
+import type { StacCollection, StacItem, StacLink } from "stac-ts";
+import { FeatureCombobox } from "@/components/feature-combobox";
 import { FormMap } from "@/components/form-map";
 import {
   AlertDialog,
@@ -30,12 +32,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  getPlaceKeywordsFromSpatialFull,
+  // getPlaceKeywordsFromSpatialFull,
   runAddressSearch,
   simplifyGeojson,
 } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
-import { FeatureCombobox } from "./components/feature-combobox";
 
 export type FeatureProperties = {
   id?: string;
@@ -65,14 +66,27 @@ export type FeatureCollectionProperties = {
   quick_region_label?: string;
 };
 
+export type ItemCollection = {
+  type: "FeatureCollection";
+  features: StacItem[];
+  links: StacLink[];
+  numberMatched?: number;
+  numberReturned?: number;
+  collection_id?: string;
+};
+
 function App() {
   const [open, setOpen] = useState<boolean>();
   const [openStatewideAlert, setOpenStatewideAlert] = useState<boolean>();
   const [statewideChecked, setStatewideChecked] = useState<boolean>();
   const [searching, setSearching] = useState<boolean>();
   const formMap = useFormMap((state) => state.formMap);
-  const collections = useFormMap((state) => state.collections);
-  const setCollections = useFormMap((state) => state.setCollections);
+  const setStacCollections = useFormMap((state) => state.setStacCollections);
+  const itemCollections = useFormMap((state) => state.itemCollections);
+  const setItemCollections = useFormMap((state) => state.setItemCollections);
+  const setCurrentStacCollection = useFormMap(
+    (state) => state.setCurrentStacCollection,
+  );
   const searchValue = useFormMap((state) => state.searchValue);
   const setSearchValue = useFormMap((state) => state.setSearchValue);
   const spatial = useFormMap((state) => state.spatial);
@@ -91,9 +105,6 @@ function App() {
   const setAddressSearchResults = useFormMap(
     (state) => state.setAddressSearchResults,
   );
-  const setCurrentCollection = useFormMap(
-    (state) => state.setCurrentCollection,
-  );
   const gm = useFormMap((state) => state.gm);
   const disableApplyButton = useFormMap((state) => state.disableApplyButton);
   const [fieldsAreInitialized, setFieldsAreInitialized] = useState(false);
@@ -101,51 +112,26 @@ function App() {
   // On first load of the widget (e.g. dataset publisher goes to Add Dataset or Edit Dataset page)
   useEffect(() => {
     (async () => {
-      // Download config.json and set FeatureCollectionProperties for collections
-      const data: { collections: FeatureCollectionProperties[] } = await (
-        await fetch(`/file/public-download/gztr/config.json`)
+      // Get STAC collections metadata
+      const stacCollections: StacCollection[] = await (
+        await fetch(`/gztr/stac/collections`)
       ).json();
-      // Sort collections by label
-      const collectionProperties = data.collections.sort(
-        (a: FeatureCollectionProperties, b: FeatureCollectionProperties) =>
-          a.label < b.label ? -1 : 1,
-      );
-      setCollections(
-        collectionProperties.map((c) => {
-          return { features: [], properties: c };
-        }),
-      );
+      setStacCollections(stacCollections);
+      // Get all Items for each STAC collection
+      // TODO: Optimize with only getting necessary ItemCollections instead of all on first page load
+      const allItemCollections: ItemCollection[] = [];
+      for (const collection of stacCollections) {
+        const itemCollection: ItemCollection = await (
+          await fetch(`/gztr/stac/collections/${collection.id}/items`)
+        ).json();
+        allItemCollections.push({
+          ...itemCollection,
+          collection_id: collection.id,
+        });
+      }
+      setItemCollections(allItemCollections);
     })();
   }, []);
-
-  useEffect(() => {
-    // Store features (with geometry) in collections
-    (async () => {
-      if (
-        collections &&
-        collections.length > 0 &&
-        collections[0].features?.length === 0
-      ) {
-        const newCollections = await Promise.all(
-          collections.map(async (c) => {
-            const newCollection = c;
-            const collectionGeoJSON: {
-              type: "FeatureCollection";
-              features: Feature[];
-            } = await (
-              await fetch(`/file/public-download/gztr/${c.properties.location}`)
-            ).json();
-            newCollection.features = collectionGeoJSON.features;
-            newCollection.features.forEach((f: Feature) => {
-              f.properties.collection = c;
-            });
-            return newCollection;
-          }),
-        );
-        setCollections(newCollections);
-      }
-    })();
-  }, [collections]);
 
   useEffect(() => {
     // Check quick region extent switch if a collection exists with quick_region_label
@@ -170,19 +156,19 @@ function App() {
     else if (spatialFullTextbox?.value) {
       setSpatialFull(JSON.parse(spatialFullTextbox?.value));
     }
-    const placeKeywordsTextbox = document.querySelector(
-      "#field-place_keywords",
-    ) as HTMLInputElement;
-    if (statewideEnabled) {
-      if (placeKeywordsTextbox)
-        placeKeywordsTextbox.value =
-          collections?.find((c) => c.properties.quick_region_label)?.properties
-            .label ?? "";
-    } else {
-      if (placeKeywordsTextbox)
-        placeKeywordsTextbox.value =
-          getPlaceKeywordsFromSpatialFull(spatialFull);
-    }
+    // const placeKeywordsTextbox = document.querySelector(
+    //   "#field-place_keywords",
+    // ) as HTMLInputElement;
+    // if (statewideEnabled) {
+    // if (placeKeywordsTextbox)
+    //   placeKeywordsTextbox.value =
+    //     collections?.find((c) => c.properties.quick_region_label)?.properties
+    //       .label ?? "";
+    // } else {
+    // if (placeKeywordsTextbox)
+    //   placeKeywordsTextbox.value =
+    //     getPlaceKeywordsFromSpatialFull(spatialFull);
+    // }
     const spatialTextbox = document.querySelector(
       "#field-spatial",
     ) as HTMLInputElement;
@@ -205,24 +191,11 @@ function App() {
             const spatialFullFeatures = spatialFull?.features;
             if (spatialFullFeatures) {
               const featuresWithGeometry = spatialFullFeatures.map((f) => {
-                const collection = collections?.find(
-                  (c) =>
-                    c.properties.location ===
-                    f.properties.collection.properties.location,
-                );
-                const identifiedFeature = collection?.features.find(
-                  (cf) =>
-                    cf.properties[
-                      cf.properties.collection.properties.id_key ?? "id"
-                    ] ===
-                    f.properties[
-                      f.properties.collection.properties.id_key ?? "id"
-                    ],
-                );
+                const identifiedFeature = itemCollections
+                  ?.find((iC) => iC.collection_id === f.collection)
+                  ?.features.find((cf) => cf.properties.id === f.properties.id);
                 const geometry = identifiedFeature?.geometry;
-                if (geometry)
-                  // @ts-expect-error
-                  f.geometry = geometry;
+                if (geometry) f.geometry = geometry;
                 return f;
               });
               spatialFull.features = featuresWithGeometry;
@@ -233,6 +206,7 @@ function App() {
           // IMPORTANT: This else statement does not run when using the Apply button
           else {
             setTempSpatialFull(undefined);
+            setCurrentStacCollection(undefined);
           }
           setOpen(o);
         }}
@@ -478,39 +452,21 @@ function App() {
                 disabled={disableApplyButton}
                 onClick={() => {
                   if (tempSpatialFull) {
+                    const newTempSpatialFull = structuredClone(tempSpatialFull);
                     if (tempSpatialFull.features.length > 0) {
-                      const bareFeatures = structuredClone(
-                        tempSpatialFull.features,
-                      ).map((f) => {
-                        // Deep clone to avoid deleting from original collections variable, not a reference
-                        f.properties.collection = {
-                          properties: f.properties.collection.properties,
-                        };
-                        return f;
-                      });
-                      const newSpatialFull = {
-                        type: "FeatureCollection",
-                        features: bareFeatures,
-                        properties: tempSpatialFull.properties,
-                      };
-                      setSpatial(simplifyGeojson(newSpatialFull));
                       // Remove geometry from spatialFull, exampleMap uses spatial, geometry added to tempSpatialFull.features
                       // Should not remove geometry from drawn features
-                      const featuresNoGeometries = structuredClone(
-                        newSpatialFull,
-                      ).features.map((f) => {
-                        if (
-                          !(
-                            f.properties.collection.properties.label ===
-                            "Drawn features"
+                      const featuresNoGeometries =
+                        newTempSpatialFull.features.map((f) => {
+                          if (
+                            // TODO: Fix
+                            !(f.collection === "Drawn features")
                           )
-                        )
-                          // @ts-expect-error
-                          delete f.geometry;
-                        return f;
-                      });
-                      newSpatialFull.features = featuresNoGeometries;
-                      setSpatialFull(newSpatialFull);
+                            f.geometry = null;
+                          return f;
+                        });
+                      newTempSpatialFull.features = featuresNoGeometries;
+                      setSpatialFull(newTempSpatialFull);
                     } else {
                       setSpatialFull(undefined);
                       setSpatial(undefined);
@@ -518,7 +474,7 @@ function App() {
                   }
                   setOpen(false);
                   setTempSpatialFull(undefined);
-                  setCurrentCollection(undefined);
+                  setCurrentStacCollection(undefined);
                 }}
               >
                 {disableApplyButton
