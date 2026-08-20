@@ -1,5 +1,7 @@
 # End-to-end tests for ckanext-gztr
 
+> Note: The end-to-end tests in this directory are considered out of date for now.
+
 This directory contains a Rust project for running tests based on Docker containers.
 
 ## Instructions
