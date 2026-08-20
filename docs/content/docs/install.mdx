@@ -4,6 +4,11 @@ description: Learn how to install ckanext-gztr to your CKAN instance.
 icon: Download
 ---
 
+import { Backlight } from "@/components/ui/backlight"
+
+<Backlight>![Install banner](/media/banners/install.png)</Backlight>
+
+{/* TODO: Quickstart installation tutorial for demo on local device */}
 {/* TODO: Quickstart page or section where user can spin up an environment for exploring */}
 
 ## Installation and setup
@@ -16,6 +21,16 @@ The following resources can be helpful for additional info as a reference. We re
 - [CKAN - Extending guide](https://docs.ckan.org/en/latest/extensions/index.html)
 - [Modernization of CKAN extension](https://extension-modernization.readthedocs.io/en/latest/)
 
+</Callout>
+
+<Callout title="Support" type="info">
+If you ever have any issues installing ckanext-gztr, please:
+
+- [Read through the troubleshooting section](/docs/troubleshooting)
+- [Search the GitHub issues or create an issue](https://github.com/dathere/ckanext-gztr/issues?q=is%3Aissue)
+- [Search the GitHub discussions or create a discussion](https://github.com/dathere/ckanext-gztr/discussions)
+
+If you need further support reach out to datHere at [support.dathere.com](https://support.dathere.com).
 </Callout>
 
 In this installation guide we'll use a CKAN source install set up for development on Ubuntu 24.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`.
@@ -45,6 +60,8 @@ cd /usr/lib/ckan/default/src
 
 The ckanext-gztr extension relies on [ckanext-scheming](https://github.com/ckan/ckanext-scheming) to add the interactive gazetteer to the new dataset form.
 
+<Callout title="Not using ckanext-scheming?">Technically ckanext-gztr can be used without ckanext-scheming, however it is likely that you may already be using ckanext-scheming and we recommend doing so.</Callout>
+
 Run the following in `/usr/lib/ckan/default/src` to install the ckanext-scheming extension:
 
 ```bash
@@ -53,16 +70,24 @@ pip install -e "ckanext-scheming@git+https://github.com/ckan/ckanext-scheming.gi
 
 Then in your CKAN config file (e.g., `/etc/ckan/default/ckan.ini`) for `ckan.plugins` add `scheming_datasets`. For example:
 
-```ini
+```ini tab="INI"
 ckan.plugins = activity scheming_datasets
+```
+
+```dotenv tab="ckanext-envvars"
+CKAN__PLUGINS="activity scheming_datasets"
 ```
 
 <Callout title="What is scheming_datasets?" type="info">Adding `scheming_datasets` to your `ckan.plugins` value enables ckanext-scheming features for datasets. In particular ckanext-gztr can expose the [dataset publisher gazetteer](http://localhost:3000/docs/features#dataset-publisher-gazetteer) through this.</Callout>
 
 Add the preset `ckanext.gztr:schemas/presets.yaml` to the end of your `scheming.presets` config value:
 
-```ini
+```ini tab="INI"
 scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
+```
+
+```dotenv tab="ckanext-envvars"
+CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
 ```
 
 <Callout title="What is a scheming preset?" type="info">[Presets](https://github.com/ckan/ckanext-scheming#preset) are sets of default values for certain field keys. What this allows for is using custom-defined HTML snippets such as the dataset publisher gazetteer in the dataset metadata form when publishing a CKAN dataset.</Callout>
@@ -78,26 +103,13 @@ scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.ya
   display_snippet: null
   validators: ignore_missing gazetteer_validator
   output_validators: scheming_load_json
-# Full GeoJSON (without geometries) as a FeatureCollection from user's selection in data publisher gazetteer
+# Full GeoJSON (without geometries for selected features)
+# as a STAC ItemCollection (based on GeoJSON FeatureCollection)
+# from user's selection in data publisher gazetteer
 - field_name: spatial_full
-  label: Spatial Full
-  # This display_snippet hides the spatial_full GeoJSON value from the dataset landing page
-  display_snippet: null
-  form_snippet: text.html
-  form_placeholder: Filled in automatically as you select areas above.
-# Simplified spatial_full geometry for indexing with Solr
-- field_name: spatial
-  label: Geospatial region (simplified)
-  # This display_snippet should show a gazetteer of the simplified GeoJSON geometry on the dataset's landing page
+  label: Geospatial metadata
   display_snippet: gazetteer_preview.html
   form_snippet: text.html
-  form_placeholder: Filled in automatically as you select areas above.
-# Place keywords as a comma-separated string
-- field_name: place_keywords
-  label: Place Keywords
-  display_snippet: text.html
-  form_attrs:
-    data-module: place_keywords
   form_placeholder: Filled in automatically as you select areas above.
 # Where DataPusher Plus stores its metadata suggestions. Only needed if you
 # use the DataPusher Plus integration described later on this page.
@@ -108,12 +120,15 @@ scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.ya
   display_snippet: null
 ```
 
-**If you do not have an existing dataset schema configured for your CKAN instance**, then you can add the following dataset schema to try out the gazetteer (e.g. right below the line with `ckan.plugins`) in the dataset metadata form:
+**If you do not have an existing dataset schema configured for your CKAN instance**, then you can add the following demo dataset schema to try out the gazetteer (e.g. right below the line with `ckan.plugins`) in the dataset metadata form:
 
-```ini
+```ini tab="INI"
 scheming.dataset_schemas = ckanext.gztr:schemas/dataset.yaml
 ```
 
+```dotenv tab="ckanext-envvars"
+CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.gztr:schemas/dataset.yaml
+```
 <Callout title="Customize for your use case!" type="warning">The `dataset.yaml` file however may not fit your use case, so ensure you use a separate schema as needed.</Callout>
 
 </Step>
@@ -136,8 +151,12 @@ pip install -r requirements.txt
 
 Then add `gztr` to your `ckan.plugins` in your `/etc/ckan/default/ckan.ini` file:
 
-```ini
+```ini tab="INI"
 ckan.plugins = activity scheming_datasets gztr
+```
+
+```dotenv tab="ckanext-envvars"
+CKAN__PLUGINS="activity scheming_datasets gztr"
 ```
 
 </Step>
@@ -150,11 +169,11 @@ ckan.plugins = activity scheming_datasets gztr
 
 With ckanext-gztr, one of the main features for public usage is geospatial search on the `/dataset` page of a CKAN web app by drawing a bounding box over a region.
 
-![ckanext-gztr public dataset search demo](/media/ckanext-gztr-search-demo.gif)
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-public-gazetteer-search-demo.mp4" />
 
 CKAN uses the open-source [Apache Solr](https://solr.apache.org/) for multi-modal search. With Apache Solr there are various ways to run a [spatial search](https://solr.apache.org/guide/solr/latest/query-guide/spatial-search.html). ckanext-gztr uses [a similar approach to ckanext-spatial](https://docs.ckan.org/projects/ckanext-spatial/en/latest/spatial-search) for spatial search, attempting to run a geospatial intersection filter by intersecting the user's drawn bounding box against each dataset's simplified spatial geometry field which is indexed. This spatial field is a geometry, often a `Polygon` or `MultiPolygon`, and is necessary to have the dataset searchable by location by having it indexed in Solr.
 
-The dataset's `spatial` field is transformed into WKT geometry using the [shapely](https://shapely.readthedocs.io/en/stable/) Python library and named as `spatial_geom` in Solr as an indexed field. Then a geospatial search query is ran through the following `Intersects` operation against `spatial_geom` and the bounds of the user's drawn bounding box (mimicing the filter used by ckanext-spatial):
+The dataset's `spatial_full` field is transformed into WKT geometry using the [shapely](https://shapely.readthedocs.io/en/stable/) Python library and named as `spatial_geom` in Solr as an indexed field. Then a geospatial search query is ran through the following `Intersects` operation against `spatial_geom` and the bounds of the user's drawn bounding box (mimicing the filter used by ckanext-spatial):
 
 ```js
 {!field f=spatial_geom}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))
@@ -218,8 +237,12 @@ For additional information see the Solr documentation for the latest documentati
 
 First check if `ckan.search.solr_allowed_query_parsers` exists in your CKAN config file (e.g. `/etc/ckan/default/ckan.ini`). Update or add it with `field` as the value.
 
-```ini
+```ini tab="INI"
 ckan.search.solr_allowed_query_parsers = field
+```
+
+```dotenv tab="ckanext-envvars"
+CKAN__SEARCH__SOLR_ALLOWED_QUERY_PARSERS=field
 ```
 
 This is necessary to ensure the public bounding box spatial search works. Otherwise you may get the following error:
@@ -234,22 +257,27 @@ Dataset search error: ("Local parameters are not supported in param 'fq'.",)
 
 ## Set up the `gztr` storage
 
-With CKAN 2.12 there are now [configurable storages](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages), which are objects that can store files in a local filesystem, cloud, database, or elsewhere. This allows you to customize where you want to store your GeoJSON files that are used throughout your installation of ckanext-gztr.
+With CKAN 2.12 there are now [configurable storages](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages), which are objects that can store files in a local filesystem, cloud, database, or elsewhere. This allows you to customize where you want to store GeoParquet files that are used throughout your installation of ckanext-gztr.
 
 Add the following lines to your CKAN configuration file and customize it as needed:
 
-```ini
+```ini tab="INI"
 ckan.files.storage.gztr.type = ckan:fs
 ckan.files.storage.gztr.path = /var/ckan/storage/uploads/gztr
 ckan.files.storage.gztr.initialize = true # Creates the `gztr` directory if it doesn't exist
-ckan.files.storage.gztr.public = true # Makes all files in the `gztr` storage publicly available
+# ckan.files.storage.gztr.public = true # Optional, makes the files publicly downloadable. May not need this since the STAC API should be used instead.
 ```
 
-The new `gztr` directory should be made in your filesystem at `/var/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoJSON files will be stored, along with a `config.json` file we'll set up soon.
+```dotenv tab="ckanext-envvars"
+CKAN__FILES__STORAGE__GZTR__TYPE=ckan:fs
+CKAN__FILES__STORAGE__GZTR__PATH=/var/lib/ckan/storage/uploads/gztr
+CKAN__FILES__STORAGE__GZTR__INITIALIZE=true
+# CKAN__FILES__STORAGE__GZTR__PUBLIC = true # Optional, makes the files publicly downloadable. May not need this since the STAC API should be used instead.
+```
 
-<Callout title="Using S3 instead of the filesystem" type="info">If you prefer to use a cloud storage service that is S3-compatible, you can learn how to set up the `gztr` storage with an S3-compatible cloud storage adapter on the [CKAN file storages documentation](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) (you may need to scroll down a bit) which uses the [ckanext-file-keeper-cloud](https://github.com/ckan/ckanext-file-keeper-cloud) CKAN extension.</Callout>
+The new `gztr` directory should be made in your filesystem at `/var/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoParquet files will be stored, along with the `catalog.json` and `collections.json` files we'll set up soon.
 
-The files in this `gztr` storage will all be public so that the ckanext-gztr extension and public users can easily access the GeoJSON files used with ckanext-gztr. These files will be available at the path `/file/public-download/gztr/{location}`, where `location` is the location of the file within the `gztr` directory. For example if we store a file `config.json` in the `gztr` storage for the New Mexico Water Data Catalog then it will be made publicly available at `https://catalog.newmexicowaterdata.org/file/public-download/gztr/config.json`.
+<Callout title="Using S3 instead of the filesystem" type="info">If you prefer to use a cloud storage service that is S3-compatible, you can learn how to set up the `gztr` storage with an S3-compatible cloud storage adapter on the [CKAN file storages documentation](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) (you may need to scroll down a bit) which uses the [ckanext-file-keeper-cloud](https://github.com/ckan/ckanext-file-keeper-cloud) CKAN extension. However note that with how ckanext-gztr is currently implemented, **there may be many calls to the S3 storage**, so you may want to periodically sync from an external S3 bucket to the filesystem storage instead.</Callout>
 
 ### Storing the files in S3
 
@@ -283,21 +311,44 @@ The `path` entry is a key prefix rather than a directory, so with the configurat
 
 <Step>
 
-## Prepare your GeoJSON files and a `config.json` file
+## Prepare your STAC and GeoJSON files
 
-### GeoJSON files
+![gztr_collection_create flow](/media/gztr_collection_create_flow.excalidraw.png)
 
-As a sysadmin you'll provide GeoJSON files that are used throughout ckanext-gztr such as for the public search gazetteer, the dataset publisher gazetteer, and the place keywords search functionality.
+## SpatioTemporal Asset Catalogs (STAC) with ckanext-gztr
+
+The [STAC](https://stacspec.org) specification is a common language to describe geospatial information, which can help make geospatial data easier to use, index, and discover.
+
+We make use of the STAC specification throughout ckanext-gztr, including both how data models are organized and for the STAC API endpoints that get added to your CKAN instance.
+
+<Callout title="Helpful STAC resources" type="info">
+If you're new to the STAC specification, here are a few resources you could get started with:
+
+- [stacspec.org](https://stacspec.org)
+- [Intro to STAC tutorial](https://stacspec.org/en/tutorials/intro-to-stac/)
+- [The STAC specification (about)](https://stacspec.org/en/about/stac-spec/)
+- [STAC spec on GitHub (radiantearth/stac-spec)](https://github.com/radiantearth/stac-spec/)
+- [STAC API spec on GitHub (radiantearth/stac-api-spec)](https://github.com/radiantearth/stac-api-spec/)
+- [Introduction to SpatioTemporal Asset Catalogs (STAC) (YouTube webinar)](https://www.youtube.com/watch?v=qGRrDPTwpmk)
+- [Introduction ot STAC API (YouTube webinar)](https://www.youtube.com/watch?v=ecb_CtvkvKs&list=PLENrKR4uOfvUny9mYz5gut-wbIy6Y6oyV&index=13)
+
+</Callout>
+
+### Upload your preset GeoJSON `FeatureCollection` files
+
+As a sysadmin you'll provide GeoJSON files that are used throughout ckanext-gztr including for the public search gazetteer, the dataset publisher gazetteer, and the place keywords search functionality.
+
+<Callout title="Geospatial data sources" type="info">We provide guides on how to download and format data from various geospatial data sources in [the geospatial data section](/docs/geospatial-data) of this documentation. However **we still recommend reading through this section first** to understand how you can add custom geospatial collections for your CKAN instance.</Callout>
 
 The GeoJSON files must be in a specific format so that ckanext-gztr can properly use them. Here are the conditions followed by an example GeoJSON file:
 
 - A GeoJSON file must be a [`FeatureCollection`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.3) using WGS84 as its geographic coordinate reference system.
-- Each [`Feature`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.2) must have a `properties` entry where the dictionary includes a **unique** `id` (default key name, can be a different name specified in `config.json`) entry. The value of the `id` entry is **unique across all `Feature`s in the `FeatureCollection`**. Therefore we do not recommend using a label such as a name for the ID, but rather a unique string or number such as basing the `id` on an existing unique ID system for the `FeatureCollection`.
-- Each `Feature` must also have a `label` (default key name, can rename in `config.json`) entry in its `properties` dictionary where the value of `label` is a human-readable name for the `Feature`, such as a county name.
+- Each [`Feature`](https://datatracker.ietf.org/doc/html/rfc7946#section-3.2) must have a **unique** `id` entry. The value of the `id` entry is **unique across all `Feature`s in the `FeatureCollection`**. Therefore we do not recommend using a label such as a name for the ID, but rather a unique string or number such as basing the `id` on an existing unique ID system for the `FeatureCollection`.
+- Each `Feature` must also have a `title` entry in its `properties` dictionary where the value of `title` is a human-readable name for the `Feature`, such as a county name.
 
 <Callout title="Unique ID is required!" type="warning">Make sure that each `Feature` in a `FeatureCollection` has a unique ID. This is required for ckanext-gztr to work properly. If you have multiple geospatial Polygon `Feature`s that are meant to be selected as one feature (e.g. a group of cities) then you may need to consolidate them into one `Feature` with a `MultiPolygon` geometry.</Callout>
 
-Here we provide an example GeoJSON file `State.geojson` for New Mexico (we omit the value for `coordinates` as it would be too long):
+Here we provide a truncated part of a GeoJSON file `Public_Water_Systems.geojson` for NMWDC with data provided by [Geoconnex](/docs/geoconnex-integration) (we omit the value for `coordinates` here as it would be too long):
 
 ```json
 {
@@ -306,100 +357,214 @@ Here we provide an example GeoJSON file `State.geojson` for New Mexico (we omit 
     {
       "type": "Feature",
       "properties": {
-        "id": 35,
-        "label": "New Mexico",
-        "geoconnex_pid": "https://geoconnex.us/ref/states/35"
+        "pws_id": "063500110",
+        "title": "JEMEZ PUEBLO", // [!code highlight]
+        "source_url": "https://www.hydroshare.org/resource/b11b8982eebd4843833932f085f71d92/data/contents/temm.geojson",
+        "data_source": "SimpleLab",
+        "geoconnex_uri": "https://geoconnex.us/ref/pws/063500110"
       },
+      "id": "063500110", // [!code highlight]
       "geometry": {
         "type": "MultiPolygon",
         "coordinates": [...]
       }
-    }
+    },
+    ...
   ]
 }
 ```
 
-Notice that the ID is based on the [U.S. FIPS code system](https://transition.fcc.gov/oet/info/maps/census/fips/fips.txt) where the state of New Mexico's has a FIPS code of `35`. We also have the state name as the value for `label`, and an optional `geoconnex_pid` URI for the opt-in [Geoconnex integration](/docs/geoconnex-integration). If there were more states for this file then the `features` list would continue with more `Feature`s following a similar format and having a unique `id`.
+Notice that the ID is based on an existing ID system for public water systems in the USA provided by the EPA as described in `collections.json`. We also have `title` in the `properties` of the `Feature` which is a human-readable name describing the feature. You can add [other common metadata](https://github.com/radiantearth/stac-spec/blob/master/commons/common-metadata.md) such as a `description` and `geoconnex_uri` as described in the [Geoconnex integration](/docs/geoconnex-integration) documentation.
 
-### `config.json`
+You'll now need to upload the GeoJSON file to your `gztr` storage through the `gztr_collection_create` custom CKAN API Action endpoint which converts your GeoJSON file into a GeoParquet file. Since we're using the CKAN API, you should ensure your CKAN instance is running.
 
-A crucial file for ensuring that ckanext-gztr discovers and uses the GeoJSON files properly is the `config.json` file. This file lists the GeoJSON files for ckanext-gztr to use along with other configuration values aside from those listed in the [Configuration docs](/docs/configuration).
+Here is an example of uploading a GeoJSON file `NM_HUC8_Sub_Basins.geojson` through the CKAN API using `curl` in a Bash shell:
 
-Currently the only top-level entry required for `config.json` is the `collections` entry, which is a list of dictionaries where each dictionary describes a `FeatureCollection` for usage with ckanext-gztr. Here's an example:
+```bash
+read -p 'CKAN sysadmin API Token: ' api_token
+curl -H "Authorization: $api_token" -X POST -F upload=@./NM_HUC8_Sub_Basins.geojson -F storage=gztr http://localhost:5000/api/3/action/gztr_collection_create
+```
+
+Here is the output that is returned:
 
 ```json
 {
-  "collections": [
-    {
-      "location": "State.geojson",
-      "label": "State",
-      "description": "State of New Mexico",
-      "source": {
-        "description": "U.S. Census TIGER/Line Shapefiles",
-        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
-      },
-      "id_key": "id",
-      "label_key": "label",
-      "quick_region_label": "statewide"
-    },
-    {
-      "location": "Counties.geojson",
-      "label": "Counties",
-      "description": "Counties of New Mexico",
-      "source": {
-        "description": "U.S. Census TIGER/Line Shapefiles",
-        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
-      }
-    },
-    {
-      "location": "Public_Water_Systems.geojson",
-      "label": "Public Water Systems",
-      "description": "Public water systems in and around New Mexico.",
-      "source": {
-        "description": "United States EPA Safe Drinking Water Information System"
-      },
-      "id_key": "PWSID"
-    }
-  ]
+  "help": "http://localhost:5000/api/3/action/help_show?name=gztr_collection_create",
+  "success": true,
+  "result": {
+    "name": "nm_huc8_sub_basins.parquet",
+    // [!code word:nm_huc8_sub_basins]
+    "location": "nm_huc8_sub_basins.parquet", // [!code highlight]
+    "storage": "gztr",
+    "content_type": "application/octet-stream",
+    "size": 6394247,
+    "hash": "91437835777a3e23633d36a0021c004e",
+    "algorithm": "md5",
+    "created": "2026-08-18T09:32:52.751045+00:00",
+    "storage_data": {},
+    "id": "a13a09bc-8694-40f8-a082-bc6bca0c21a7",
+    "owner_type": "user",
+    "owner_id": "255d924c-f5fc-4dc1-9204-1e9bfa899219",
+    "pinned": false
+  }
 }
 ```
 
-Each collection must have a `location` entry and a `label` entry. The other entries are optional and situational. We provide an explanation of each entry in the table below:
+Now **copy the `location` stem** that is returned after uploading because we will use it for later, for example `nm_huc8_sub_basins` (case-sensitive! notice the file name is not exactly the same as the original GeoJSON file). Do this for each file you upload, as you'll need the value for when you define your STAC Catalog and STAC Collections in the next steps.
 
-| Entry key | Description | Required? |
-| --- | --- | --- |
-| `location` | The location of the file as per `https://<domain>/file/public-download/gztr/{location}`. | Required |
-| `label` | Human-readable name of the collection. | Required |
-| `description` | Human-readable description of the collection. | Required |
-| `source` | The origin(s) of where the GeoJSON data was sourced. The `description` key is required, and the `url` key is recommended. | Required |
-| `id_key` | The name of the unique ID field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `id`, however if the GeoJSON file uses a different key name then it can be specified here in `id_key`. | Optional |
-| `label_key` | The name of the label field used across all `Feature`s in the `FeatureCollection`. By default ckanext-gztr assumes the key name is `label`, however if the GeoJSON file uses a different key name then it can be specified here in `label_key`. | Optional |
-| `quick_region_label` | This entry should only be set to a string for one collection (or none). This entry is a human-readable name for a collection with a single feature that can easily be toggled in the dataset metadata form without needing to open the interactive gazetteer. | Optional |
+{/* | `quick_region_label` | This entry should only be set to a string for one collection (or none). This entry is a human-readable name for a collection with a single feature that can easily be toggled in the dataset metadata form without needing to open the interactive gazetteer. | Optional | */}
 
-Once you complete the installation guide on this page then this file should be publicly available at `https://<domain>/file/public-download/gztr/config.json`.
+### STAC Catalog (`catalog.json`) and STAC Collections (`collections.json`)
 
-</Step>
+We need to define metadata about the geospatial data that is being stored by the CKAN instance and exposed through the STAC API. You'll need to define a [STAC Catalog](https://github.com/radiantearth/stac-spec/blob/master/catalog-spec/catalog-spec.md) as a `catalog.json` file which is a top-level description of your the geospatial data available from your CKAN instance using STAC. You'll also need to define a file `collections.json` that defines the [STAC Collections](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) available from your STAC API.
 
-<Step>
+We provide truncated examples in the clickable accordions below.
 
-## Run CKAN and add your files to the `gztr` storage
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
-Once you have your GeoJSON files prepared as described above, you'll want to create them in CKAN as registered files (these files will have their metadata appear in the Postgres database). Here is an example of uploading a GeoJSON file through the CKAN API using `curl` in a Bash shell (make sure you use a sysadmin's API token):
+<Accordions type="single">
+  <Accordion title="STAC Catalog `catalog.json` example">
+  ```json
+  {
+    "id": "nmwdc",
+    "stac_version": "1.1.0",
+    "type": "Catalog",
+    "title": "New Mexico Water Data Catalog STAC API",
+    "description": "Geospatial collections and features used for dataset publishing and search by the New Mexico Water Data Catalog, organized through the SpatioTemporal Asset Catalogs (STAC) specification.",
+    "links": [
+      {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+        "rel": "collections",
+        "type": "application/json"
+      },
+      {
+        // [!code word:public_water_systems]
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+        "rel": "child",
+        "type": "application/json",
+        "title": "Public Water Systems"
+      }
+    ]
+  }
+  ```
+
+  Notice that the returned ID value `public_water_systems` is used as one of the `child` links as a STAC Collection at the end in the `href` URL value. If we were using the HUC8 Sub basins file from the previous example, then the value would be `nm_huc8_sub_basins`.
+  </Accordion>
+  <Accordion title="STAC Collections `collections.json` example">
+  Next you'll need to define your geospatial collections as a [STAC Collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) in a `collections.json` file as a list of dictionaries, where each dictionary is the metadata for a single STAC Collection. Here's a truncated example for NMWDC:
+
+  ```json
+  [
+    {
+      // [!code word:public_water_systems]
+      "id": "public_water_systems",
+      "type": "Collection",
+      "stac_version": "1.1.0",
+      "title": "Public Water Systems",
+      "description": "Public Water Systems as defined by the U.S. Environmental Protection Agency (EPA) which intersect with New Mexico.",
+      "providers": [
+        {
+          "name": "U.S. Environmental Protection Agency (EPA)",
+          "description": "Independent agency of the United States government focused on environmental protection concerns.",
+          "roles": [
+            "producer"
+          ],
+          "url": "https://epa.gov"
+        },
+        {
+          "name": "Geoconnex",
+          "description": "Geoconex Reference API hosting the public water systems geospatial data. The public water systems for New Mexico are a subset of the data hosted by Geoconnex.",
+          "roles": [
+            "host"
+          ],
+          "url": "https://reference.geoconnex.us/collections/pws"
+        }
+      ],
+      "extent": {
+        "spatial": {
+          "bbox": [
+            [
+              -180.0,
+              -90.0,
+              180.0,
+              90.0
+            ]
+          ]
+        },
+        "temporal": {
+          "interval": [
+            [
+              null,
+              null
+            ]
+          ]
+        }
+      },
+      "license": "proprietary",
+      "links": [
+        {
+          // [!code word:public_water_systems]
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+          "rel": "self",
+          "type": "application/json"
+        },
+        {
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+          "rel": "parent",
+          "type": "application/json"
+        },
+        {
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+          "rel": "root",
+          "type": "application/json"
+        },
+        {
+          // [!code word:public_water_systems]
+          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems/items",
+          "rel": "items",
+          "type": "application/geo+json"
+        }
+      ]
+    }
+  ]
+  ```
+
+  Notice that the `id` value `public_water_systems` for the Public Water Systems collection is from the previous upload step. If we were using the HUC8 Sub basins file from a previous example, then the value would be `nm_huc8_sub_basins`.
+  </Accordion>
+</Accordions>
+
+You should refer to the [STAC Catalog specification](https://github.com/radiantearth/stac-spec/blob/master/catalog-spec/catalog-spec.md) and the [STAC Collection specification](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) to guide your creation of the data for `catalog.json` and `collection.json`. You may also refer to the [STAC best practices file](https://github.com/radiantearth/stac-spec/blob/master/best-practices.md).
+
+For the `catalog.json` file we also provide a form below that generates basic STAC Catalog JSON that you can start with for your `catalog.json` file. For `collections.json` refer to example above and the specification.
+
+Note that the generator below only works for a single STAC Collection, so you'll want to add more STAC Collections manually.
+
+import { StacCatalogGenerator } from "@/components/stac-catalog-generator";
+
+<StacCatalogGenerator />
+
+Remember to also set up a `collections.json` file.
+
+### Upload `catalog.json` and `collections.json` to the `gztr` storage
+
+Now that you have your STAC Catalog and STAC Collections files prepared, you'll need to upload them to the `gztr` storage.
+
+Here is an example of uploading the `catalog.json` and `collections.json` files through the CKAN API using `curl` in a Bash shell (make sure you use a sysadmin's API token):
 
 ```bash
 read -p 'CKAN sysadmin API Token: ' api_token
-curl -H "Authorization: $api_token" -X POST -F upload=@./State.geojson -F storage=gztr http://localhost:5000/api/3/action/file_create
-```
-
-Verify that the new file appears at the public endpoint. For example if you're running a local CKAN instance on on port `5000`, open [http://localhost:5000/file/public-download/gztr/state.geojson](http://localhost:5000/file/public-download/gztr/state.geojson) in your browser to view or download the file. Notice that the URL ends in `state.geojson`, not `State.geojson`.
-
-<Callout title="The location can often change!" type="warning">When we uploaded `State.geojson`, the `location` value is now in lowercase as `state.geojson` as provided in the response of the `curl` request. Make sure you verify using the correct `location` value for `config.json`!</Callout>
-
-Upload all of your GeoJSON files you plan on using with ckanext-gztr. Then when you're done with uploading your files, you'll want to get the `location` value provided by CKAN for each GeoJSON file and update your `config.json` file accordingly. Then upload the `config.json` file.
-
-```bash
-read -p 'CKAN sysadmin API Token: ' api_token
-curl -H "Authorization: $api_token" -X POST -F upload=@./config.json -F storage=gztr http://localhost:5000/api/3/action/file_create
+curl -H "Authorization: $api_token" -X POST -F upload=@./catalog.json -F storage=gztr http://localhost:5000/api/3/action/file_create
+curl -H "Authorization: $api_token" -X POST -F upload=@./collections.json -F storage=gztr http://localhost:5000/api/3/action/file_create
 ```
 
 </Step>
@@ -420,6 +585,8 @@ ckan -c /etc/ckan/default/ckan.ini run
 Then you should have your local CKAN instance running which you can open in your web browser at [http://localhost:5000](http://localhost:5000). If you visit the Datasets page at [http://localhost:5000/dataset](http://localhost:5000/dataset) then you should see an interactive search gazetteer to search by bounding box intersections and a dataset publisher gazetteer in the new dataset form.
 
 If you visit [http://localhost:5000/api/3/action/status_show](http://localhost:5000/api/3/action/status_show) then there should be a JSON response where `gztr` is present in the `result.extensions` array.
+
+You can also now explore your STAC API at [http://localhost:5000/gztr/stac](http://localhost:5000/gztr/stac).
 
 </Step>
 
@@ -473,3 +640,28 @@ export QSV_LLM_APIKEY="<your API key>"
 </Step>
 
 </Steps>
+
+import { BlocksIcon, DropletIcon, EarthIcon,WrenchIcon } from 'lucide-react';
+
+## What next?
+
+import { ConfettiSideCannons } from "@/components/confetti-side-cannons";
+
+<ConfettiSideCannons />
+
+There's plenty more to explore with ckanext-gztr. In particular you'll want to **customize your configuration** such as setting the default map location, zoom, and your basemaps. We also recommend "watching" [the GitHub repository](https://github.com/dathere/ckanext-gztr) to ensure you get notified when a new release is made and learn steps for updating your extension.
+
+<Cards>
+  <Card icon={<WrenchIcon fill="#bde0fe" />} href="/docs/configuration" title="Configuration">
+    Customize ckanext-gztr with configuration options.
+  </Card>
+  <Card icon={<EarthIcon />} href="/docs/geospatial-data" title="Geospatial data">
+    Learn how geospatial data is organized along with tutorials to ingest data from various data sources.
+  </Card>
+  <Card icon={<DropletIcon fill="#bde0fe" />} href="/docs/geoconnex-integration" title="Geoconnex integration">
+    Learn how to sync your water data with Geoconnex.
+  </Card>
+  <Card icon={<BlocksIcon fill="#81b29a" />} href="/docs/software-architecture" title="Software architecture">
+    Learn about how ckanext-gztr is innovatively organized.
+  </Card>
+</Cards>

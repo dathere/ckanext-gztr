@@ -1,32 +1,49 @@
 import GLMap, { Layer, Source } from "react-map-gl/maplibre";
 import "@/assets/maplibre-gl.css";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+import type { ItemCollection } from "@/App";
 import { useFormMap } from "@/stores/form-map-store";
 
 const ExampleMap = () => {
-  const collections = useFormMap((state) => state.collections);
+  const stacCollections = useFormMap((state) => state.stacCollections);
+  const itemCollections = useFormMap((state) => state.itemCollections);
   const quickRegionGeoJSON = useFormMap((state) => state.quickRegionGeoJSON);
   const setQuickRegionGeoJSON = useFormMap(
     (state) => state.setQuickRegionGeoJSON,
   );
-  const spatial = useFormMap((state) => state.spatial);
+  const spatialFull = useFormMap((state) => state.spatialFull);
   const statewideEnabled = useFormMap((state) => state.statewideEnabled);
+  const [featuresWithGeometries, setFeaturesWithGeometries] = useState<
+    ItemCollection | undefined
+  >(undefined);
+
+  // Get geometry values from itemCollections for each selected feature
+  // Then display all selected and drawn features on the example map
+  useEffect(() => {
+    const spatialFullWithGeometries = structuredClone(spatialFull);
+    if (spatialFullWithGeometries?.features) {
+      spatialFullWithGeometries?.features.forEach((f) => {
+        const identifiedFeature = itemCollections
+          ?.find((iC) => iC.collection_id === f.collection)
+          ?.features.find((cf) => cf.id === f.properties.id);
+        const geometry = identifiedFeature?.geometry;
+        if (geometry) f.geometry = geometry;
+      });
+      setFeaturesWithGeometries(spatialFullWithGeometries);
+    }
+  }, [itemCollections, spatialFull]);
 
   useEffect(() => {
-    const quickRegionCategory = collections?.find(
-      (c) => c.properties.quick_region_label,
+    const quickRegionCollection = stacCollections?.find(
+      (c) => c.quick_region_label,
     );
-    // TODO: If collections has the data then grab it from there
-    if (quickRegionCategory)
-      (async () => {
-        const data = await (
-          await fetch(
-            `/file/public-download/gztr/${quickRegionCategory.properties.location}`,
-          )
-        ).json();
-        setQuickRegionGeoJSON(data);
-      })();
-  }, [collections, setQuickRegionGeoJSON]);
+    if (quickRegionCollection)
+      setQuickRegionGeoJSON(
+        itemCollections?.find(
+          (iC) => iC.collection_id === quickRegionCollection.id,
+        ),
+      );
+  }, [stacCollections, setQuickRegionGeoJSON]);
 
   return (
     <GLMap
@@ -38,8 +55,9 @@ const ExampleMap = () => {
       style={{ width: "100%", height: 400, borderRadius: "1rem" }}
       mapStyle="https://tiles.openfreemap.org/styles/liberty"
     >
-      {spatial && (
-        <Source type="geojson" data={spatial}>
+      {featuresWithGeometries && (
+        // @ts-expect-error
+        <Source type="geojson" data={featuresWithGeometries}>
           <Layer
             type="fill"
             paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}

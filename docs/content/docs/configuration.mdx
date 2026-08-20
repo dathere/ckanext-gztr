@@ -4,92 +4,73 @@ description: Explore how to configure ckanext-gztr along with the various config
 icon: Wrench
 ---
 
+![Configuration banner](/media/banners/configuration.png)
+
 ## Configuring ckanext-gztr
 
-Configuring ckanext-gztr involves a few additional steps compared to the common CKAN extension due to how ckanext-gztr is architected. Here we will go over the steps involved for customizing your installation followed by all of the available configuration options.
+Here we will go over the steps involved for customizing your installation of ckanext-gztr followed by all of the available configuration options. For maximum configuration you could fork the [ckanext-gztr git repository](https://github.com/dathere/ckanext-gztr), make your own changes, and then use that fork for your use cases. However we attempt to consolidate some configurable options used throughout ckanext-gztr that may be common for various use cases.
 
-<Callout title="Plans for ease of configuration" type="info">There are plans to allow configuration through the CKAN instance itself when logged in as a sysadmin in a future release of ckanext-gztr.</Callout>
+## Modify your CKAN config INI file or environment variables
 
-import { Step, Steps } from 'fumadocs-ui/components/steps';
-
-<Steps>
-
-<Step>
-
-### Modify the ckanext-gztr configuration options in `/etc/ckan/default/ckan.ini`
-
-The extension provides multiple configuration options that can be defined in your CKAN configuration file, which by default is available at `/etc/ckan/default/ckan.ini`. You can add these options and values to customize your installation of ckanext-gztr for your CKAN instance for the next time you run your CKAN instance (e.g. by running `ckan -c /etc/ckan/default/ckan.ini run`). The available configuration options are listed further below on this page.
+The extension provides multiple configuration options that can be defined in your CKAN configuration file, which in a CKAN source install is available at `/etc/ckan/default/ckan.ini` by default. You can add these options and values to customize your installation of ckanext-gztr for your CKAN instance for the next time you run your CKAN instance (e.g. by running `ckan -c /etc/ckan/default/ckan.ini run`). The available configuration options are listed further below on this page.
 
 If you use [ckanext-envvars](https://github.com/ckan/ckanext-envvars) then each configuration option should be modifiable by environment variable declarations. For example the `ckanext.gztr.enable_drawn_features` configuration option can have its value set by the environment variable `CKANEXT__GZTR__ENABLE_DRAWN_FEATURES`. This method can be useful when deploying CKAN with Docker or Docker Compose.
 
-</Step>
+<Callout title="Updating ckanext-gztr">As ckanext-gztr is developed over time, existing or new configuration changes may occur and therefore we recommend reviewing release notes for each release of ckanext-gztr to learn which configuration options you may have to update for your CKAN instance when updating ckanext-gztr.</Callout>
 
-<Step>
+## General options
 
-### Install Bun and rebuild the widgets
-
-In most cases customizing the configuration options alone for ckanext-gztr is not enough to have the changes take effect in your CKAN instance. This is because of how ckanext-gztr is architected, where the interactive gazetteers are built with React.
-
-After you've changed the configuration options, you'll need to rebuild the gazetteer widgets. The extension provides a default build available in `ckanext/gztr/assets` which is why New Mexico appears by default when first installing ckanext-gztr without any configuration changes. Now that you've customized your configuration options, you'll need to rebuild the widgets with your customization options to generate the necessary artifacts available in `ckanext/gztr/assets`.
-
-To do this, first you'll need to have Bun installed which you can find installation instructions for at [bun.sh](https://bun.sh) (which is usually the one-liner script you can run on the home page).
-
-Then **for each widget** you'll need to change into their directory to install dependencies with `bun i` then build the output with `bun run build` like so:
-
-```bash
-cd /usr/lib/ckan/default/src/ckanext-gztr/widgets/gztr-search
-bun i
-bun run build
-cd /usr/lib/ckan/default/src/ckanext-gztr/widgets/gztr-admin
-bun i
-bun run build
+```ini tab="INI"
+# Default map configuration for gazetteers (for example here we use New Mexico's location).
+ckanext.gztr.default_latitude = 34.0
+ckanext.gztr.default_longitude = -106.018066
+ckanext.gztr.default_zoom = 5
+# URL to map tile server whose tiles are rendered on the maps.
+ckanext.gztr.map_tile_server = https://tiles.openfreemap.org/styles/liberty
 ```
 
-Now the files in `ckanext/gztr/assets` should be updated and the next time when you run your CKAN instance (e.g. `ckan -c /etc/ckan/default/ckan.ini run`) the changes to your configuration options should take effect.
+```dotenv tab="ckanext-envvars"
+# Default map configuration for gazetteers (for example here we use New Mexico's location).
+CKANEXT__GZTR__DEFAULT_LATITUDE=34.0
+CKANEXT__GZTR__DEFAULT_LONGITUDE=-106.018066
+CKANEXT__GZTR__DEFAULT_ZOOM=5
+# URL to map tile server whose tiles are rendered on the maps.
+CKANEXT__GZTR__MAP_TILE_SERVER=https://tiles.openfreemap.org/styles/liberty
+```
 
-</Step>
-
-</Steps>
-
-## Available options
-
-### General options
+## Public search gazetteer
 
 ```ini
-# Default map configuration for gazetteers (for example here we use New Mexico's location).
-ckanext.gztr.latitude = 34.0
-ckanext.gztr.longitude = -106.018066
-ckanext.gztr.zoom = 5
-# URL to map tile servers whose tiles are rendered on the maps.
-ckanext.gztr.map_tiles = https://tiles.openfreemap.org/styles/liberty
+# Display or hide the address search feature which uses Nominatim.
+ckanext.gztr.search.enable_nominatim_search = true
+# Display or hide the feature collections preview dropdown.
+ckanext.gztr.search.enable_feature_categories_preview = true
 ```
 
-### Data publisher gazetteer
+## Dataset form configuration
+
+We prefix configuration specific to the dataset form with `ckanext.gztr.form` (e.g. configuration for the dataset publisher gazetteer, place keywords, etc.).
 
 ```ini
 # Whether to allow data publishers to draw custom polygons as features.
 # Set this to false if you want data publishers to only use preset features.
-ckanext.gztr.enable_drawn_features = true
-ckanext.gztr.dialog_map_height = 60vh
+ckanext.gztr.form.enable_drawn_features = true
+ckanext.gztr.form.dialog_map_height = 60vh
 ```
 
-### Public search gazetteer
+## Public search preview map
+
+## Dataset search results preview maps
+
+## Dataset landing page preview map
+
+## Geoconnex integration
+
+This configuration is used when enabling the [Geoconnex integration](/docs/geoconnex-integration).
 
 ```ini
-# Display or hide the address search feature which uses Nominatim.
-ckanext.gztr.enable_nominatim_search = true
-# Display or hide the feature categories preview dropdown.
-ckanext.gztr.enable_feature_categories_preview = true
+# Set this field to true to enable Geoconnex-specific features
+ckanext.gztr.geoconnex.enable = false
 ```
 
-### Public search preview map
-
-### Dataset search results maps
-
-### Dataset landing page map
-
-### Geoconnex integration
-
-### Geospatial Action API endpoints
-
-### Apache SedonaDB
+## Apache SedonaDB

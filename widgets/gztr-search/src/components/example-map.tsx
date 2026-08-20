@@ -7,32 +7,22 @@ import GLMap, {
   Source,
 } from "react-map-gl/maplibre";
 import "@/assets/maplibre-gl.css";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useFormMap } from "@/stores/form-map-store";
 
-const ExampleMap = () => {
+const ExampleMap = ({ config }: any) => {
   const [bboxGeojson, setBboxGeojson] = useState();
-  const setStateGeojson = useFormMap((state) => state.setStateGeojson);
   const spatialFull = useFormMap((state) => state.spatialFull);
-
-  useEffect(() => {
-    (async () => {
-      const data = await (
-        await fetch(`/data/gztr-features/NM_State.geojson`)
-      ).json();
-      setStateGeojson(data);
-    })();
-  }, []);
 
   return (
     <GLMap
       initialViewState={{
-        latitude: 34.0,
-        longitude: -106.018066,
-        zoom: 5,
+        latitude: config["ckanext.gztr.default_latitude"] ?? 34.0,
+        longitude: config["ckanext.gztr.default_longitude"] ?? -106.018066,
+        zoom: config["ckanext.gztr.default_zoom"] ?? 5,
       }}
       style={{ width: "100%", height: 400 }}
-      mapStyle="https://tiles.openfreemap.org/styles/liberty"
+      mapStyle={config["ckanext.gztr.map_tile_server"] ?? "https://tiles.openfreemap.org/styles/liberty"}
       onLoad={(e) => {
         const map = e.target;
         // Display drawn bounding box if ext_bbox exists in URL query parameters

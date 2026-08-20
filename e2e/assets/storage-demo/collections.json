@@ -1,0 +1,66 @@
+[
+  {
+    "id": "public_water_systems",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Public Water Systems",
+    "description": "Public Water Systems as defined by the U.S. Environmental Protection Agency (EPA) which intersect with New Mexico.",
+    "providers": [
+      {
+        "name": "U.S. Environmental Protection Agency (EPA)",
+        "description": "Independent agency of the United States government focused on environmental protection concerns.",
+        "roles": [
+          "producer"
+        ],
+        "url": "https://epa.gov"
+      },
+      {
+        "name": "Geoconnex",
+        "description": "Geoconnex Reference API hosting the public water systems geospatial data. The public water systems for New Mexico are a subset of the data hosted by Geoconnex.",
+        "roles": [
+          "host"
+        ],
+        "url": "https://reference.geoconnex.us/collections/pws"
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          -180.0,
+          -90.0,
+          180.0,
+          90.0
+        ]
+      },
+      "temporal": {
+        "interval": [
+          null,
+          null
+        ]
+      }
+    },
+    "license": "proprietary",
+    "links": [
+      {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  }
+]

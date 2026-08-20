@@ -15,38 +15,6 @@ gztr_theme-css:
   contents:
     - leaflet.css
     - ckanext_gztr.css
-    
-# gazetteer_widget-css:
-#   filter: cssrewrite
-#   output: ckanext-gztr/%(version)s-gazetteer_widget.css
-#   contents:
-#     - gazetteer/css/bootstrap-select.css
-#     - gazetteer/css/easy-button.css
-#     - gazetteer/css/draw.css
-#     - gazetteer/css/library.css
-
-# gazetteer_widget-js:
-#   filter: rjsmin
-#   output: ckanext-gztr/%(version)s-gazetteer_widget.js
-#   extra:
-#     preload:
-#       - base/main
-#   contents:
-#     - gazetteer/js/bootstrap-select.js
-#     - gazetteer/js/easy-button.js
-#     - gazetteer/js/named-places-data.js
-#     - gazetteer/js/topojson-client.js
-#     - gazetteer/js/topojson-server.js
-#     - gazetteer/js/topojson-simplify.js
-#     - gazetteer/js/simplify-geojson.js
-#     - gazetteer/js/draw.js
-#     - gazetteer/js/gazetteer.js
-
-# gazetteer_widget-react-css:
-#   filter: cssrewrite
-#   output: ckanext-gztr/%(version)s-gazetteer_widget.css
-#   contents:
-#     - gztr-react/assets/index.css
 
 gazetteer_widget-react-js:
   filter: rjsmin

@@ -38,30 +38,10 @@ import { Spinner } from "@/components/ui/spinner";
 import { runAddressSearch } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
 
-export type FeatureCategory = {
-  // GeoJSON file name without .geojson (e.g. "State" or "NM_Counties")
-  // value: string;
-  // Human-readable name that shows up in the dropdown (e.g. "Counties" or "Public Water Systems")
-  // label: string;
-  // Key in a `Feature`'s `properties` that has the human-readable label/name (e.g. "NAMELSAD")
-  // nameKey: string;
-  location: string;
-  label: string;
-  description: string;
-  source: {
-    description: string;
-    url?: string;
-  };
-  id_key?: string;
-  label_key?: string;
-  quick_region_label?: string;
-};
-
-function App() {
+function App({ config }: any) {
   const [searching, setSearching] = useState<boolean>(false);
   const [isDraw, setIsDraw] = useState<boolean>(false);
   const [showClear, setShowClear] = useState<boolean>(false);
-  const categories = useFormMap((state) => state.categories);
   const searchMap = useFormMap((state) => state.searchMap);
   const gm = useFormMap((state) => state.gm);
   const addressSearchResults = useFormMap(
@@ -184,13 +164,14 @@ function App() {
                     <MapPinIcon />
                   </InputGroupAddon>
                   <InputGroupInput
-                    placeholder="Type to search for an address..."
+                    placeholder="Enter an address to search for here..."
                     onChange={(e) => setSearchValue(e.target.value)}
                     onKeyDown={async (e) => {
                       if (e.key === "Enter") {
                         if (searchMap) {
                           setSearching(true);
                           await runAddressSearch(
+                            config,
                             searchValue,
                             searchMap,
                             setAddressSearchResults,
@@ -212,6 +193,7 @@ function App() {
                         if (searchMap) {
                           setSearching(true);
                           await runAddressSearch(
+                            config,
                             searchValue,
                             searchMap,
                             setAddressSearchResults,
@@ -274,10 +256,10 @@ function App() {
                   )}
                 </InputGroup>
               </div>
-              <SearchMap />
+              <SearchMap config={config} />
             </DialogContent>
           </Dialog>
-          <ExampleMap />
+          <ExampleMap config={config} />
         </div>
       </section>
     </div>

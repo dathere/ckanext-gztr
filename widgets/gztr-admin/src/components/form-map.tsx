@@ -21,7 +21,7 @@ import {
 import { XCircleIcon } from "lucide-react";
 import type { Feature, Map as GLMapType } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
-import type { FeatureCollectionProperties } from "@/App";
+import type { ItemCollection } from "@/App";
 import { HomeControl } from "@/components/home-control";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,13 +43,17 @@ const FormMap = () => {
   const setCurrentCollectionGeoJSON = useFormMap(
     (state) => state.setCurrentCollectionGeoJSON,
   );
-  const collections = useFormMap((state) => state.collections);
-  const currentCollection = useFormMap((state) => state.currentCollection);
+  const stacCollections = useFormMap((state) => state.stacCollections);
+  const itemCollections = useFormMap((state) => state.itemCollections);
+  const currentStacCollection = useFormMap(
+    (state) => state.currentStacCollection,
+  );
+  const setCurrentStacCollection = useFormMap(
+    (state) => state.setCurrentStacCollection,
+  );
   const tempSpatialFull = useFormMap((state) => state.tempSpatialFull);
   const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
   const [selectedFeature, setSelectedFeature] = useState<Feature>();
-  const [selectedFeatureCategory, setSelectedFeatureCategory] =
-    useState<FeatureCollectionProperties>();
   const [lngLat, setLngLat] = useState<number[]>();
   const gm = useFormMap((state) => state.gm);
   const setGm = useFormMap((state) => state.setGm);
@@ -66,13 +70,14 @@ const FormMap = () => {
           layers: ["featuresFill"],
         },
       );
-      const identifiedCollection = collections?.find(
-        (c) => c.properties.location === currentCollection?.location,
+      const identifiedCollection = stacCollections?.find(
+        (c) => c.id === currentStacCollection?.id,
       );
       if (identifiedCollection) {
         const feature = renderedFeatures.at(0);
         if (feature) {
-          feature.properties.collection = identifiedCollection;
+          // @ts-expect-error
+          feature.collection = identifiedCollection.id;
           // @ts-expect-error
           setSelectedFeature(feature);
           setLngLat([e.lngLat.lng, e.lngLat.lat]);
@@ -85,20 +90,19 @@ const FormMap = () => {
   useEffect(() => {
     (async () => {
       // Display the currently selected feature collection GeoJSON on the map
-      if (currentCollection) {
-        const data = await (
-          await fetch(
-            `/file/public-download/gztr/${currentCollection.location}`,
-          )
-        ).json();
-        setCurrentCollectionGeoJSON(data);
+      if (currentStacCollection) {
+        setCurrentCollectionGeoJSON(
+          itemCollections?.find(
+            (iC) => iC.collection_id === currentStacCollection.id,
+          ),
+        );
       }
       if (formMap) {
         const map = formMap.current?.getMap();
         if (map) await enablePopup(map);
       }
     })();
-  }, [currentCollection, setCurrentCollectionGeoJSON]);
+  }, [currentStacCollection, setCurrentCollectionGeoJSON]);
 
   useEffect(() => {
     // @ts-expect-error
@@ -139,33 +143,29 @@ const FormMap = () => {
               // For each drawn feature add as GM feature
               // Add geometry to tempSpatialFull.features (using collections) and use that throughout this
               if (tempSpatialFull) {
-              const nTSFFeatures = tempSpatialFull?.features.filter((f) => f.properties.collection.properties.label !== "Drawn features").map((f) => {
-                const collection = collections?.find(
-                  (c) =>
-                    c.properties.location ===
-                    f.properties.collection.properties.location,
-                );
-                const foundFeature = collection?.features.find(
-                  (g) =>
-                    g.properties[
-                      g.properties.collection.properties.id_key ?? "id"
-                    ] ===
-                    f.properties[
-                      f.properties.collection.properties.id_key ?? "id"
-                    ],
-                );
-                const featureWithGeometry = structuredClone(f);
-                // @ts-expect-error
-                featureWithGeometry.geometry = foundFeature?.geometry;
-                return featureWithGeometry;
-              });
-              const tempSpatialFullWithGeometry = structuredClone(tempSpatialFull);
-              tempSpatialFullWithGeometry.features = nTSFFeatures;
-              tempSpatialFullWithGeometry?.features?.forEach((dF) => {
-                // @ts-expect-error
-                newGm.features.importGeoJsonFeature(dF);
-              });
-              setTempSpatialFull(tempSpatialFullWithGeometry);
+                const nTSFFeatures = tempSpatialFull?.features
+                  .filter((f) => f.collection !== "Drawn features")
+                  .map((f) => {
+                    const collection = f.collection;
+                    const foundFeature = itemCollections
+                      ?.find((iC) => iC.collection_id === collection)
+                      ?.features.find(
+                        (g) => g.properties.id === f.properties.id,
+                      );
+                    const featureWithGeometry = structuredClone(f);
+                    // @ts-expect-error
+                    featureWithGeometry.geometry = foundFeature?.geometry;
+                    return featureWithGeometry;
+                  });
+                const tempSpatialFullWithGeometry =
+                  structuredClone(tempSpatialFull);
+                tempSpatialFullWithGeometry.features = nTSFFeatures;
+                tempSpatialFullWithGeometry?.features?.forEach((dF) => {
+                  if (dF.geometry)
+                    // @ts-expect-error
+                    newGm.features.importGeoJsonFeature(dF);
+                });
+                setTempSpatialFull(tempSpatialFullWithGeometry);
               }
               // ?.filter(
               //   (f) =>
@@ -186,7 +186,7 @@ const FormMap = () => {
                 ? geojsonData.features.findIndex(
                     (f: any) =>
                       f.properties.id === event.feature.id &&
-                      f.properties.collection === "Drawn features",
+                      f.collection === "Drawn features",
                   )
                 : -1;
               if (existingFeatureIndex > -1) {
@@ -205,6 +205,7 @@ const FormMap = () => {
                 existingSource?.setData(geojsonData);
               }
             });
+            // TODO
             map.on(
               "gm:globaleditmodetoggled",
               async (event: GlobalEditToggledFwdEvent) => {
@@ -246,7 +247,8 @@ const FormMap = () => {
                 drawnFeatureName,
                 drawnFeatureCategory,
                 formMap,
-                collections!,
+                stacCollections!,
+                itemCollections!,
                 tempSpatialFull!,
                 // @ts-expect-error
                 drawnGeojson,
@@ -268,7 +270,8 @@ const FormMap = () => {
                 },
               };
               geojsonData.features[0].properties.collection = {};
-              geojsonData.features[0].properties.collection.properties = geojsonData.properties;
+              geojsonData.features[0].properties.collection.properties =
+                geojsonData.properties;
               setTempSpatialFull(geojsonData);
             });
             // Show selected features from spatialFull as map layer
@@ -298,18 +301,11 @@ const FormMap = () => {
             // Show popup on click of already selected features
             map.on("click", "featureLayer", async (e) => {
               // @ts-expect-error
-              if (e.features[0].properties.collection?.features)
-                // @ts-expect-error
-                delete e.features[0].properties.collection.features;
-              // @ts-expect-error
-              e.features[0].properties.collection = JSON.parse(
-                // @ts-expect-error
-                e.features[0].properties.collection,
-              );
-              // @ts-expect-error
-              const collection = e.features[0].properties.collection;
+              const collection = e.features[0].collection;
               // Add popup for currently selected feature layer (drawn and not drawn)
-              setSelectedFeatureCategory(collection.properties);
+              setCurrentStacCollection(
+                stacCollections?.find((c) => c.id === collection),
+              );
               // @ts-expect-error
               setSelectedFeature(e.features[0]);
               setLngLat([e.lngLat.lng, e.lngLat.lat]);
@@ -333,7 +329,7 @@ const FormMap = () => {
       <NavigationControl />
       <FullscreenControl />
       <ScaleControl />
-      {currentCollectionGeoJSON && currentCollection && (
+      {currentCollectionGeoJSON && currentStacCollection && (
         <Source id="geojson" type="geojson" data={currentCollectionGeoJSON}>
           <Layer
             id="featuresFill"
@@ -353,7 +349,7 @@ const FormMap = () => {
         <Popup
           closeOnClick={false}
           onClose={() => {
-            setSelectedFeatureCategory(undefined);
+            // setSelectedFeatureCategory(undefined);
           }}
           longitude={lngLat[0]}
           latitude={lngLat[1]}
@@ -365,24 +361,12 @@ const FormMap = () => {
             <div className="tw:flex tw:justify-between tw:w-full tw:gap-4">
               <div className="tw:w-full">
                 <span className="tw:text-xl">
-                  <strong>
-                    {
-                      selectedFeature.properties[
-                        selectedFeature.properties.collection.properties
-                          .label_key ?? "label"
-                      ]
-                    }
-                  </strong>
+                  <strong>{selectedFeature.properties.title}</strong>
                 </span>
                 <br />
-                {(currentCollection || selectedFeatureCategory) && (
+                {currentStacCollection && (
                   <span className="tw:text-md">
-                    <strong>
-                      Category:{" "}
-                      {currentCollection && !selectedFeatureCategory
-                        ? currentCollection.label
-                        : selectedFeatureCategory?.label}
-                    </strong>
+                    <strong>Category: {currentStacCollection.title}</strong>
                   </span>
                 )}
               </div>
@@ -401,14 +385,7 @@ const FormMap = () => {
               onClick={async () => {
                 const featureToRemoveIndex =
                   tempSpatialFull?.features.findIndex(
-                    (f) =>
-                      f.properties[
-                        f.properties.collection.properties.id_key ?? "id"
-                      ] ===
-                      selectedFeature.properties[
-                        selectedFeature.properties.collection.properties
-                          .id_key ?? "id"
-                      ],
+                    (f) => f.properties.id === selectedFeature.properties.id,
                   );
                 // Convert from MapLibre Feature to GeoJSON Feature
                 let newSelectedFeatures = tempSpatialFull?.features
@@ -435,19 +412,12 @@ const FormMap = () => {
                 else {
                   const selectedFeatureAsGeoJSONFeature = {
                     type: "Feature",
-                    id:
-                      selectedFeature.id ??
-                      selectedFeature.properties[
-                        selectedFeature.properties.collection.properties
-                          .id_key ?? "id"
-                      ],
+                    id: selectedFeature.properties.id,
+                    // @ts-expect-error
+                    collection: selectedFeature.collection,
                     geometry: selectedFeature.geometry,
                     properties: selectedFeature.properties,
                   };
-                  const selectedFeatureGeoJSONWithoutCollections =
-                    structuredClone(selectedFeatureAsGeoJSONFeature);
-                  delete selectedFeatureGeoJSONWithoutCollections.properties
-                    .collection.features;
                   // // @ts-expect-error
                   // gm?.features.importGeoJsonFeature(selectedFeatureGeoJSONWithoutCollections);
                   // TODO: Fix issue of selection
@@ -455,11 +425,7 @@ const FormMap = () => {
                   newSelectedFeatures =
                     tempSpatialFull?.features &&
                     !tempSpatialFull?.features.find(
-                      (f) =>
-                        f.properties[currentCollection?.id_key ?? "id"] ===
-                        selectedFeature.properties[
-                          currentCollection?.id_key ?? "id"
-                        ],
+                      (f) => f.id === selectedFeature.properties.id,
                     )
                       ? [
                           ...tempSpatialFull.features,
@@ -474,53 +440,24 @@ const FormMap = () => {
                   setTempSpatialFull(newTempSpatialFull);
                   // Remvoe the feature from the MapLibre featureSource Source (also removes the highlight)
                   // Remove giant features array to prevent recursion error in MapLibre usage
-                  const nTSFWithoutCollections =
-                    structuredClone(newTempSpatialFull);
-                  nTSFWithoutCollections.features =
-                    nTSFWithoutCollections.features.map((f) => {
-                      delete f.properties.collection.features;
-                      return f;
-                    });
                   // @ts-expect-error
-                  featureSource?.setData(nTSFWithoutCollections);
+                  featureSource?.setData(newTempSpatialFull);
                 } else {
-                  const newTempSpatialFull = {
+                  const newTempSpatialFull: ItemCollection = {
                     type: "FeatureCollection",
                     features: newSelectedFeatures,
-                    properties: {
-                      label: "Dataset's geospatial features",
-                      description:
-                        "Geospatial features selected by a dataset publisher for a CKAN dataset using the ckanext-gztr CKAN extension.",
-                      source: {
-                        // TODO: Get source info from site
-                        description: window.location.origin,
-                      },
-                    },
+                    links: [],
                   };
                   setTempSpatialFull(newTempSpatialFull);
                   // Add the feature to the MapLibre featureSource Source (which is then highlighted as a selected feature)
                   // Remove giant features array to prevent recursion error in Geoman usage
-                  const nTSFWithoutCollections =
-                    structuredClone(newTempSpatialFull);
-                  nTSFWithoutCollections.features =
-                    nTSFWithoutCollections.features.map((f) => {
-                      delete f.properties.collection.features;
-                      return f;
-                    });
                   // @ts-expect-error
-                  featureSource?.setData(nTSFWithoutCollections);
+                  featureSource?.setData(newTempSpatialFull);
                 }
               }}
             >
               {tempSpatialFull?.features.find(
-                (f) =>
-                  f.properties[
-                    f.properties.collection.properties.label_key ?? "label"
-                  ] ===
-                  selectedFeature.properties[
-                    selectedFeature.properties.collection.properties
-                      .label_key ?? "label"
-                  ],
+                (f) => f.properties.id === selectedFeature.properties.id,
               )
                 ? "Remove"
                 : "Select"}{" "}

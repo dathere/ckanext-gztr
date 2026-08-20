@@ -1,8 +1,75 @@
 ---
 title: "Geospatial data"
-description: Download geospatial collection data that are ready for usage on your CKAN instance.
+description: Learn how geospatial data is organized with ckanext-gztr and data sources to retrieve data from.
 icon: Earth
 ---
 
-TODO
+import { Backlight } from "@/components/ui/backlight"
 
+<Backlight>![Geospatial data banner](/media/banners/geospatial-data.png)</Backlight>
+
+## How ckanext-gztr handles geospatial data
+
+As mentioned in the installation documentation, ckanext-gztr organizes geospatial data using the [STAC](https://stacspec.org) specification. This is because by default ckanext-gztr involves setting up a storage using the storage system introduced in CKAN 2.12. This storage is where GeoParquet files are stored (based on the sysadmin's uploaded GeoJSON files) and the STAC API and custom CKAN Action API endpoints make use of this storage for transforming and returning geospatial data in the expected format. Therefore the STAC specification works well for cataloging the geospatial data in a common open format.
+
+![gztr_collection_create flow](/media/gztr_collection_create_flow.excalidraw.png)
+
+Cataloging the geospatial data on the CKAN instance however introduces the expectation that the geospatial data is maintained by the CKAN instance's sysadmin(s). For example if a geospatial collection of city boundaries for a state is added for this year then the city boundaries may change by the next year or even earlier than that and may need to be updated.
+
+Therefore to achieve **automated metadata maintenance** differs on a case-by-case basis. ckanext-gztr provides an avenue for cataloging data in the storage with a requirement for unique feature IDs per geospatial collection and allowing updates through the CKAN API. This way when specific use cases arise for automation then there can be separate processes developed for updating the GeoParquet files in the storage on a periodic basis along with ensuring that datasets continue to refer to the correct feature IDs in their metadata.
+
+## Managing geospatial data with a medallion-like architecture
+
+As a CKAN sysadmin, managing geospatial data may be a new feat especially when various methods exist. For a better conceptual vision of how the geospatial data can be processed and organized, we suggest **loosely** following a medallion architecture as one method for handling your geospatial data with ckanext-gztr.
+
+The following diagram is provided by Matt Forrest from Wherobots [in this article](https://wherobots.com/blog/geospatial-medallion-architecture/).
+
+![Geospatial medallion architecture diagram](/media/geospatial-medallion-architecture.webp)
+
+<Callout title="Note">ckanext-gztr and datHere are not affiliated with Wherobots and Matt Forrest.</Callout>
+
+The installation process we document does not cover having a data lake such as [Apache Iceberg](https://iceberg.apache.org), and storing the original raw data may be unnecessary for the purposes of the ckanext-gztr extension which already stores GeoParquet files in the `gztr` storage. You can consider Apache Iceberg separately in a production setting.
+
+We opt to document a relatively straightforward and manual process to get started and then a CKAN sysadmin can identify what flows work best for their CKAN instance and software architecture for automation.
+
+Here's a summary of the straightforward approach:
+
+| Tier | Process |
+| ---- | ---------------- |
+| Bronze | Load geospatial data (external API, local files) to a local device or server. GeoJSON, Shapefile, etc. |
+| Silver | Format your file as described in the installation section (`id` and `properties.title` for each `Feature`) then upload the file through the `/api/3/action/file_create` or `/api/3/action/gztr_collection_create` endpoint, storing the data as a GeoParquet file(s). Update the STAC Catalog (`catalog.json`) and STAC Collections (`collections.json`) files in the `gztr` storage too. |
+| Gold | The GeoParquet Silver tier is enough for ckanext-gztr to provide a STAC API which the frontend gazetteer maps use (this is why we mention "loosely" and "medallion-**like**"). However one could reuse the `gztr` storage for other files or set up other flows. |
+
+In a production setting you could orchestrate ETL processes with software such as [Apache Airflow](https://airflow.apache.org) into a data lake such as [Apache Iceberg](https://iceberg.apache.org/) with geospatial extensions enabled. If the `gztr` storage is configured as an S3 bucket or other external storage then adding GeoParquet files directly to the storage can also work so long as the STAC Catalog and STAC Collections files are updated in the `gztr` storage too. On a relatively simpler scale one could set up cron jobs or [CKAN background jobs](https://docs.ckan.org/en/latest/maintaining/background-tasks.html) instead.
+
+{/* TODO: Diagram example of ETL */}
+{/* TODO: Video tutorial of ETL */}
+
+## Tutorials on how to add geospatial data from external sources to ckanext-gztr
+
+There are numerous data sources to retrieve data from and they differ based on your CKAN instance's region and purpose along with where you plan on running your ETL process.
+
+We provide a JupyterLab you can explore to learn how to retrieve, transform, and upload geospatial data from various data sources by clicking the button below (takes a moment to load).
+
+{/* TODO: GIF */}
+
+import { MicroscopeIcon } from "lucide-react";
+
+<div class="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon class="mr-2 w-4 h-4 my-auto" /> Open JupyterLab</a></div>
+
+Most of the Jupyter Notebooks in the JupyterLab demonstrate using Python with [Apache SedonaDB](https://sedona.apache.org/sedonadb/latest/) for data retrieval and transformation along with the [ckanapi](https://github.com/ckan/ckanapi) Python library for uploading the file to a CKAN instance. Occasionally we also use the Python [requests](https://requests.readthedocs.io/en/latest/) library to retrieve data.
+
+## Tutorials on how to use an orchestrator to manage geospatial data
+
+The previous section has multiple notebooks that demonstrate a workflow which straightforward CKAN deployments can follow for adding new geospatial data. However production setups may involve orchestration software for automating and managing the data engineering process.
+
+We therefore additionally provide the following example tutorials with orchestration-related software:
+
+<Cards>
+  <Card icon={<img alt="Apache Airflow logo" width={20} height={20} src="/media/logos/devicon--apacheairflow.svg" />} href="/docs/geospatial-data/etl-tutorials/apache-airflow" title="Apache Airflow" />
+  <Card icon={<img alt="RQ logo" width={20} height={20} src="/media/logos/rq_logo.png" />} href="/docs/geospatial-data/etl-tutorials/ckan-rq" title="CKAN RQ background jobs" />
+  <Card icon={<img className="dark:invert" alt="Cron image" width={20} height={20} src="/media/logos/arcticons--cron.svg" />} href="/docs/geospatial-data/etl-tutorials/cron" title="Cron jobs" />
+  <Card icon={<img className="dark:invert" alt="Prefect logo" width={20} height={20} src="/media/logos/simple-icons--prefect.svg" />} href="/docs/geospatial-data/etl-tutorials/prefect" title="Prefect" />
+</Cards>
+
+Each orchestration software has a single relatively simple scenario that will be covered that mimic the Jupyter Notebooks in purpose. Your setup may be robust and differ based on your use case so feel free to modify examples as needed for your use case.

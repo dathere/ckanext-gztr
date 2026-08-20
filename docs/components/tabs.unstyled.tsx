@@ -1,17 +1,17 @@
 "use client";
 
+import * as Primitive from "@radix-ui/react-tabs";
 import {
   type ComponentProps,
   createContext,
   useContext,
+  useEffectEvent,
   useLayoutEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
-import * as Primitive from "@radix-ui/react-tabs";
 import { mergeRefs } from "../lib/merge-refs";
-import { useEffectEvent } from "react";
 
 type ChangeListener = (v: string) => void;
 const listeners = new Map<string, ChangeListener[]>();

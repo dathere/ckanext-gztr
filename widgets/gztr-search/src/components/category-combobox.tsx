@@ -19,9 +19,9 @@ import { useFormMap } from "@/stores/form-map-store";
 
 export function CategoryCombobox() {
   const [open, setOpen] = useState(false);
-  const categories = useFormMap((state) => state.categories);
-  const currentCategory = useFormMap((state) => state.currentCategory);
-  const setCurrentCategory = useFormMap((state) => state.setCurrentCategory);
+  const collections = useFormMap((state) => state.collections);
+  const currentCollection = useFormMap((state) => state.currentCollection);
+  const setCurrentCollection = useFormMap((state) => state.setCurrentCollection);
 
   return (
     <Popover modal={true} open={open} onOpenChange={setOpen}>
@@ -34,13 +34,13 @@ export function CategoryCombobox() {
         >
           <span>
             <MapIcon className="tw:inline-block tw:w-4 tw:h-4 tw:mr-2 tw:opacity-50" />
-            {categories && currentCategory ? (
-              categories.find(
-                (category) => category.location === currentCategory.location,
-              )?.label
+            {collections && currentCollection ? (
+              collections.find(
+                (collection) => collection.id === currentCollection.id,
+              )?.title
             ) : (
               <span className="tw:text-muted-foreground">
-                Select a feature category to show on the map.
+                Select a feature collection to show on the map.
               </span>
             )}
           </span>
@@ -53,17 +53,17 @@ export function CategoryCombobox() {
           <CommandList>
             <CommandEmpty>No category found.</CommandEmpty>
             <CommandGroup>
-              {categories?.map((category) => (
+              {collections?.map((collection) => (
                 <CommandItem
-                  key={category.location}
-                  value={category.location}
+                  key={collection.id}
+                  value={collection.id}
                   onSelect={(currentValue) => {
-                    setCurrentCategory(
-                      currentValue === currentCategory?.location
+                    setCurrentCollection(
+                      currentValue === currentCollection?.id
                         ? undefined
-                        : categories.find(
-                            (tempCategory) =>
-                              currentValue === tempCategory.location,
+                        : collections.find(
+                            (tempCollection) =>
+                              currentValue === tempCollection.id,
                           ),
                     );
                     setOpen(false);
@@ -73,12 +73,12 @@ export function CategoryCombobox() {
                   <CheckIcon
                     className={cn(
                       "tw:mr-2 tw:h-4 tw:w-4",
-                      currentCategory?.location === category.location
+                      currentCollection?.id === collection.id
                         ? "tw:opacity-100"
                         : "tw:opacity-0",
                     )}
                   />
-                  {category.label}
+                  {collection.title}
                 </CommandItem>
               ))}
             </CommandGroup>

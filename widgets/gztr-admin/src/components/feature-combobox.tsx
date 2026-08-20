@@ -1,4 +1,3 @@
-import * as turf from "@turf/turf";
 import Fuse from "fuse.js";
 import {
   ChevronDownIcon,
@@ -7,9 +6,10 @@ import {
   SearchIcon,
   SearchXIcon,
 } from "lucide-react";
-import type { Feature } from "maplibre-gl";
 import { useState } from "react";
-import type { FeatureCollectionExt } from "@/App";
+import type { StacItem } from "stac-ts";
+import type { ItemCollection } from "@/App";
+import { Button } from "@/components/ui/button";
 import {
   Collapsible,
   CollapsibleContent,
@@ -33,7 +33,6 @@ import {
 } from "@/components/ui/combobox";
 import { InputGroupAddon } from "@/components/ui/input-group";
 import { useFormMap } from "@/stores/form-map-store";
-import { Button } from "./ui/button";
 
 export function FeatureCombobox() {
   // Used to ensure the popup dropdown stays at and at the width of the combobox
@@ -41,10 +40,13 @@ export function FeatureCombobox() {
   const [userQuery, setUserQuery] = useState<string>();
   const [openCollapsibles, setOpenCollapsibles] = useState(false);
   const formMap = useFormMap((state) => state.formMap);
-  const collections = useFormMap((state) => state.collections);
-  const currentCollection = useFormMap((state) => state.currentCollection);
-  const setCurrentCollection = useFormMap(
-    (state) => state.setCurrentCollection,
+  const stacCollections = useFormMap((state) => state.stacCollections);
+  const itemCollections = useFormMap((state) => state.itemCollections);
+  const currentStacCollection = useFormMap(
+    (state) => state.currentStacCollection,
+  );
+  const setCurrentStacCollection = useFormMap(
+    (state) => state.setCurrentStacCollection,
   );
   const tempSpatialFull = useFormMap((state) => state.tempSpatialFull);
   const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
@@ -58,21 +60,15 @@ export function FeatureCombobox() {
         else setOpenCollapsibles(false);
       }}
       on
-      items={collections?.filter((c) => !c.properties.quick_region_label)}
+      items={itemCollections}
       multiple
       // TODO: Identify scenarios where selected values still persist even after closing and opening the dialog
       value={tempSpatialFull?.features ?? []}
       isItemEqualToValue={(itemValue, value) => {
         return (
           Object.is(itemValue, value) ||
-          (itemValue.properties[
-            itemValue.properties.collection?.properties.id_key ?? "id"
-          ] ===
-            value.properties[
-              value.properties.collection?.properties.id_key ?? "id"
-            ] &&
-            itemValue.properties.collection?.properties.location ===
-              value.properties.collection?.properties.location)
+          (itemValue.id === value.id &&
+            itemValue.collection === value.collection)
         );
       }}
       // When user selection changes
@@ -80,36 +76,21 @@ export function FeatureCombobox() {
         // Get map layer info; e.g. for adding/removing a darker layer for the selected feature
         const map = formMap?.current?.getMap();
         const featureSource = map?.getSource("featureSource");
-        const newTempSpatialFull = {
+        const newTempSpatialFull: ItemCollection = {
           type: "FeatureCollection",
           features: value,
-          properties: {
-            label: "Dataset's geospatial features",
-            description:
-              "Geospatial features selected by a dataset publisher for a CKAN dataset using the ckanext-gztr CKAN extension.",
-            source: {
-              // TODO: Get source info from site
-              description: window.location.origin,
-            },
-          },
+          links: [],
         };
         setTempSpatialFull(newTempSpatialFull);
         // Add the feature to the MapLibre featureSource Source (which is then highlighted as a selected feature)
-        // Remove giant features array to prevent recursion error in Geoman usage
-        const nTSFWithoutCollections = structuredClone(newTempSpatialFull);
-        nTSFWithoutCollections.features = nTSFWithoutCollections.features.map(
-          (f) => {
-            delete f.properties.collection.features;
-            return f;
-          },
-        );
+        // Remove giant features array to prevent recursion error in Geoman usage;
         // @ts-expect-error
-        featureSource?.setData(nTSFWithoutCollections);
+        featureSource?.setData(newTempSpatialFull);
       }}
       // @ts-expect-error
-      filter={(collection: FeatureCollectionExt, query) => {
-        const featureLabels: string[] = collection.features.map(
-          (f) => f.properties[collection.properties.label_key ?? "label"],
+      filter={(collection: ItemCollection, query) => {
+        const featureLabels = collection.features.map(
+          (f) => f.properties.title,
         );
         const fuse = new Fuse(featureLabels, { threshold: 0.2 });
         return fuse.search(query).length > 0;
@@ -131,21 +112,35 @@ export function FeatureCombobox() {
           </div>
           <div className="tw:flex tw:flex-wrap tw:gap-2 tw:w-full">
             {tempSpatialFull?.features.map((feature) => (
-              <ComboboxChip className="tw:bg-sky-200" key={feature.id}>
-                {
-                  feature.properties[
-                    feature.properties.collection.properties.label_key ??
-                      "label"
-                  ]
-                }
+              <ComboboxChip
+              className="tw:bg-sky-200"
+                // @ts-expect-error
+                key={feature.properties.id}
+              >
+                {feature.properties.title}
                 <Button
                   className="tw:h-fit tw:has-[>svg]:p-1 tw:[&_svg:not([class*=size-])]:size-3"
                   variant="ghost"
                   onClick={() => {
                     const map = formMap?.current.getMap();
                     if (map) {
-                      // @ts-expect-error
-                      map.fitBounds(turf.bbox(feature));
+                      try {
+                        if (feature.bbox)
+                          // @ts-expect-error
+                          map.fitBounds(feature.bbox);
+                        else if (feature.properties.bbox)
+                          // @ts-expect-error
+                          map.fitBounds(JSON.parse(feature.properties.bbox));
+                      } catch (e) {
+                        console.error(
+                          "Error while attempting to zoom to feature bounds.",
+                        );
+                      }
+                      setCurrentStacCollection(
+                        stacCollections?.find(
+                          (c) => c.id === feature.collection,
+                        ),
+                      );
                     }
                   }}
                 >
@@ -161,9 +156,9 @@ export function FeatureCombobox() {
         <ComboboxEmpty>No geospatial features found.</ComboboxEmpty>
         <ComboboxList>
           {/* Refers to the value of the items attribute in <Combobox /> */}
-          {(collection: FeatureCollectionExt, index) => (
+          {(collection: ItemCollection, index) => (
             <ComboboxGroup
-              key={collection.properties.location}
+              key={collection.collection_id}
               items={collection.features}
             >
               <Collapsible
@@ -172,19 +167,29 @@ export function FeatureCombobox() {
               >
                 <CollapsibleTrigger className="tw:w-full tw:flex tw:justify-between tw:items-center">
                   <ComboboxLabel className="tw:text-md">
-                    {collection.properties.label}
+                    {
+                      stacCollections?.find(
+                        (c) => c.id === collection.collection_id,
+                      )?.title
+                    }
                   </ComboboxLabel>
                   <div className="tw:flex tw:items-center">
                     <Button
                       className="tw:w-4 tw:h-4 tw:p-0"
                       onClick={() => {
-                        if (currentCollection) setCurrentCollection(undefined);
-                        else setCurrentCollection(collection.properties);
+                        if (currentStacCollection)
+                          setCurrentStacCollection(undefined);
+                        else
+                          setCurrentStacCollection(
+                            stacCollections?.find(
+                              (c) => c.id === collection.collection_id,
+                            ),
+                          );
                       }}
                       variant="ghost"
                     >
-                      {currentCollection?.location ===
-                      collection.properties.location ? (
+                      {currentStacCollection?.id ===
+                      collection.collection_id ? (
                         <SearchXIcon className="tw:w-4 tw:h-4 tw:mr-1" />
                       ) : (
                         <SearchIcon className="tw:w-4 tw:h-4 tw:mr-1" />
@@ -197,11 +202,8 @@ export function FeatureCombobox() {
                 </CollapsibleTrigger>
                 <CollapsibleContent>
                   <ComboboxCollection>
-                    {(feature: Feature) => {
-                      const featureLabel: string =
-                        feature.properties[
-                          collection.properties.label_key ?? "label"
-                        ];
+                    {(feature: StacItem) => {
+                      const featureLabel = feature.properties.title;
                       const fuse = new Fuse([featureLabel], { threshold: 0.2 });
                       if (
                         !userQuery ||
@@ -214,16 +216,16 @@ export function FeatureCombobox() {
                               const map = formMap?.current.getMap();
                               if (map) {
                                 // @ts-expect-error
-                                map.fitBounds(turf.bbox(feature));
-                                setCurrentCollection(collection.properties);
+                                map.fitBounds(feature.bbox);
+                                setCurrentStacCollection(
+                                  stacCollections?.find(
+                                    (c) => c.id === collection.collection_id,
+                                  ),
+                                );
                               }
                             }}
-                            key={
-                              feature.properties[
-                                feature.properties.collection.properties
-                                  .id_key ?? "id"
-                              ]
-                            }
+                            // @ts-expect-error
+                            key={feature.properties.id}
                             value={feature}
                           >
                             {featureLabel}
@@ -237,8 +239,12 @@ export function FeatureCombobox() {
                                 const map = formMap?.current.getMap();
                                 if (map) {
                                   // @ts-expect-error
-                                  map.fitBounds(turf.bbox(feature));
-                                  setCurrentCollection(collection.properties);
+                                  map.fitBounds(feature.bbox);
+                                  setCurrentStacCollection(
+                                    stacCollections?.find(
+                                      (c) => c.id === collection.collection_id,
+                                    ),
+                                  );
                                 }
                               }}
                             >
@@ -270,9 +276,9 @@ export function FeatureCombobox() {
                   );
                 }}
               </ComboboxCollection> */}
-              {collections &&
-                collections.length > 1 &&
-                index < collections.length - 1 && <ComboboxSeparator />}
+              {stacCollections &&
+                stacCollections.length > 1 &&
+                index < stacCollections.length - 1 && <ComboboxSeparator />}
             </ComboboxGroup>
           )}
         </ComboboxList>

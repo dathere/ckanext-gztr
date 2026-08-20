@@ -1,7 +1,7 @@
 import type { Geoman } from "@geoman-io/maplibre-geoman-free";
 import type { Map as GLMap } from "maplibre-gl";
 import { create } from "zustand";
-import type { FeatureCategory } from "@/App";
+import type { StacCollection } from "stac-ts";
 
 interface FormMapState {
   searchMap: GLMap | undefined;
@@ -11,9 +11,6 @@ interface FormMapState {
   // GeoJSON for currentCategory, showing category map layer
   geojson: any;
   setGeojson: (geojson: any) => void;
-  // Statewide extent GeoJSON
-  stateGeojson: any;
-  setStateGeojson: (stateGeojson: any) => void;
   // spatial field used in ckanext-spatial for indexing (simplified GeoJSON)
   spatial: any;
   setSpatial: (spatial: any) => void;
@@ -23,10 +20,10 @@ interface FormMapState {
   // tempSpatialFull field used in ckanext-gztr for temporary state management and properties within the modal
   tempSpatialFull: any;
   setTempSpatialFull: (tempSpatialFull: any) => void;
-  categories: FeatureCategory[] | undefined;
-  setCategories: (categories: FeatureCategory[] | undefined) => void;
-  currentCategory: FeatureCategory | undefined;
-  setCurrentCategory: (currentCategory: FeatureCategory | undefined) => void;
+  collections: StacCollection[] | undefined;
+  setCollections: (categories: StacCollection[] | undefined) => void;
+  currentCollection: StacCollection | undefined;
+  setCurrentCollection: (currentCollection: StacCollection | undefined) => void;
   searchValue: string | undefined;
   setSearchValue: (searchValue: string) => void;
   statewideEnabled: boolean;
@@ -52,18 +49,16 @@ export const useFormMap = create<FormMapState>((set) => ({
   setViewState: (viewState) => set(() => ({ viewState })),
   geojson: undefined,
   setGeojson: (geojson) => set(() => ({ geojson })),
-  stateGeojson: undefined,
-  setStateGeojson: (stateGeojson) => set(() => ({ stateGeojson })),
   spatial: undefined,
   setSpatial: (spatial) => set(() => ({ spatial })),
   spatialFull: undefined,
   setSpatialFull: (spatialFull) => set(() => ({ spatialFull })),
   tempSpatialFull: undefined,
   setTempSpatialFull: (tempSpatialFull) => set(() => ({ tempSpatialFull })),
-  categories: undefined,
-  setCategories: (categories) => set(() => ({ categories })),
-  currentCategory: undefined,
-  setCurrentCategory: (currentCategory) => set(() => ({ currentCategory })),
+  collections: undefined,
+  setCollections: (collections) => set(() => ({ collections })),
+  currentCollection: undefined,
+  setCurrentCollection: (currentCollection) => set(() => ({ currentCollection })),
   searchValue: undefined,
   setSearchValue: (searchValue) => set(() => ({ searchValue })),
   features: [],

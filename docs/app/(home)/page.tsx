@@ -1,10 +1,12 @@
 /** biome-ignore-all lint/suspicious/noArrayIndexKey: Would need to look into this trivial issue */
 "use client";
 
+import { cva } from "class-variance-authority";
 import { CodeBlock } from "fumadocs-ui/components/codeblock";
 import defaultMdxComponents from "fumadocs-ui/mdx";
-import { cn } from "@/lib/cn";
 import {
+  ArrowLeftCircleIcon,
+  ArrowRightCircleIcon,
   BlocksIcon,
   GitMergeIcon,
   HomeIcon,
@@ -19,12 +21,20 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { type HTMLProps, type ReactNode, useState } from "react";
+import { type HTMLProps, type ReactNode, useEffect, useState } from "react";
 import { Pre } from "@/components/codeblock";
-import { buttonVariants } from "@/components/ui/button";
-import SelectFeaturesDemo from "./select-features-demo.gif";
-import SearchDemo from "./search-demo.gif";
-import { cva } from "class-variance-authority";
+import { BlurFade } from "@/components/ui/blur-fade";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import {
+  Carousel,
+  type CarouselApi,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@/components/ui/carousel";
+import { cn } from "@/lib/cn";
 
 export default function HomePage() {
   const gridColor =
@@ -47,6 +57,9 @@ export default function HomePage() {
         >
           <div className="relative mb-4">
             <Hero />
+            <BlurFade delay={1} inView>
+              <LogoCloud02 />
+            </BlurFade>
             {/* <Why /> */}
           </div>
         </div>
@@ -80,8 +93,40 @@ export default function HomePage() {
   );
 }
 
+import confetti from "canvas-confetti";
+import LogoCloud02 from "@/components/blocks/logo-cloud-02";
+import { Backlight } from "@/components/ui/backlight";
+
+const sideConfetti = () => {
+  const end = Date.now() + 1 * 1000;
+
+  const frame = () => {
+    if (Date.now() > end) return;
+
+    confetti({
+      particleCount: 2,
+      angle: 60,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 0, y: 0.5 },
+      // colors: colors,
+    });
+    confetti({
+      particleCount: 2,
+      angle: 120,
+      spread: 55,
+      startVelocity: 60,
+      origin: { x: 1, y: 0.5 },
+      // colors: colors,
+    });
+
+    requestAnimationFrame(frame);
+  };
+
+  frame();
+};
+
 function Hero() {
-  const { Card, Cards } = defaultMdxComponents;
   return (
     <div className="relative z-2 flex flex-col border-x border-t bg-fd-background/80 px-4 pt-12 max-md:text-center md:px-12 md:pt-16 [.uwu_&]:hidden overflow-hidden">
       <div
@@ -102,51 +147,75 @@ function Hero() {
             "repeating-linear-gradient(65deg, var(--color-purple-300), var(--color-purple-300) 12px, color-mix(in oklab, var(--color-blue-600) 30%, transparent) 20px, transparent 200px)",
         }}
       />
-      <h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1>
+      <BlurFade>
+        <h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1>
+      </BlurFade>
       <h1 className="mb-8 max-w-[800px] text-4xl font-medium max-md:hidden">
         <span className="text-5xl">
-          ckanext-gztr <MapPinnedIcon className="inline-block w-10 h-10 pb-1" />
+          <BlurFade>
+            ckanext-gztr{" "}
+            <MapPinnedIcon className="inline-block w-10 h-10 pb-1" />
+          </BlurFade>
         </span>
-        <br />
-        Interactive gazetteer maps for your datasets.
+        <BlurFade delay={0.5}>
+          Interactive gazetteer maps for your datasets.
+        </BlurFade>
       </h1>
-      <p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        ckanext-gztr is a{" "}
-        <Link href="https://ckan.org" className="text-blue-400">
-          CKAN
-        </Link>{" "}
-        extension that lets you associate features on an interactive map for
-        each dataset and also provides spatial search by drawing a bounding box.
-      </p>
-      <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
-        Provided by{" "}
-        <Link className="text-fd-info" href="https://dathere.com">
-          datHere
-        </Link>
-        .
-      </p>
-      <div className="inline-flex items-center gap-3 max-md:mx-auto">
-        <Link
-          href="/docs"
-          className={cn(
-            buttonVariants({ size: "lg", className: "rounded-full" }),
-          )}
-        >
-          Get Started
-        </Link>
-        <Link
-          href="https://github.com/dathere/ckanext-gztr"
-          className={cn(
-            buttonVariants({
-              variant: "secondary",
-              size: "lg",
-              className: "rounded-full",
-            }),
-          )}
-        >
-          Source Code
-        </Link>
-      </div>
+      <BlurFade delay={1}>
+        <p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
+          ckanext-gztr is a{" "}
+          <Link href="https://ckan.org" className="text-blue-400">
+            CKAN
+          </Link>{" "}
+          extension that lets you associate features on an interactive map for
+          each dataset, perform geospatial search, expose a{" "}
+          <Link href="https://stacspec.org" className="text-blue-400">
+            STAC
+          </Link>{" "}
+          API, and{" "}
+          <Link href="/docs/features" className="text-blue-400">
+            more
+          </Link>
+          .
+        </p>
+      </BlurFade>
+      <BlurFade delay={1.25}>
+        <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
+          Provided by{" "}
+          <Link className="text-fd-info" href="https://dathere.com">
+            datHere
+          </Link>
+          .
+          {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
+        </p>
+      </BlurFade>
+      <BlurFade delay={1.5}>
+        <div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
+          <Backlight blur={5}>
+            <Link
+              href="/docs"
+              className={cn(
+                buttonVariants({ size: "lg", className: "rounded-full" }),
+              )}
+              onClick={() => sideConfetti()}
+            >
+              Get started
+            </Link>
+          </Backlight>
+          <Link
+            href="https://github.com/dathere/ckanext-gztr"
+            className={cn(
+              buttonVariants({
+                variant: "secondary",
+                size: "lg",
+                className: "rounded-full",
+              }),
+            )}
+          >
+            Source code
+          </Link>
+        </div>
+      </BlurFade>
       {/* <Cards>
         <Card icon={<ZapIcon />} href="/docs/builder" title="Quick start">
           Install ckanext-gztr on your CKAN instance
@@ -169,56 +238,124 @@ function Hero() {
           View the source code of ckanext-gztr on GitHub
         </Card>
       </Cards> */}
-      <PreviewImages />
+      <FeaturesCarousel />
+      {/* TODO: More sections, e.g. problems solved, software architecture, portals using extension, learn/collaborate, etc. */}
+      {/* Refer to stacspec.org and Apache SedonaDB for examples of home pages */}
     </div>
   );
 }
 
-function PreviewImages() {
-  const [active, setActive] = useState(0);
-  const previews = [
+function FeaturesCarousel() {
+  const [api, setApi] = useState<CarouselApi>();
+  const [current, setCurrent] = useState(0);
+  const features = [
     {
-      image: SelectFeaturesDemo,
+      src: "/media/nmwdc-data-publisher-gazetteer-demo.mp4",
+      type: "video",
       name: "Select map features",
     },
     {
-      image: SearchDemo,
+      src: "/media/nmwdc-public-gazetteer-search-demo.mp4",
+      type: "video",
       name: "Search by bounding box",
+    },
+    {
+      src: "/media/datasets-page.png",
+      type: "image",
+      name: "Minimaps",
+    },
+    {
+      src: "/media/gztr_collection_create_flow.excalidraw.png",
+      type: "image",
+      name: "Interact with STAC API",
+    },
+    {
+      src: "/media/geoconnex-diagram.png",
+      type: "image",
+      name: "Integrate with Geoconnex",
     },
   ];
 
+  useEffect(() => {
+    if (!api) {
+      return;
+    }
+
+    setCurrent(api.selectedScrollSnap() + 1);
+
+    api.on("select", () => {
+      setCurrent(api.selectedScrollSnap() + 1);
+    });
+  }, [api]);
+
   return (
-    <div className="p-8 min-w-[600px] md:min-w-[800px] overflow-hidden xl:-mx-12 dark:[mask-image:linear-gradient(to_top,transparent,white_40px)]">
-      <div className="absolute flex flex-row left-1/2 -translate-1/2 bottom-4 z-2 p-1 rounded-full bg-fd-card border shadow-xl dark:shadow-fd-background">
-        <div
-          role="none"
-          className="absolute bg-fd-primary rounded-full w-48 h-9 transition-transform z-[-1]"
-          style={{
-            transform: `translateX(calc(var(--spacing) * 48 * ${active}))`,
-          }}
-        />
-        {previews.map((item, i) => (
-          <button
-            key={i}
-            className={cn(previewButtonVariants({ active: active === i }))}
-            onClick={() => setActive(i)}
-          >
-            {item.name}
-          </button>
-        ))}
-      </div>
-      {previews.map((item, i) => (
-        <Image
-          key={i}
-          src={item.image}
-          alt="preview"
-          priority
-          className={cn(
-            "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0",
-            active !== i && "hidden",
-          )}
-        />
-      ))}
+    <div className="mx-auto max-w-[75%] md:max-w-[90%] my-8">
+      <Carousel setApi={setApi} opts={{ loop: true }} className="w-full">
+        <CarouselContent>
+          {features.map((feature, index) => (
+            <CarouselItem key={index}>
+              <Card className="border-none shadow-none">
+                <CardContent className="flex justify-center p-0">
+                  <div className="flex flex-col justify-center">
+                    {feature.type === "video" ? (
+                      <video
+                        key={index}
+                        className={cn(
+                          "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0",
+                        )}
+                        style={{ borderRadius: "1rem" }}
+                        autoPlay
+                        muted
+                        loop
+                        controls={false}
+                        src={feature.src}
+                      />
+                    ) : (
+                      <Image
+                        key={index}
+                        src={feature.src}
+                        alt="preview"
+                        priority
+                        width={500}
+                        height={500}
+                        className={cn(
+                          "rounded-xl w-full select-none duration-1000 animate-in fade-in md:-mb-60 slide-in-from-bottom-12 lg:-mb-0",
+                        )}
+                      />
+                    )}
+                    <div className="flex mt-8">
+                      <Button
+                        className="w-fit h-fit p-0 rounded-full cursor-pointer"
+                        variant="ghost"
+                        onClick={() => {
+                          api?.scrollPrev();
+                        }}
+                      >
+                        <ArrowLeftCircleIcon />
+                      </Button>
+                      <Button className="dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1">
+                        {feature.name}
+                      </Button>
+                      <Button
+                        className="w-fit h-fit p-0 rounded-full cursor-pointer"
+                        variant="ghost"
+                        onClick={() => {
+                          api?.scrollNext();
+                        }}
+                      >
+                        <ArrowRightCircleIcon />
+                      </Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </CarouselItem>
+          ))}
+        </CarouselContent>
+      </Carousel>
+      {/* <div className="py-2 text-center text-sm text-muted-foreground">
+        {features.name}
+      </div> */}
     </div>
   );
 }

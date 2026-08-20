@@ -1,3 +1,7 @@
+# To prevent error: https://nextjs-forum.com/post/1486702171046281330
+packages: 
+  - .
+
 allowBuilds:
   esbuild: true
   sharp: true

@@ -9,6 +9,8 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const runAddressSearch = async (
+  // @ts-expect-error
+  config: any,
   search_query?: string,
   map?: FormMap,
   setAddressSearchResults?: (addressSearchResults: any[]) => void,
@@ -19,6 +21,7 @@ export const runAddressSearch = async (
     const result = await (
       await fetch(nominatimEndpoint, {
         headers: {
+          // TODO: User-Agent based on CKAN instance config
           "User-Agent": "New Mexico Water Data Hub",
         },
         signal: AbortSignal.timeout(5000),
