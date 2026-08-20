@@ -23,6 +23,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { type HTMLProps, type ReactNode, useEffect, useState } from "react";
 import { Pre } from "@/components/codeblock";
+import { BlurFade } from "@/components/ui/blur-fade";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
@@ -34,7 +35,6 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { cn } from "@/lib/cn";
-import { BlurFade } from "@/components/ui/blur-fade"
 
 export default function HomePage() {
   const gridColor =
@@ -57,7 +57,9 @@ export default function HomePage() {
         >
           <div className="relative mb-4">
             <Hero />
-            <BlurFade delay={1} inView><LogoCloud02 /></BlurFade>
+            <BlurFade delay={1} inView>
+              <LogoCloud02 />
+            </BlurFade>
             {/* <Why /> */}
           </div>
         </div>
@@ -91,15 +93,15 @@ export default function HomePage() {
   );
 }
 
+import confetti from "canvas-confetti";
 import LogoCloud02 from "@/components/blocks/logo-cloud-02";
 import { Backlight } from "@/components/ui/backlight";
-import confetti from "canvas-confetti";
 
 const sideConfetti = () => {
-  const end = Date.now() + 1 * 1000
+  const end = Date.now() + 1 * 1000;
 
   const frame = () => {
-    if (Date.now() > end) return
+    if (Date.now() > end) return;
 
     confetti({
       particleCount: 2,
@@ -108,7 +110,7 @@ const sideConfetti = () => {
       startVelocity: 60,
       origin: { x: 0, y: 0.5 },
       // colors: colors,
-    })
+    });
     confetti({
       particleCount: 2,
       angle: 120,
@@ -116,13 +118,13 @@ const sideConfetti = () => {
       startVelocity: 60,
       origin: { x: 1, y: 0.5 },
       // colors: colors,
-    })
+    });
 
-    requestAnimationFrame(frame)
-  }
+    requestAnimationFrame(frame);
+  };
 
-  frame()
-}
+  frame();
+};
 
 function Hero() {
   return (
@@ -145,62 +147,74 @@ function Hero() {
             "repeating-linear-gradient(65deg, var(--color-purple-300), var(--color-purple-300) 12px, color-mix(in oklab, var(--color-blue-600) 30%, transparent) 20px, transparent 200px)",
         }}
       />
-      <BlurFade><h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1></BlurFade>
+      <BlurFade>
+        <h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1>
+      </BlurFade>
       <h1 className="mb-8 max-w-[800px] text-4xl font-medium max-md:hidden">
         <span className="text-5xl">
-          <BlurFade>ckanext-gztr <MapPinnedIcon className="inline-block w-10 h-10 pb-1" /></BlurFade>
+          <BlurFade>
+            ckanext-gztr{" "}
+            <MapPinnedIcon className="inline-block w-10 h-10 pb-1" />
+          </BlurFade>
         </span>
-        <BlurFade delay={0.5}>Interactive gazetteer maps for your datasets.</BlurFade>
+        <BlurFade delay={0.5}>
+          Interactive gazetteer maps for your datasets.
+        </BlurFade>
       </h1>
-      <BlurFade delay={1}><p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
-        ckanext-gztr is a{" "}
-        <Link href="https://ckan.org" className="text-blue-400">
-          CKAN
-        </Link>{" "}
-        extension that lets you associate features on an interactive map for
-        each dataset, perform geospatial search, expose a{" "}
-        <Link href="https://stacspec.org" className="text-blue-400">
-          STAC
-        </Link>{" "}
-        API, and{" "}
-        <Link href="/docs/features" className="text-blue-400">
-          more
-        </Link>
-        .
-      </p></BlurFade>
-      <BlurFade delay={1.25}><p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
-        Provided by{" "}
-        <Link className="text-fd-info" href="https://dathere.com">
-          datHere
-        </Link>
-        .
-        {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
-      </p></BlurFade>
-      <BlurFade delay={1.5}><div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
-        <Backlight blur={5}>
-          <Link
-            href="/docs"
-            className={cn(
-              buttonVariants({ size: "lg", className: "rounded-full" }),
-            )}
-            onClick={() => sideConfetti()}
-          >
-            Get started
+      <BlurFade delay={1}>
+        <p className="mb-2 text-fd-muted-foreground md:max-w-[80%] md:text-xl">
+          ckanext-gztr is a{" "}
+          <Link href="https://ckan.org" className="text-blue-400">
+            CKAN
+          </Link>{" "}
+          extension that lets you associate features on an interactive map for
+          each dataset, perform geospatial search, expose a{" "}
+          <Link href="https://stacspec.org" className="text-blue-400">
+            STAC
+          </Link>{" "}
+          API, and{" "}
+          <Link href="/docs/features" className="text-blue-400">
+            more
           </Link>
-        </Backlight>
-        <Link
-          href="https://github.com/dathere/ckanext-gztr"
-          className={cn(
-            buttonVariants({
-              variant: "secondary",
-              size: "lg",
-              className: "rounded-full",
-            }),
-          )}
-        >
-          Source code
-        </Link>
-      </div>
+          .
+        </p>
+      </BlurFade>
+      <BlurFade delay={1.25}>
+        <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
+          Provided by{" "}
+          <Link className="text-fd-info" href="https://dathere.com">
+            datHere
+          </Link>
+          .
+          {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
+        </p>
+      </BlurFade>
+      <BlurFade delay={1.5}>
+        <div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
+          <Backlight blur={5}>
+            <Link
+              href="/docs"
+              className={cn(
+                buttonVariants({ size: "lg", className: "rounded-full" }),
+              )}
+              onClick={() => sideConfetti()}
+            >
+              Get started
+            </Link>
+          </Backlight>
+          <Link
+            href="https://github.com/dathere/ckanext-gztr"
+            className={cn(
+              buttonVariants({
+                variant: "secondary",
+                size: "lg",
+                className: "rounded-full",
+              }),
+            )}
+          >
+            Source code
+          </Link>
+        </div>
       </BlurFade>
       {/* <Cards>
         <Card icon={<ZapIcon />} href="/docs/builder" title="Quick start">

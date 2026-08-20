@@ -4,22 +4,53 @@ description: Features your CKAN water data hub includes when enabling the Geocon
 icon: Sparkles
 ---
 
-TODO
+import { Backlight } from "@/components/ui/backlight";
+
+<Backlight>![Geoconnex features](/media/banners/geoconnex-features.png)</Backlight>
+
+If your CKAN instance stores CKAN datasets about real-world hydrologic features or custom geospatial features with ckanext-gztr, you can opt-in to retrieve and share data with the Geoconnex water data knowledge graph.
+
+Explore the multiple benefits that this synchronization has to offer here, and on the next page we'll cover how to enable Geoconnex capabilities for your CKAN instance.
 
 ## Mint Persistent Identifiers (PIDs) for your CKAN instance's data
+
+![Geoconnex diagram](/media/geoconnex-diagram.png)
+
+{/* TODO: Description, diagram of mapping PID to CKAN dataset or feature collection */}
 
 ## Associate real-world features/locations with your CKAN datasets
 
 <video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-data-publisher-gazetteer-demo.mp4" />
 
+{/* TODO: Description, Diagram of how the association works */}
+
 ## Expose Geoconnex-compatible JSON-LD linked data on CKAN dataset landing pages
+
+{/* TODO: Description, diagram, and sample code */}
 
 ## Sync your geospatial collections with Geoconnex reference features
 
+{/* TODO: Description */}
+
+<Cards>
+  <Card icon={<img alt="Apache Airflow logo" width={20} height={20} src="/media/logos/devicon--apacheairflow.svg" />} href="/docs/geospatial-data/etl-tutorials/apache-airflow" title="Apache Airflow" />
+  <Card icon={<img alt="RQ logo" width={20} height={20} src="/media/logos/rq_logo.png" />} href="/docs/geospatial-data/etl-tutorials/ckan-rq" title="CKAN RQ background jobs" />
+  <Card icon={<img className="dark:invert" alt="Cron image" width={20} height={20} src="/media/logos/arcticons--cron.svg" />} href="/docs/geospatial-data/etl-tutorials/cron" title="Cron jobs" />
+  <Card icon={<img className="dark:invert" alt="Prefect logo" width={20} height={20} src="/media/logos/simple-icons--prefect.svg" />} href="/docs/geospatial-data/etl-tutorials/prefect" title="Prefect" />
+</Cards>
+
 ## Find your CKAN instance's data linked on the Geoconnex Explorer
+
+TODO
 
 ## Query for your CKAN instance's data with SPARQL against the Geoconnex knowledge graph
 
+TODO
+
 ### Run a SPARQL query with the SPARQL Helper
 
+TODO
+
 ### Run a SPARQL query using Python
+
+TODO

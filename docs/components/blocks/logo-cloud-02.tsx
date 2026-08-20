@@ -1,6 +1,6 @@
 import Link from "next/link";
-import { Backlight } from "../ui/backlight";
 import { useTheme } from "next-themes";
+import { Backlight } from "../ui/backlight";
 
 const logos = [
   {
@@ -26,7 +26,6 @@ const logos = [
 ];
 
 export default function LogoCloud02() {
-
   const { theme } = useTheme();
 
   return (
@@ -38,19 +37,20 @@ export default function LogoCloud02() {
         <div className="mt-12 flex w-fit p-4 mx-auto gap-8 overflow-hidden rounded-2xl">
           {logos.map((logo) => (
             <Backlight key={logo.name} blur={theme === "dark" ? 5 : 0}>
-            <Link
-              href={logo.href}
-              className="flex flex-col h-fit items-center my-auto mx-auto justify-center bg-card bg-blue-200 dark:bg-blue-300 p-4 rounded-xl"
-            >
-              <div>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={logo.src}
-                  alt={logo.name}
-                  className={logo.name === "datHere" ? "h-12" : "h-16"}
-                />
-              </div>
-            </Link></Backlight>
+              <Link
+                href={logo.href}
+                className="flex flex-col h-fit items-center my-auto mx-auto justify-center bg-card bg-blue-200 dark:bg-blue-300 p-4 rounded-xl"
+              >
+                <div>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={logo.src}
+                    alt={logo.name}
+                    className={logo.name === "datHere" ? "h-12" : "h-16"}
+                  />
+                </div>
+              </Link>
+            </Backlight>
           ))}
         </div>
       </div>
