@@ -7,17 +7,12 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
-  BlocksIcon,
-  GitMergeIcon,
-  HomeIcon,
+  Code2Icon,
   LayoutListIcon,
   MapPinnedIcon,
   MousePointerClickIcon,
   PenLineIcon,
   SquareDashedMousePointerIcon,
-  TerminalIcon,
-  Trash2Icon,
-  ZapIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -57,7 +52,7 @@ export default function HomePage() {
         >
           <div className="relative mb-4">
             <Hero />
-            <BlurFade delay={1} inView>
+            <BlurFade delay={0.25} inView>
               <LogoCloud02 />
             </BlurFade>
             {/* <Why /> */}
@@ -167,8 +162,8 @@ function Hero() {
           <Link href="https://ckan.org" className="text-blue-400">
             CKAN
           </Link>{" "}
-          extension that lets you associate geospatial features on an interactive map for
-          datasets, perform spatial search, expose a{" "}
+          extension that lets you associate geospatial features on an
+          interactive map for datasets, perform spatial search, expose a{" "}
           <Link href="https://stacspec.org" className="text-blue-400">
             STAC
           </Link>{" "}
@@ -199,7 +194,7 @@ function Hero() {
               )}
               onClick={() => sideConfetti()}
             >
-              Get started
+              Get started <MousePointerClickIcon className="w-4 h-4 ml-1" />
             </Link>
           </Backlight>
           <Link
@@ -212,7 +207,7 @@ function Hero() {
               }),
             )}
           >
-            Source code
+            Source code <Code2Icon className="w-4 h-4 ml-1" />
           </Link>
         </div>
       </BlurFade>
