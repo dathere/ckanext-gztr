@@ -8,6 +8,9 @@ import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
   Code2Icon,
+  DropletIcon,
+  EarthIcon,
+  GlobeIcon,
   LayoutListIcon,
   MapPinnedIcon,
   MousePointerClickIcon,
@@ -248,26 +251,31 @@ function FeaturesCarousel() {
       src: "/media/nmwdc-data-publisher-gazetteer-demo.mp4",
       type: "video",
       name: "Select map features",
+      icon: <EarthIcon className="w-5 h-5 mr-1" />
     },
     {
       src: "/media/nmwdc-public-gazetteer-search-demo.mp4",
       type: "video",
       name: "Search by bounding box",
+      icon: <SquareDashedMousePointerIcon className="w-5 h-5 mr-1" />
     },
     {
       src: "/media/datasets-page.png",
       type: "image",
       name: "Minimaps",
+      icon: <MapPinnedIcon className="w-5 h-5 mr-1" />
     },
     {
       src: "/media/gztr_collection_create_flow.excalidraw.png",
       type: "image",
-      name: "Interact with STAC API",
+      name: "Expose a STAC API",
+      icon: <GlobeIcon className="w-5 h-5 mr-1" />
     },
     {
       src: "/media/geoconnex-diagram.png",
       type: "image",
-      name: "Integrate with Geoconnex",
+      name: "Sync water data with Geoconnex",
+      icon: <DropletIcon className="w-5 h-5 mr-1" />
     },
   ];
 
@@ -329,7 +337,7 @@ function FeaturesCarousel() {
                         <ArrowLeftCircleIcon className="stroke-primary" />
                       </Button>
                       <Button className="dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current md:text-lg w-fit mx-auto border-1 rounded-xl bg-sky-100 dark:bg-sky-800 p-4">
-                        {feature.name}
+                        {feature.icon} {feature.name}
                       </Button>
                       <Button
                         className="w-fit h-fit p-0 rounded-full cursor-pointer"
