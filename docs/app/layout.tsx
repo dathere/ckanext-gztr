@@ -4,8 +4,14 @@ import localFont from "next/font/local";
 import Script from "next/script";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import type { Metadata } from 'next';
 
 const inter = localFont({ src: "../lib/inter.ttf" });
+
+export const metadata = {
+  title: "ckanext-gztr",
+  description: "ckanext-gztr is a CKAN extension that lets you associate geospatial features on an interactive map for datasets, perform spatial search, expose a STAC API, and more."
+}
 
 export default function Layout({ children }: LayoutProps<"/">) {
   return (

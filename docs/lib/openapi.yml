@@ -16,7 +16,7 @@ components:
 servers:
   - url: http://localhost:5000/
   - url: '{protocol}://{domain}/'
-    description: Your custom server running the CKAN Actions API (v3).
+    description: Your CKAN instance URL.
     variables:
       protocol:
         enum:
