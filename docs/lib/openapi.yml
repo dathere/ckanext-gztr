@@ -1,0 +1,105 @@
+info:
+  title: ckanext-gztr API endpoints
+security:
+  - apiTokenHeader:
+      description: CKAN API token
+      type: apiKey
+      name: Authorization
+      in: header
+components:
+  securitySchemes:
+    apiTokenHeader:
+      type: apiKey
+      in: header
+      name: Authorization
+      description: CKAN API token
+servers:
+  - url: http://localhost:5000/
+  - url: '{protocol}://{domain}/'
+    description: Your custom server running the CKAN Actions API (v3).
+    variables:
+      protocol:
+        enum:
+          - https
+          - http
+        default: https
+      domain:
+        default: 'demo.ckan.org'
+tags:
+  - name: STAC
+    description: SpatioTemporal Assets Catalog
+  - name: Action API
+    description: CKAN Actions API
+paths:
+  /gztr/stac:
+    get:
+      tags:
+        - STAC
+      operationId: catalog_show
+      summary: /gztr/stac
+      description: Returns the STAC Catalog (`catalog.json` in the `gztr` storage) as JSON.
+  /gztr/stac/collections:
+    get:
+      tags:
+        - STAC
+      operationId: collections_list
+      summary: /gztr/stac/collections
+      description: Returns a list of STAC Collection metadata as JSON.
+  /gztr/stac/collections/{collectionId}:
+    post:
+      tags:
+        - STAC
+      operationId: collections_show
+      summary: /gztr/stac/collections/{collectionId}
+      description: Returns a specific STAC Collection's metadata as JSON.
+  /gztr/stac/collections/{collectionId}/items:
+    post:
+      tags:
+        - STAC
+      operationId: items_list
+      summary: /gztr/stac/collections/{collectionId}/items
+      description: Returns a STAC `ItemCollection` (based on GeoJSON `FeatureCollection`) for a specific STAC Collection as GeoJSON.
+  /gztr/stac/collections/{collectionId}/items/{itemId}:
+    post:
+      tags:
+        - STAC
+      operationId: items_show
+      summary: /gztr/stac/collections/{collectionId}/items/{itemId}
+      description: Returns a STAC `Item` (based on GeoJSON `Feature`) for a specific STAC Item as GeoJSON.
+  /api/3/action/gztr_collection_create:
+    post:
+      tags:
+        - Action API
+      operationId: gztr_collection_create
+      summary: /api/3/action/gztr_collection_create
+      description: Create a geospatial collection (stored as a GeoParquet file) from an uploaded GeoJSON file.
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: human-readable name of the GeoParquet file, unique per storage.
+                upload:
+                  type: string
+                  format: binary
+  /api/3/action/gztr_spatial_full_with_geometry:
+    post:
+      tags:
+        - Action API
+      operationId: gztr_spatial_full_with_geometry
+      summary: /api/3/action/gztr_spatial_full_with_geometry
+      description: Provide the spatial_full value from a CKAN dataset's metadata to attempt filling null geometry values for features that have installed geospatial collections.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                spatial_full:
+                  type: string
+                  description: GeoJSON

@@ -1,5 +1,6 @@
 import { docs } from "collections/server";
 import { type InferPageType, loader } from "fumadocs-core/source";
+import { openapiPlugin } from "fumadocs-openapi/server";
 import { icons } from "lucide-react";
 import { createElement } from "react";
 
@@ -53,6 +54,7 @@ export const source = loader({
       });
     if (icon in icons) return createElement(icons[icon as keyof typeof icons]);
   },
+  plugins: [openapiPlugin()],
 });
 
 export function getPageImage(page: InferPageType<typeof source>) {

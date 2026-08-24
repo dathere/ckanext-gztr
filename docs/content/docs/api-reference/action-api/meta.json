@@ -1,0 +1,8 @@
+{
+  "title": "Action API",
+  "description": "CKAN Actions API",
+  "pages": [
+    "gztr_collection_create",
+    "gztr_spatial_full_with_geometry"
+  ]
+}
