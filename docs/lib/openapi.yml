@@ -30,6 +30,14 @@ components:
       schema:
         type: string
         example: 010106001
+    fields:
+      name: fields
+      description: Comma-separated list of field names, where exclude values are prefixed with `-`, e.g., `-geometry`. Currently only implemented for optionally excluding `geometry` with `-geometry`.
+      in: query
+      required: false
+      schema:
+        type: string
+        example: -geometry
 servers:
   - url: http://localhost:5000/
   - url: '{protocol}://{domain}/'
@@ -80,6 +88,7 @@ paths:
       description: Returns a STAC `ItemCollection` (based on GeoJSON `FeatureCollection`) for a specific STAC Collection as GeoJSON.
       parameters:
         - $ref: '#/components/parameters/collectionId'
+        - $ref: '#/components/parameters/fields'
   /gztr/stac/collections/{collectionId}/items/{itemId}:
     get:
       tags:
