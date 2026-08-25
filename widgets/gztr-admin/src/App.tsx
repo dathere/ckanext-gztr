@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import {
+  getItemFromAPI,
   // getPlaceKeywordsFromSpatialFull,
   runAddressSearch,
   simplifyGeojson,
@@ -122,7 +123,7 @@ function App() {
       const allItemCollections: ItemCollection[] = [];
       for (const collection of stacCollections) {
         const itemCollection: ItemCollection = await (
-          await fetch(`/gztr/stac/collections/${collection.id}/items`)
+          await fetch(`/gztr/stac/collections/${collection.id}/items?fields=-geometry`)
         ).json();
         allItemCollections.push({
           ...itemCollection,
@@ -194,8 +195,9 @@ function App() {
                 const identifiedFeature = itemCollections
                   ?.find((iC) => iC.collection_id === f.collection)
                   ?.features.find((cf) => cf.properties.id === f.properties.id);
-                const geometry = identifiedFeature?.geometry;
-                if (geometry) f.geometry = geometry;
+                if (!f.geometry && identifiedFeature?.geometry) {
+                  f.geometry = identifiedFeature?.geometry;
+                }
                 return f;
               });
               spatialFull.features = featuresWithGeometry;

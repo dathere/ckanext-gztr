@@ -10,7 +10,7 @@ import sedonadb
 from ckan.lib.files import get_storage
 from ckan.lib.io import get_ckan_temp_directory
 from ckan.types import Response
-from flask import Blueprint
+from flask import Blueprint, request
 from flask.json import jsonify
 
 from .utils import gztr_get_collection, gztr_json_file_as_dict
@@ -71,14 +71,19 @@ def stac_item_list(collection_id: str) -> Response:
             df = sd.read_parquet(f.name)
             df.to_view("item")
             buffer = io.BytesIO()
-            df = sd.sql("""
-            SELECT *, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item
+            fields_query_param = request.args.get("fields", None)
+            columns_to_query = "*"
+            if fields_query_param and "-geometry" in fields_query_param.split(","):
+                columns_to_query = ",".join([col for col in df.columns if col != "geometry"])
+            df = sd.sql(f"""
+            SELECT {columns_to_query}, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item
             """)
-            df.to_pyogrio(buffer, driver="GeoJSON", geometry_name="geometry")
+            df.to_pyogrio(buffer, driver="GeoJSON", geometry_name="geometry" if "geometry" in columns_to_query else None)
             output = io.TextIOWrapper(buffer, encoding="utf-8").read()
             collection_items = json.loads(output)
             del collection_items["name"]
-            del collection_items["crs"]
+            if collection_items.get("crs"):
+                del collection_items["crs"]
             for feature in collection_items["features"]:
                 feature["stac_version"] = "1.1.0"
                 # The id from original GeoJSON is prioritized by properties.id and if that doesn't exist then id is moved to properties

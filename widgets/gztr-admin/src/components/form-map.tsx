@@ -29,6 +29,7 @@ import {
   toggleOptionInSource,
 } from "@/lib/state-management";
 import { useFormMap } from "@/stores/form-map-store";
+import { getItemCollectionFromAPI, getItemFromAPI } from "@/lib/utils";
 
 const FormMap = () => {
   const mapRef = useRef<MapRef>(undefined);
@@ -45,6 +46,7 @@ const FormMap = () => {
   );
   const stacCollections = useFormMap((state) => state.stacCollections);
   const itemCollections = useFormMap((state) => state.itemCollections);
+  const setItemCollections = useFormMap((state) => state.setItemCollections);
   const currentStacCollection = useFormMap(
     (state) => state.currentStacCollection,
   );
@@ -91,12 +93,47 @@ const FormMap = () => {
     (async () => {
       // Display the currently selected feature collection GeoJSON on the map
       if (currentStacCollection) {
-        setCurrentCollectionGeoJSON(
-          itemCollections?.find(
+        const itemCollection = itemCollections?.find(
             (iC) => iC.collection_id === currentStacCollection.id,
-          ),
-        );
+          );
+        if (itemCollection) {
+          if (itemCollection.features.length > 0) {
+            if (itemCollection.features.at(0)?.geometry) {
+              setCurrentCollectionGeoJSON(itemCollection);
+            } else {
+              // Fetch the entire ItemCollection if a feature's geometry does not exist
+              // We make an assumption that all Items in an ItemCollection must have a geometry
+              const allItemCollections: ItemCollection[] = [];
+              if (itemCollections)
+                for (const itemCollection of itemCollections.filter((iC) => iC.collection_id !== currentStacCollection.id)) {
+                  allItemCollections.push(itemCollection)
+                }
+              const currentItemCollection = await getItemCollectionFromAPI(currentStacCollection.id);
+              setCurrentCollectionGeoJSON(currentItemCollection);
+              allItemCollections.push({
+                ...currentItemCollection,
+                collection_id: currentStacCollection.id,
+              });
+              setItemCollections(allItemCollections);
+            }
+          }
+        }
+        else {
+          const allItemCollections: ItemCollection[] = [];
+          if (itemCollections)
+            for (const itemCollection of itemCollections) {
+              allItemCollections.push(itemCollection)
+            }
+          const currentItemCollection = await getItemCollectionFromAPI(currentStacCollection.id);
+          setCurrentCollectionGeoJSON(currentItemCollection);
+          allItemCollections.push({
+            ...currentItemCollection,
+            collection_id: currentStacCollection.id,
+          });
+          setItemCollections(allItemCollections);
+        }
       }
+      // Enable the popup on click of a geometry on the map
       if (formMap) {
         const map = formMap.current?.getMap();
         if (map) await enablePopup(map);
@@ -142,21 +179,26 @@ const FormMap = () => {
               setDisableApplyButton(false);
               // For each drawn feature add as GM feature
               // Add geometry to tempSpatialFull.features (using collections) and use that throughout this
+              // TODO: Check if geometry in ItemCollections otherwise fetch from Action API
+              // Purpose: Display tempSpatialFull feature geometries on the map
               if (tempSpatialFull) {
                 const nTSFFeatures = tempSpatialFull?.features
                   .filter((f) => f.collection !== "Drawn features")
                   .map((f) => {
-                    const collection = f.collection;
-                    const foundFeature = itemCollections
-                      ?.find((iC) => iC.collection_id === collection)
-                      ?.features.find(
-                        (g) => g.properties.id === f.properties.id,
-                      );
-                    const featureWithGeometry = structuredClone(f);
-                    // @ts-expect-error
-                    featureWithGeometry.geometry = foundFeature?.geometry;
-                    return featureWithGeometry;
-                  });
+                    const collectionId = f.collection;
+                    if (collectionId) {
+                      const foundFeature = itemCollections
+                        ?.find((iC) => iC.collection_id === collectionId)
+                        ?.features.find(
+                          (g) => g.properties.id === f.properties.id,
+                          // @ts-expect-error
+                        ) ?? getItemFromAPI(collectionId, f.properties.id);
+                      const featureWithGeometry = structuredClone(f);
+                      // @ts-expect-error
+                      featureWithGeometry.geometry = foundFeature?.geometry;
+                      return featureWithGeometry;
+                    }
+                  }).filter((item) => item !== undefined);
                 const tempSpatialFullWithGeometry =
                   structuredClone(tempSpatialFull);
                 tempSpatialFullWithGeometry.features = nTSFFeatures;
@@ -413,8 +455,7 @@ const FormMap = () => {
                   const selectedFeatureAsGeoJSONFeature = {
                     type: "Feature",
                     id: selectedFeature.properties.id,
-                    // @ts-expect-error
-                    collection: selectedFeature.collection,
+                    collection: currentStacCollection?.id,
                     geometry: selectedFeature.geometry,
                     properties: selectedFeature.properties,
                   };

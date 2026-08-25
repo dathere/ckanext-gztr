@@ -29,7 +29,7 @@ def gztr_spatial_full_with_geometry(context: types.Context, data_dict: dict[str,
     :type spatial_full: str
     """
     try:
-        spatial_full = data_dict.get("spatial_full")
+        spatial_full = json.loads(data_dict.get("spatial_full"))
         if spatial_full:
             collections = gztr_json_file_as_dict("collections.json")
             for feature in spatial_full["features"]:
