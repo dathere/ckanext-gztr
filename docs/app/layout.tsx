@@ -8,7 +8,8 @@ import type { Metadata } from 'next';
 
 const inter = localFont({ src: "../lib/inter.ttf" });
 
-export const metadata = {
+export const metadata: Metadata = {
+  metadataBase: new URL("https://gztr.dathere.com"),
   title: "ckanext-gztr",
   description: "ckanext-gztr is a CKAN extension that lets you associate geospatial features on an interactive map for datasets, perform spatial search, expose a STAC API, and more."
 }

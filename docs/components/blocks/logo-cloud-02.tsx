@@ -59,7 +59,7 @@ export default function LogoCloud02() {
         <h2 className="text-center font-semibold text-2xl tracking-tight text-foreground sm:text-3xl">
           Built as a collaborative effort.
         </h2>
-        <div className="mt-12 grid grid-cols-3 w-fit p-4 mx-auto gap-10 items-center rounded-2xl">
+        <div className="mt-12 flex flex-col md:grid md:grid-cols-3 w-fit p-4 mx-auto gap-10 items-center rounded-2xl">
           {logos.slice(0, 6).map((logo) => (
             <Backlight key={logo.name} blur={theme === "dark" ? 5 : 0}>
               <Tooltip delayDuration={200}>
@@ -78,7 +78,7 @@ export default function LogoCloud02() {
               </Tooltip>
             </Backlight>
           ))}
-          <div className="flex justify-center gap-8 col-span-3">
+          <div className="flex flex-col md:flex-row justify-center gap-8 col-span-3">
             {logos.slice(6).map((logo) => (
               <Backlight key={logo.name} blur={theme === "dark" ? 5 : 0}>
                 <Tooltip delayDuration={200}>

@@ -4,7 +4,7 @@ full: true
 _openapi:
   preload:
     - ./lib/openapi.yml
-  method: POST
+  method: GET
   webhook: false
   toc: []
   structuredData:
@@ -23,7 +23,7 @@ export default function Layout(props) {
   return (
     <>
       {props.children}
-      <Comp document="./lib/openapi.yml" operations={[{"path":"/gztr/stac/collections/{collectionId}/items/{itemId}","method":"post"}]} showDescription />
+      <Comp document="./lib/openapi.yml" operations={[{"path":"/gztr/stac/collections/{collectionId}/items/{itemId}","method":"get"}]} showDescription />
     </>
   );
 }

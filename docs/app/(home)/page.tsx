@@ -236,7 +236,9 @@ function Hero() {
           View the source code of ckanext-gztr on GitHub
         </Card>
       </Cards> */}
+      <BlurFade delay={1.75}>
       <FeaturesCarousel />
+      </BlurFade>
       {/* TODO: More sections, e.g. problems solved, software architecture, portals using extension, learn/collaborate, etc. */}
       {/* Refer to stacspec.org and Apache SedonaDB for examples of home pages */}
     </div>
