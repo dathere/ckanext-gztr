@@ -461,7 +461,6 @@ function App() {
                       const featuresNoGeometries =
                         newTempSpatialFull.features.map((f) => {
                           if (
-                            // TODO: Fix
                             !(f.collection === "Drawn features")
                           )
                             f.geometry = null;
