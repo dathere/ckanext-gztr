@@ -28,8 +28,8 @@ import {
   initializeFeatureSourceAndLayer,
   toggleOptionInSource,
 } from "@/lib/state-management";
-import { useFormMap } from "@/stores/form-map-store";
 import { getItemCollectionFromAPI, getItemFromAPI } from "@/lib/utils";
+import { useFormMap } from "@/stores/form-map-store";
 
 const FormMap = () => {
   const mapRef = useRef<MapRef>(undefined);
@@ -94,8 +94,8 @@ const FormMap = () => {
       // Display the currently selected feature collection GeoJSON on the map
       if (currentStacCollection) {
         const itemCollection = itemCollections?.find(
-            (iC) => iC.collection_id === currentStacCollection.id,
-          );
+          (iC) => iC.collection_id === currentStacCollection.id,
+        );
         if (itemCollection) {
           if (itemCollection.features.length > 0) {
             if (itemCollection.features.at(0)?.geometry) {
@@ -105,10 +105,14 @@ const FormMap = () => {
               // We make an assumption that all Items in an ItemCollection must have a geometry
               const allItemCollections: ItemCollection[] = [];
               if (itemCollections)
-                for (const itemCollection of itemCollections.filter((iC) => iC.collection_id !== currentStacCollection.id)) {
-                  allItemCollections.push(itemCollection)
+                for (const itemCollection of itemCollections.filter(
+                  (iC) => iC.collection_id !== currentStacCollection.id,
+                )) {
+                  allItemCollections.push(itemCollection);
                 }
-              const currentItemCollection = await getItemCollectionFromAPI(currentStacCollection.id);
+              const currentItemCollection = await getItemCollectionFromAPI(
+                currentStacCollection.id,
+              );
               setCurrentCollectionGeoJSON(currentItemCollection);
               allItemCollections.push({
                 ...currentItemCollection,
@@ -117,14 +121,15 @@ const FormMap = () => {
               setItemCollections(allItemCollections);
             }
           }
-        }
-        else {
+        } else {
           const allItemCollections: ItemCollection[] = [];
           if (itemCollections)
             for (const itemCollection of itemCollections) {
-              allItemCollections.push(itemCollection)
+              allItemCollections.push(itemCollection);
             }
-          const currentItemCollection = await getItemCollectionFromAPI(currentStacCollection.id);
+          const currentItemCollection = await getItemCollectionFromAPI(
+            currentStacCollection.id,
+          );
           setCurrentCollectionGeoJSON(currentItemCollection);
           allItemCollections.push({
             ...currentItemCollection,
@@ -187,18 +192,20 @@ const FormMap = () => {
                   .map((f) => {
                     const collectionId = f.collection;
                     if (collectionId) {
-                      const foundFeature = itemCollections
-                        ?.find((iC) => iC.collection_id === collectionId)
-                        ?.features.find(
-                          (g) => g.properties.id === f.properties.id,
-                          // @ts-expect-error
-                        ) ?? getItemFromAPI(collectionId, f.properties.id);
+                      const foundFeature =
+                        itemCollections
+                          ?.find((iC) => iC.collection_id === collectionId)
+                          ?.features.find(
+                            (g) => g.properties.id === f.properties.id,
+                            // @ts-expect-error
+                          ) ?? getItemFromAPI(collectionId, f.properties.id);
                       const featureWithGeometry = structuredClone(f);
                       // @ts-expect-error
                       featureWithGeometry.geometry = foundFeature?.geometry;
                       return featureWithGeometry;
                     }
-                  }).filter((item) => item !== undefined);
+                  })
+                  .filter((item) => item !== undefined);
                 const tempSpatialFullWithGeometry =
                   structuredClone(tempSpatialFull);
                 tempSpatialFullWithGeometry.features = nTSFFeatures;
@@ -452,13 +459,18 @@ const FormMap = () => {
                 }
                 // User clicked "Select this feature"
                 else {
-                  const selectedFeatureAsGeoJSONFeature = {
-                    type: "Feature",
-                    id: selectedFeature.properties.id,
-                    collection: currentStacCollection?.id,
-                    geometry: selectedFeature.geometry,
-                    properties: selectedFeature.properties,
-                  };
+                  const selectedFeatureAsGeoJSONFeature = itemCollections
+                    ?.find((c) => c.collection_id === currentStacCollection?.id)
+                    ?.features.find(
+                      (f) => f.id === selectedFeature.properties.id,
+                    );
+                  // const selectedFeatureAsGeoJSONFeature = {
+                  //   type: "Feature",
+                  //   id: selectedFeature.properties.id,
+                  //   collection: currentStacCollection?.id,
+                  //   geometry: selectedFeature.geometry,
+                  //   properties: selectedFeature.properties,
+                  // };
                   // // @ts-expect-error
                   // gm?.features.importGeoJsonFeature(selectedFeatureGeoJSONWithoutCollections);
                   // TODO: Fix issue of selection
@@ -479,7 +491,7 @@ const FormMap = () => {
                   const newTempSpatialFull = structuredClone(tempSpatialFull);
                   newTempSpatialFull.features = newSelectedFeatures;
                   setTempSpatialFull(newTempSpatialFull);
-                  // Remvoe the feature from the MapLibre featureSource Source (also removes the highlight)
+                  // Remove the feature from the MapLibre featureSource Source (also removes the highlight)
                   // Remove giant features array to prevent recursion error in MapLibre usage
                   // @ts-expect-error
                   featureSource?.setData(newTempSpatialFull);

@@ -19,6 +19,6 @@
     "hooks": "@/hooks"
   },
   "registries": {
-    "@mapcn": "https://mapcn.dev/r/{name}.json"
+    "@animate-ui": "https://animate-ui.com/r/{name}.json"
   }
 }
