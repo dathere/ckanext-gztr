@@ -8,6 +8,16 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const getItemCollectionFromAPI = async (collectionId: string) => {
+  const itemCollection = await ((await fetch(`/gztr/stac/collections/${collectionId}/items`)).json());
+  return itemCollection;
+}
+
+export const getItemFromAPI = async (collectionId: string, itemId: string) => {
+  const item = await ((await fetch(`/gztr/stac/collections/${collectionId}/items/${itemId}`)).json());
+  return item;
+}
+
 export const runAddressSearch = async (
   search_query?: string,
   map?: FormMap,

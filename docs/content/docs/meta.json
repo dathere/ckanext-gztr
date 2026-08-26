@@ -7,8 +7,8 @@
     "geospatial-data",
     "---Reference---",
     "configuration",
-    "api-reference",
     "geoconnex-integration",
+    "api-reference",
     "software-architecture",
     "---Maintenance---",
     "troubleshooting",
@@ -16,6 +16,7 @@
     "ckanext-spatial-migration",
     "contributing",
     "--- ---",
+    "credits",
     "[Privacy Policy](https://dathere.com/privacy-policy/)"
   ]
 }

@@ -1,0 +1,11 @@
+{
+  "title": "STAC",
+  "description": "SpatioTemporal Assets Catalog",
+  "pages": [
+    "catalog_show",
+    "collections_list",
+    "collections_show",
+    "items_list",
+    "items_show"
+  ]
+}

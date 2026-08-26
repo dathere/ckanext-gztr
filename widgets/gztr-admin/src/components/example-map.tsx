@@ -19,18 +19,23 @@ const ExampleMap = () => {
 
   // Get geometry values from itemCollections for each selected feature
   // Then display all selected and drawn features on the example map
+  // TODO: (Optimization) Check if geometry exist in itemCollection for each geometry, if not then API action call
   useEffect(() => {
-    const spatialFullWithGeometries = structuredClone(spatialFull);
-    if (spatialFullWithGeometries?.features) {
-      spatialFullWithGeometries?.features.forEach((f) => {
-        const identifiedFeature = itemCollections
-          ?.find((iC) => iC.collection_id === f.collection)
-          ?.features.find((cf) => cf.id === f.properties.id);
-        const geometry = identifiedFeature?.geometry;
-        if (geometry) f.geometry = geometry;
-      });
+    (async() => {
+    if (spatialFull?.features) {
+      const spatialFullWithGeometries = JSON.parse((await (
+          await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              "spatial_full": JSON.stringify(spatialFull)
+            })
+          })
+        ).json()).result);
       setFeaturesWithGeometries(spatialFullWithGeometries);
-    }
+    }})()
   }, [itemCollections, spatialFull]);
 
   useEffect(() => {

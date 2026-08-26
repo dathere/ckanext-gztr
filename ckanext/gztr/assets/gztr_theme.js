@@ -12,16 +12,15 @@ const createMapImage = async () => {
 
   for (const [index, mapElement] of datasetMaps.entries()) {
     const spatialFull = mapElement.getAttribute("data-package");
-    const spatialFullWithGeometry = (await (await fetch("/api/3/action/gztr_spatial_full_with_geometry", {
+    const spatialFullWithGeometry = (await (await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
       method: "POST",
-      body: JSON.stringify({ "spatial_full": JSON.parse(spatialFull) }),
       headers: {
         "Content-Type": "application/json"
-      }
+      },
+      body: JSON.stringify({
+        "spatial_full": spatialFull
+      })
     })).json()).result;
-
-    console.log("OLD", spatialFull);
-    console.log("NEW", spatialFullWithGeometry);
 
     mapElement.style.width = `${width}px`;
     mapElement.style.height = `${height}px`;

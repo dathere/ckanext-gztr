@@ -7,17 +7,15 @@ import defaultMdxComponents from "fumadocs-ui/mdx";
 import {
   ArrowLeftCircleIcon,
   ArrowRightCircleIcon,
-  BlocksIcon,
-  GitMergeIcon,
-  HomeIcon,
+  Code2Icon,
+  DropletIcon,
+  EarthIcon,
+  GlobeIcon,
   LayoutListIcon,
   MapPinnedIcon,
   MousePointerClickIcon,
   PenLineIcon,
   SquareDashedMousePointerIcon,
-  TerminalIcon,
-  Trash2Icon,
-  ZapIcon,
 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -57,7 +55,7 @@ export default function HomePage() {
         >
           <div className="relative mb-4">
             <Hero />
-            <BlurFade delay={1} inView>
+            <BlurFade delay={0.25} inView>
               <LogoCloud02 />
             </BlurFade>
             {/* <Why /> */}
@@ -150,7 +148,7 @@ function Hero() {
       <BlurFade>
         <h1 className="mb-8 text-4xl font-medium md:hidden">ckanext-gztr</h1>
       </BlurFade>
-      <h1 className="mb-8 max-w-[800px] text-4xl font-medium max-md:hidden">
+      <h1 className="mb-4 max-w-[800px] text-4xl font-medium max-md:hidden">
         <span className="text-5xl">
           <BlurFade>
             ckanext-gztr{" "}
@@ -167,8 +165,8 @@ function Hero() {
           <Link href="https://ckan.org" className="text-blue-400">
             CKAN
           </Link>{" "}
-          extension that lets you associate features on an interactive map for
-          each dataset, perform geospatial search, expose a{" "}
+          extension that lets you associate geospatial features on an
+          interactive map for datasets, perform spatial search, expose a{" "}
           <Link href="https://stacspec.org" className="text-blue-400">
             STAC
           </Link>{" "}
@@ -179,18 +177,18 @@ function Hero() {
           .
         </p>
       </BlurFade>
-      <BlurFade delay={1.25}>
+      {/* <BlurFade delay={1.25}>
         <p className="mb-8 text-fd-muted-foreground md:max-w-[80%] md:text-sm">
           Provided by{" "}
           <Link className="text-fd-info" href="https://dathere.com">
             datHere
           </Link>
           .
-          {/* . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Sciences</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>. */}
+          . Supported by the <Link className="text-fd-info" href="https://cgsearth.org/">Center for Geospatial Solutions</Link> and the <Link className="text-fd-info" href="https://www.usgs.gov/">U.S. Geological Survey (USGS)</Link>.
         </p>
-      </BlurFade>
+      </BlurFade> */}
       <BlurFade delay={1.5}>
-        <div className="inline-flex items-center gap-3 max-md:mx-auto mb-4 md:mb-0">
+        <div className="inline-flex items-center gap-3 max-md:mx-auto my-4 md:mb-0">
           <Backlight blur={5}>
             <Link
               href="/docs"
@@ -199,7 +197,7 @@ function Hero() {
               )}
               onClick={() => sideConfetti()}
             >
-              Get started
+              Get started <MousePointerClickIcon className="w-4 h-4 ml-1" />
             </Link>
           </Backlight>
           <Link
@@ -212,7 +210,7 @@ function Hero() {
               }),
             )}
           >
-            Source code
+            Source code <Code2Icon className="w-4 h-4 ml-1" />
           </Link>
         </div>
       </BlurFade>
@@ -238,7 +236,9 @@ function Hero() {
           View the source code of ckanext-gztr on GitHub
         </Card>
       </Cards> */}
-      <FeaturesCarousel />
+      <BlurFade delay={1.75}>
+        <FeaturesCarousel />
+      </BlurFade>
       {/* TODO: More sections, e.g. problems solved, software architecture, portals using extension, learn/collaborate, etc. */}
       {/* Refer to stacspec.org and Apache SedonaDB for examples of home pages */}
     </div>
@@ -253,26 +253,31 @@ function FeaturesCarousel() {
       src: "/media/nmwdc-data-publisher-gazetteer-demo.mp4",
       type: "video",
       name: "Select map features",
+      icon: <EarthIcon className="w-5 h-5 mr-1" />,
     },
     {
       src: "/media/nmwdc-public-gazetteer-search-demo.mp4",
       type: "video",
       name: "Search by bounding box",
+      icon: <SquareDashedMousePointerIcon className="w-5 h-5 mr-1" />,
     },
     {
       src: "/media/datasets-page.png",
       type: "image",
       name: "Minimaps",
+      icon: <MapPinnedIcon className="w-5 h-5 mr-1" />,
     },
     {
       src: "/media/gztr_collection_create_flow.excalidraw.png",
       type: "image",
-      name: "Interact with STAC API",
+      name: "Expose a STAC API",
+      icon: <GlobeIcon className="w-5 h-5 mr-1" />,
     },
     {
       src: "/media/geoconnex-diagram.png",
       type: "image",
-      name: "Integrate with Geoconnex",
+      name: "Sync water data with Geoconnex",
+      icon: <DropletIcon className="w-5 h-5 mr-1" />,
     },
   ];
 
@@ -323,7 +328,7 @@ function FeaturesCarousel() {
                         )}
                       />
                     )}
-                    <div className="flex mt-8">
+                    <div className="flex w-fit gap-4 mx-auto items-center justify-center mt-8">
                       <Button
                         className="w-fit h-fit p-0 rounded-full cursor-pointer"
                         variant="ghost"
@@ -331,10 +336,10 @@ function FeaturesCarousel() {
                           api?.scrollPrev();
                         }}
                       >
-                        <ArrowLeftCircleIcon />
+                        <ArrowLeftCircleIcon className="stroke-primary" />
                       </Button>
-                      <Button className="dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current md:text-lg w-fit mx-auto border-2 rounded-xl bg-sky-100 dark:bg-sky-800 p-1">
-                        {feature.name}
+                      <Button className="dark:hover:bg-sky-700 text-primary hover:bg-sky-200 dark:text-current md:text-lg w-fit mx-auto border-1 rounded-xl bg-sky-100 dark:bg-sky-800 p-4">
+                        {feature.icon} {feature.name}
                       </Button>
                       <Button
                         className="w-fit h-fit p-0 rounded-full cursor-pointer"
@@ -343,7 +348,7 @@ function FeaturesCarousel() {
                           api?.scrollNext();
                         }}
                       >
-                        <ArrowRightCircleIcon />
+                        <ArrowRightCircleIcon className="stroke-primary" />
                       </Button>
                     </div>
                   </div>
