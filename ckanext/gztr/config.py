@@ -4,7 +4,7 @@ import ckan.plugins.toolkit as tk
 
 DEFAULT_LATITUDE = "ckanext.gztr.default_latitude"
 DEFAULT_LONGITUDE = "ckanext.gztr.default_longitude"
-DEFAULT_ZOOM = "ckanext.gztr.default_longitude"
+DEFAULT_ZOOM = "ckanext.gztr.default_zoom"
 MAP_TILE_SERVER = "ckanext.gztr.map_tile_server"
 
 def dataset_publisher_widget_config() -> dict:
