@@ -32,7 +32,6 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import {
-  getItemFromAPI,
   // getPlaceKeywordsFromSpatialFull,
   runAddressSearch,
   simplifyGeojson,
@@ -123,7 +122,9 @@ function App() {
       const allItemCollections: ItemCollection[] = [];
       for (const collection of stacCollections) {
         const itemCollection: ItemCollection = await (
-          await fetch(`/gztr/stac/collections/${collection.id}/items?fields=-geometry`)
+          await fetch(
+            `/gztr/stac/collections/${collection.id}/items?fields=-geometry`,
+          )
         ).json();
         allItemCollections.push({
           ...itemCollection,
@@ -460,9 +461,7 @@ function App() {
                       // Should not remove geometry from drawn features
                       const featuresNoGeometries =
                         newTempSpatialFull.features.map((f) => {
-                          if (
-                            !(f.collection === "Drawn features")
-                          )
+                          if (!(f.collection === "Drawn features"))
                             f.geometry = null;
                           return f;
                         });

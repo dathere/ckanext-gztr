@@ -2,13 +2,20 @@ import Fuse from "fuse.js";
 import {
   ChevronDownIcon,
   ChevronsUpDownIcon,
+  FileJsonIcon,
+  InfoIcon,
   MapPinnedIcon,
   SearchIcon,
   SearchXIcon,
 } from "lucide-react";
 import { useState } from "react";
-import type { StacItem } from "stac-ts";
+import type { StacItem, StacLink } from "stac-ts";
 import type { ItemCollection } from "@/App";
+import {
+  Code,
+  CodeBlock,
+  CodeHeader,
+} from "@/components/animate-ui/components/animate/code";
 import { Button } from "@/components/ui/button";
 import {
   Collapsible,
@@ -32,7 +39,26 @@ import {
   useComboboxAnchor,
 } from "@/components/ui/combobox";
 import { InputGroupAddon } from "@/components/ui/input-group";
+import {
+  Popover,
+  PopoverContent,
+  PopoverDescription,
+  PopoverHeader,
+  PopoverTitle,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { Separator } from "@/components/ui/separator";
 import { useFormMap } from "@/stores/form-map-store";
+import { CopyButton } from "./animate-ui/components/buttons/copy";
+
+const isValidHttpUrl = (url: string) => {
+  try {
+    const newUrl = new URL(url);
+    return newUrl.protocol === "http:" || newUrl.protocol === "https:";
+  } catch (err) {
+    return false;
+  }
+};
 
 export function FeatureCombobox() {
   // Used to ensure the popup dropdown stays at and at the width of the combobox
@@ -111,43 +137,126 @@ export function FeatureCombobox() {
             </InputGroupAddon>
           </div>
           <div className="tw:flex tw:flex-wrap tw:gap-2 tw:w-full">
-            {tempSpatialFull?.features.map((feature) => (
-              <ComboboxChip
-              className="tw:bg-sky-200"
-                // @ts-expect-error
-                key={feature.properties.id}
-              >
-                {feature.properties.title}
-                <Button
-                  className="tw:h-fit tw:has-[>svg]:p-1 tw:[&_svg:not([class*=size-])]:size-3"
-                  variant="ghost"
-                  onClick={() => {
-                    const map = formMap?.current.getMap();
-                    if (map) {
-                      try {
-                        if (feature.bbox)
-                          // @ts-expect-error
-                          map.fitBounds(feature.bbox);
-                        else if (feature.properties.bbox)
-                          // @ts-expect-error
-                          map.fitBounds(JSON.parse(feature.properties.bbox));
-                      } catch (e) {
-                        console.error(
-                          "Error while attempting to zoom to feature bounds.",
+            {tempSpatialFull?.features.map((feature) => {
+              const featureWithoutGeometry = { ...feature, geometry: null };
+              const featureStacLink = (feature.links as StacLink[])?.find(
+                (link: StacLink) => link.rel === "self",
+              )?.href;
+              return (
+                <ComboboxChip
+                  className="tw:bg-sky-200"
+                  // @ts-expect-error
+                  key={feature.properties.id}
+                >
+                  {feature.properties.title}
+                  <Separator
+                    className="tw:bg-muted-foreground"
+                    orientation="vertical"
+                  />
+                  {feature.collection !== "Drawn features" && (
+                    <Popover>
+                      <PopoverTrigger>
+                        <Button
+                          className="tw:cursor-pointer tw:h-fit tw:has-[>svg]:p-1 tw:[&_svg:not([class*=size-])]:size-3"
+                          variant="ghost"
+                        >
+                          <InfoIcon className="tw:w-3 tw:h-3" />
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent
+                        side="right"
+                        className="tw:w-full tw:h-full tw:max-w-[65vw] tw:ml-8"
+                      >
+                        <PopoverHeader>
+                          <PopoverTitle className="tw:text-xl">
+                            {feature.properties.title}
+                          </PopoverTitle>
+                          <PopoverDescription>
+                            <div className="tw:flex tw:flex-col tw:gap-0">
+                              <p className="mb-0">
+                                STAC Item ID: {feature.id}{" "}
+                                <CopyButton
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="tw:inline-block tw:w-fit tw:h-fit tw:ml-1"
+                                  variant="ghost"
+                                  size="xs"
+                                  content={feature.id}
+                                />
+                              </p>
+                              <p className="mb-0">
+                                STAC Collection ID: {feature.collection}{" "}
+                                <CopyButton
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="tw:inline-block tw:w-fit tw:h-fit tw:ml-1"
+                                  variant="ghost"
+                                  size="xs"
+                                  // @ts-ignore
+                                  content={feature.collection}
+                                />
+                              </p>
+                              <p className="mb-0">
+                                <strong>Note:</strong> The <code>geometry</code>{" "}
+                                value may be set to <code>null</code> in the
+                                code block below due to its length. Visit the
+                                URL for the full STAC Item data.
+                              </p>
+                            </div>
+                            <Code
+                              className="mt-2 tw:w-full tw:h-full tw:max-h-[50vh]"
+                              code={JSON.stringify(
+                                featureWithoutGeometry,
+                                null,
+                                2,
+                              )}
+                            >
+                              <CodeHeader icon={FileJsonIcon} copyButton>
+                                {featureStacLink &&
+                                isValidHttpUrl(featureStacLink) ? (
+                                  <a href={featureStacLink}>
+                                    {featureStacLink}
+                                  </a>
+                                ) : (
+                                  "Feature GeoJSON (without geometry)"
+                                )}
+                              </CodeHeader>
+                              <CodeBlock lang="json" />
+                            </Code>
+                          </PopoverDescription>
+                        </PopoverHeader>
+                      </PopoverContent>
+                    </Popover>
+                  )}
+                  <Button
+                    className="tw:h-fit tw:has-[>svg]:p-1 tw:[&_svg:not([class*=size-])]:size-3"
+                    variant="ghost"
+                    onClick={() => {
+                      const map = formMap?.current.getMap();
+                      if (map) {
+                        try {
+                          if (feature.bbox)
+                            // @ts-expect-error
+                            map.fitBounds(feature.bbox);
+                          else if (feature.properties.bbox)
+                            // @ts-expect-error
+                            map.fitBounds(JSON.parse(feature.properties.bbox));
+                        } catch (e) {
+                          console.error(
+                            "Error while attempting to zoom to feature bounds.",
+                          );
+                        }
+                        setCurrentStacCollection(
+                          stacCollections?.find(
+                            (c) => c.id === feature.collection,
+                          ),
                         );
                       }
-                      setCurrentStacCollection(
-                        stacCollections?.find(
-                          (c) => c.id === feature.collection,
-                        ),
-                      );
-                    }
-                  }}
-                >
-                  <SearchIcon className="tw:w-3 tw:h-3" />
-                </Button>
-              </ComboboxChip>
-            ))}
+                    }}
+                  >
+                    <SearchIcon className="tw:w-3 tw:h-3" />
+                  </Button>
+                </ComboboxChip>
+              );
+            })}
           </div>
         </ComboboxValue>
       </ComboboxChips>
@@ -205,6 +314,13 @@ export function FeatureCombobox() {
                     {(feature: StacItem) => {
                       const featureLabel = feature.properties.title;
                       const fuse = new Fuse([featureLabel], { threshold: 0.2 });
+                      const featureWithoutGeometry = {
+                        ...feature,
+                        geometry: null,
+                      };
+                      const featureStacLink = (
+                        feature.links as StacLink[]
+                      )?.find((link: StacLink) => link.rel === "self")?.href;
                       if (
                         !userQuery ||
                         (userQuery && fuse.search(userQuery).length > 0)
@@ -229,27 +345,109 @@ export function FeatureCombobox() {
                             value={feature}
                           >
                             {featureLabel}
-                            {/* Zoom to feature button (Search magnifying glass icon) */}
-                            <Button
-                              className="tw:h-fit tw:has-[>svg]:p-1 tw:[&_svg:not([class*=size-])]:size-3"
-                              variant="ghost"
-                              onClick={(e) => {
-                                // Prevent selection, just search
-                                e.stopPropagation();
-                                const map = formMap?.current.getMap();
-                                if (map) {
-                                  // @ts-expect-error
-                                  map.fitBounds(feature.bbox);
-                                  setCurrentStacCollection(
-                                    stacCollections?.find(
-                                      (c) => c.id === collection.collection_id,
-                                    ),
-                                  );
-                                }
-                              }}
-                            >
-                              <SearchIcon className="tw:w-3 tw:h-3" />
-                            </Button>
+                            <div>
+                              {/* STAC Item information button */}
+                              <Popover>
+                                <PopoverTrigger
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  <Button
+                                    className="tw:cursor-pointer tw:h-fit tw:has-[>svg]:p-1 tw:[&_svg:not([class*=size-])]:size-3"
+                                    variant="ghost"
+                                  >
+                                    <InfoIcon className="tw:w-3 tw:h-3" />
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent
+                                  side="right"
+                                  className="tw:w-full tw:h-full tw:max-w-[65vw] tw:ml-8"
+                                >
+                                  <PopoverHeader>
+                                    <PopoverTitle className="tw:text-xl">
+                                      {feature.properties.title}
+                                    </PopoverTitle>
+                                    <PopoverDescription>
+                                      <div className="tw:flex tw:flex-col tw:gap-0">
+                                        <p className="mb-0">
+                                          STAC Item ID: {feature.id}{" "}
+                                          <CopyButton
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="tw:inline-block tw:w-fit tw:h-fit tw:ml-1"
+                                            variant="ghost"
+                                            size="xs"
+                                            content={feature.id}
+                                          />
+                                        </p>
+                                        <p className="mb-0">
+                                          STAC Collection ID:{" "}
+                                          {feature.collection}{" "}
+                                          <CopyButton
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="tw:inline-block tw:w-fit tw:h-fit tw:ml-1"
+                                            variant="ghost"
+                                            size="xs"
+                                            // @ts-expect-error
+                                            content={feature.collection}
+                                          />
+                                        </p>
+                                        <p className="mb-0">
+                                          <strong>Note:</strong> The{" "}
+                                          <code>geometry</code> value may be set
+                                          to <code>null</code> in the code block
+                                          below due to its length. Visit the URL
+                                          for the full STAC Item data.
+                                        </p>
+                                      </div>
+                                      <Code
+                                        className="mt-2 tw:w-full tw:h-full tw:max-h-[50vh]"
+                                        code={JSON.stringify(
+                                          featureWithoutGeometry,
+                                          null,
+                                          2,
+                                        )}
+                                      >
+                                        <CodeHeader
+                                          icon={FileJsonIcon}
+                                          copyButton
+                                        >
+                                          {featureStacLink &&
+                                          isValidHttpUrl(featureStacLink) ? (
+                                            <a href={featureStacLink}>
+                                              {featureStacLink}
+                                            </a>
+                                          ) : (
+                                            "Feature GeoJSON (without geometry)"
+                                          )}
+                                        </CodeHeader>
+                                        <CodeBlock lang="json" />
+                                      </Code>
+                                    </PopoverDescription>
+                                  </PopoverHeader>
+                                </PopoverContent>
+                              </Popover>
+                              {/* Zoom to feature button (Search magnifying glass icon) */}
+                              <Button
+                                className="tw:h-fit tw:has-[>svg]:p-1 tw:[&_svg:not([class*=size-])]:size-3"
+                                variant="ghost"
+                                onClick={(e) => {
+                                  // Prevent selection, just search
+                                  e.stopPropagation();
+                                  const map = formMap?.current.getMap();
+                                  if (map) {
+                                    // @ts-expect-error
+                                    map.fitBounds(feature.bbox);
+                                    setCurrentStacCollection(
+                                      stacCollections?.find(
+                                        (c) =>
+                                          c.id === collection.collection_id,
+                                      ),
+                                    );
+                                  }
+                                }}
+                              >
+                                <SearchIcon className="tw:w-3 tw:h-3" />
+                              </Button>
+                            </div>
                           </ComboboxItem>
                         );
                     }}

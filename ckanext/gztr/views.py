@@ -55,6 +55,7 @@ def stac_collection_show(collection_id: str) -> Response:
 def stac_item_list(collection_id: str) -> Response:
     """GeoJSON FeatureCollection-conformant entity of Item objects in collection"""
     try:
+        ckan_site_url = tk.config["ckan.site_url"]
         # Read the collection GeoJSON file data from the gztr storage
         gztr_storage = get_storage("gztr")
         # Load {collection_id}.parquet file into Apache SedonaDB dataframe and label the view as collection
@@ -93,12 +94,12 @@ def stac_item_list(collection_id: str) -> Response:
                 feature["links"] = [
                     {
                         # TODO: id should already be available at the top-level for each Item, not specifically in properties
-                        "href": f"http://localhost:5000/gztr/stac/collections/{collection_id}/items/{feature['properties']['id']}",
+                        "href": f"{ckan_site_url}/gztr/stac/collections/{collection_id}/items/{feature['properties']['id']}",
                         "rel": "self",
                         "type": "application/json"
                     },
                     {
-                        "href": f"http://localhost:5000/gztr/stac/collections/{collection_id}",
+                        "href": f"{ckan_site_url}/gztr/stac/collections/{collection_id}",
                         "rel": "collection",
                         "type": "application/json"
                     }
@@ -113,6 +114,7 @@ def stac_item_list(collection_id: str) -> Response:
 @bp.route("/gztr/stac/collections/<collection_id>/items/<item_id>", strict_slashes=False)
 def stac_item_show(collection_id: str, item_id: str) -> Response:
     try:
+        ckan_site_url = tk.config["ckan.site_url"]
         # Read the collection GeoJSON file data from the gztr storage
         gztr_storage = get_storage("gztr")
         # Load {collection_id}.parquet file into Apache SedonaDB dataframe and label the view as collection
@@ -144,12 +146,12 @@ def stac_item_show(collection_id: str, item_id: str) -> Response:
             item["bbox"] = item["properties"]["bbox"]
             item["links"] = [
                 {
-                    "href": f"http://localhost:5000/gztr/stac/collections/{collection_id}/items/{item_id}",
+                    "href": f"{ckan_site_url}/gztr/stac/collections/{collection_id}/items/{item_id}",
                     "rel": "self",
                     "type": "application/json"
                 },
                 {
-                    "href": f"http://localhost:5000/gztr/stac/collections/{collection_id}",
+                    "href": f"{ckan_site_url}/gztr/stac/collections/{collection_id}",
                     "rel": "collection",
                     "type": "application/json"
                 }
