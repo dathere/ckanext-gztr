@@ -75,7 +75,9 @@ def stac_item_list(collection_id: str) -> Response:
             fields_query_param = request.args.get("fields", None)
             columns_to_query = "*"
             if fields_query_param and "-geometry" in fields_query_param.split(","):
-                columns_to_query = ",".join([col for col in df.columns if col != "geometry"])
+                # Quote each identifier: SedonaDB folds unquoted identifiers to lowercase,
+                # so uppercase parquet columns (OBJECTID, GEO_ID, ...) would not resolve.
+                columns_to_query = ",".join(['"{}"'.format(col.replace('"', '""')) for col in df.columns if col != "geometry"])
             df = sd.sql(f"""
             SELECT {columns_to_query}, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item
             """)
