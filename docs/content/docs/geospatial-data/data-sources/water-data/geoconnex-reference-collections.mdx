@@ -10,8 +10,6 @@ import { Backlight } from "@/components/ui/backlight"
 
 [Geoconnex](/docs/geoconnex-integration) [reference collections](https://reference.geoconnex.us/collections) are collections of hydrologic-related geospatial features. These include HUC08 Subbasins, USGS National Aquifers, Census Designated Places, and more available to sync with your CKAN instance's region using ckanext-gztr.
 
-{/* TODO: User should be able to select specific reference feature collections in admin UI to auto-sync for their region. */}
-
 ## Jupyter Lab Tutorial
 
 Learn how to download HUC08 Sub Basins for your region and add the geospatial collection to your CKAN instance through an interactive Jupyter Lab session. Click the button below to get started.
@@ -19,60 +17,3 @@ Learn how to download HUC08 Sub Basins for your region and add the geospatial co
 import { MicroscopeIcon } from "lucide-react";
 
 <div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://mybinder.org/v2/gh/dathere/ckanext-gztr/HEAD?urlpath=%2Fdoc%2Ftree%2Flab%2Fgeoconnex%2Fgeoconnex_huc08_subbasins.ipynb" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon className="mr-2 w-4 h-4 my-auto" /> Open JupyterLab</a></div>
-
-In this tutorial we'll attempt to:
-
-1. Download a subset of geospatial features from a Geoconnex reference collection based on a bounding box you define or a preset query filter using the [Geoconnex Reference API](https://reference.geoconnex.us/openapi) as a GeoParquet file.
-2. Upload your GeoParquet file to the `gztr` storage.
-3. Update your `config.json` file to point to your geospatial collection.
-4. View your geospatial collection on your CKAN instance.
-{/* TODO: Optional auto-sync step */}
-5. (Optional) Enable the Geoconnex integration to sync your water data with Geoconnex
-
-After following these steps, you could run these steps as a cron job to automatically update your geospatial collections on a periodic basis (there is an example at the end).
-
-{/* TODO: "Alternatively you can use the Geoconnex integration to directly download data from Geoconnex instead of storing data as GeoParquet files and you can then modify them with custom GeoParquet files as needed." */}
-
-{/* TODO: Some way to enable such a job on CKAN */}
-{/* For ckanext-spatial, CKAN members provide a crontab command that users can simply paste. We can do something similar, perhaps even with a TUI or similar */}
-{/* https://docs.ckan.org/projects/ckanext-spatial/en/latest/csw/#running-it-on-production-site */}
-
-## 1. Download geospatial features for your region
-
-### Choose a reference collection
-
-First you'll want to identify a Geoconnex reference collection that you want to add to your CKAN instance.
-
-**[Browse through the reference collections here](https://reference.geoconnex.us/collections)**.
-
-For example we'll add a subset of [HUC08 subbasins](https://reference.geoconnex.us/collections/hu08) and [counties](https://reference.geoconnex.us/collections/states) to our CKAN instance based on our region.
-
-### Define a filter for your region
-
-Our CKAN instance is (likely) not globally-scoped, but rather it exists for storing a particular region's water data. Therefore we want to filter for the CKAN instance's region of interest and download a subset of the Geoconnex reference collection instead of the entire reference collection.
-
-To filter the reference collection, the [Geoconnex Reference API](https://reference.geoconnex.us) demonstrates several methods for filtering the reference collection as it is OpenAPI-compatible with a SwaggerUI interface.
-
-Let's start with the HUC08 sub-basins. You can draw and export a bounding box from [geojson.io](https://geojson.io) and use that value in your API request using the `bbox` parameter.
-
-{/* TODO: Add a bounding box tool here */}
-
-{/* Here are a few example reference collections you can start with. */}
-
-{/* 
-import { BlocksIcon, LibraryBigIcon, DownloadIcon, SparklesIcon, WrenchIcon } from 'lucide-react';
-
-<Cards>
-  <Card icon={<LibraryBigIcon />} href="/docs/geoconnex-integration/about-geoconnex" title="Learn about Geoconnex">
-    Explore Geoconnex and learn how specialists are mapping water data in a water data knowledge graph.
-  </Card>
-  <Card icon={<SparklesIcon fill="#ffb703" />} href="/docs/geoconnex-integration/features" title="Explore CKAN-Geoconnex features">
-    Explore the Geoconnex features your CKAN instance receives when enabling the Geoconnex integration.
-  </Card>
-  <Card icon={<DownloadIcon fill="#81b29a" />} href="/docs/geoconnex-integration/install" title="Enable the Geoconnex integration">
-    Learn how to enable the Geoconnex integration for your CKAN instance to sync water data.
-  </Card>
-  <Card icon={<BlocksIcon fill="#bde0fe" />} href="/docs/geoconnex-integration/software-architecture" title="Software architecture">
-    Learn about the software systems running as infrastructure for the CKAN-Geoconnex integration.
-  </Card>
-</Cards> */}
