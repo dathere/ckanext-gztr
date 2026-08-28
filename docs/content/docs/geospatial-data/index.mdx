@@ -8,6 +8,20 @@ import { Backlight } from "@/components/ui/backlight"
 
 <Backlight>![Geospatial data banner](/media/banners/geospatial-data.png)</Backlight>
 
+## Tutorials on how to add external geospatial data to your CKAN instance
+
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/Geoconnex_Jupyter_Lab_Scroll_Demo.mp4" />
+
+There are numerous data sources to retrieve data from and they differ based on your CKAN instance's region and purpose along with where you plan on running your ETL process.
+
+We provide a JupyterLab you can explore to learn how to retrieve, transform, and upload geospatial data from various data sources by clicking the button below (takes a moment to load).
+
+import { MicroscopeIcon } from "lucide-react";
+
+<div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://mybinder.org/v2/gh/dathere/ckanext-gztr/HEAD?urlpath=%2Fdoc%2Ftree%2Flab" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon className="mr-2 w-4 h-4 my-auto" /> Open Jupyter Lab</a></div>
+
+Most of the Jupyter Notebooks in the JupyterLab demonstrate using Python with [Apache SedonaDB](https://sedona.apache.org/sedonadb/latest/) for data retrieval and transformation along with the [ckanapi](https://github.com/ckan/ckanapi) Python library for uploading the file to a CKAN instance. Occasionally we also use the Python [requests](https://requests.readthedocs.io/en/latest/) library to retrieve data.
+
 ## How ckanext-gztr handles geospatial data
 
 As mentioned in the installation documentation, ckanext-gztr organizes geospatial data using the [STAC](https://stacspec.org) specification. This is because by default ckanext-gztr involves setting up a storage using the storage system introduced in CKAN 2.12. This storage is where GeoParquet files are stored (based on the sysadmin's uploaded GeoJSON files) and the STAC API and custom CKAN Action API endpoints make use of this storage for transforming and returning geospatial data in the expected format. Therefore the STAC specification works well for cataloging the geospatial data in a common open format.
@@ -41,23 +55,6 @@ Here's a summary of the straightforward approach:
 | Gold | The GeoParquet Silver tier is enough for ckanext-gztr to provide a STAC API which the frontend gazetteer maps use (this is why we mention "loosely" and "medallion-**like**"). However one could reuse the `gztr` storage for other files or set up other flows. |
 
 In a production setting you could orchestrate ETL processes with software such as [Apache Airflow](https://airflow.apache.org) into a data lake such as [Apache Iceberg](https://iceberg.apache.org/) with geospatial extensions enabled. If the `gztr` storage is configured as an S3 bucket or other external storage then adding GeoParquet files directly to the storage can also work so long as the STAC Catalog and STAC Collections files are updated in the `gztr` storage too. On a relatively simpler scale one could set up cron jobs or [CKAN background jobs](https://docs.ckan.org/en/latest/maintaining/background-tasks.html) instead.
-
-{/* TODO: Diagram example of ETL */}
-{/* TODO: Video tutorial of ETL */}
-
-## Tutorials on how to add geospatial data from external sources to ckanext-gztr
-
-There are numerous data sources to retrieve data from and they differ based on your CKAN instance's region and purpose along with where you plan on running your ETL process.
-
-We provide a JupyterLab you can explore to learn how to retrieve, transform, and upload geospatial data from various data sources by clicking the button below (takes a moment to load).
-
-{/* TODO: GIF */}
-
-import { MicroscopeIcon } from "lucide-react";
-
-<div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://mybinder.org/v2/gh/dathere/ckanext-gztr/HEAD?urlpath=%2Fdoc%2Ftree%2Flab" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon className="mr-2 w-4 h-4 my-auto" /> Open Jupyter Lab</a></div>
-
-Most of the Jupyter Notebooks in the JupyterLab demonstrate using Python with [Apache SedonaDB](https://sedona.apache.org/sedonadb/latest/) for data retrieval and transformation along with the [ckanapi](https://github.com/ckan/ckanapi) Python library for uploading the file to a CKAN instance. Occasionally we also use the Python [requests](https://requests.readthedocs.io/en/latest/) library to retrieve data.
 
 ## Tutorials on how to use an orchestrator to manage geospatial data
 
