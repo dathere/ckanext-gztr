@@ -1,0 +1,5 @@
+apache-sedona[db]
+jupyterlab
+lonboard
+ckanapi
+requests
