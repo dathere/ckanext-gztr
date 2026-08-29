@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# postBuild file used for the lab
+
 set -ex
 
 pip install "apache-sedona[db]" jupyterlab lonboard ckanapi requests
