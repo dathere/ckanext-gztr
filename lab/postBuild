@@ -1,0 +1,5 @@
+#!/bin/bash
+
+set -ex
+
+pip install "apache-sedona[db]" jupyterlab lonboard ckanapi requests
