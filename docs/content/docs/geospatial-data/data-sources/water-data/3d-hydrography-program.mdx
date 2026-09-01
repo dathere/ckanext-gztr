@@ -1,24 +1,19 @@
 ---
 title: "3D Hydrography Program (3DHP)"
-description: TODO
+description: Provide your CKAN instance with features from the 3D Hydrography Program.
 icon: Box
 ---
 
-TODO
+<img width="50%" alt="USGS logo" src="/media/logos/USGS_logo_green.png" />
 
-import { BlocksIcon, LibraryBigIcon, DownloadIcon, SparklesIcon, WrenchIcon } from 'lucide-react';
+The [3D National Hydrography Program (3DHP)](https://www.usgs.gov/3d-hydrography-program) is the latest systematic remapping of U.S. hydrography supported by the [U.S. Geological Survey](https://usgs.gov).
 
-<Cards>
-  <Card icon={<LibraryBigIcon />} href="/docs/geoconnex-integration/about-geoconnex" title="Learn about Geoconnex">
-    Explore Geoconnex and learn how specialists are mapping water data in a water data knowledge graph.
-  </Card>
-  <Card icon={<SparklesIcon fill="#ffb703" />} href="/docs/geoconnex-integration/features" title="Explore CKAN-Geoconnex features">
-    Explore the Geoconnex features your CKAN instance receives when enabling the Geoconnex integration.
-  </Card>
-  <Card icon={<DownloadIcon fill="#81b29a" />} href="/docs/geoconnex-integration/install" title="Enable the Geoconnex integration">
-    Learn how to enable the Geoconnex integration for your CKAN instance to sync water data.
-  </Card>
-  <Card icon={<BlocksIcon fill="#bde0fe" />} href="/docs/geoconnex-integration/software-architecture" title="Software architecture">
-    Learn about the software systems running as infrastructure for the CKAN-Geoconnex integration.
-  </Card>
-</Cards>
+## Jupyter Lab Tutorial
+
+Learn how to download 3DHP data for your region and add the geospatial collection to your CKAN instance through an interactive Jupyter Lab session. Click the button below to get started.
+
+import { MicroscopeIcon } from "lucide-react";
+
+<div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://mybinder.org/v2/gh/dathere/ckanext-gztr/HEAD?urlpath=%2Fdoc%2Ftree%2Flab%2F3dhp%2F3dhp_tutorial.ipynb" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon className="mr-2 w-4 h-4 my-auto" /> Open Jupyter Lab</a></div>
+
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/3DHP_Jupyter_Lab_Demo.mp4" />
