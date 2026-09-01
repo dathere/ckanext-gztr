@@ -10,10 +10,16 @@ The [3D National Hydrography Program (3DHP)](https://www.usgs.gov/3d-hydrography
 
 ## Jupyter Lab Tutorial
 
-Learn how to download 3DHP data for your region and add the geospatial collection to your CKAN instance through an interactive Jupyter Lab session. Click the button below to get started.
+In the Jupyter notebook below you can learn how to add a geospatial collection to your CKAN instance for your region based on 3DHP.
 
-import { MicroscopeIcon } from "lucide-react";
+Note that this process is based on the large [3DHP data download from ScienceBase](https://www.sciencebase.gov/catalog/item/69743a65d4be0260181a121e), which is about 20GB compressed and about 60GB when uncompressed as a GeoPackage file.
+
+Therefore we won't download the file in the interactive Jupyter Lab, there's an assumption that you'll run the notebook locally so you can also click the download button instead of the interactive Jupyter Lab to run the process on your local device.
+
+import { DownloadIcon, MicroscopeIcon } from "lucide-react";
 
 <div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://mybinder.org/v2/gh/dathere/ckanext-gztr/HEAD?urlpath=%2Fdoc%2Ftree%2Flab%2F3dhp%2F3dhp_tutorial.ipynb" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon className="mr-2 w-4 h-4 my-auto" /> Open Jupyter Lab</a></div>
+
+<div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://github.com/dathere/ckanext-gztr/blob/main/lab/3dhp/3dhp_tutorial.ipynb" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><DownloadIcon className="mr-2 w-4 h-4 my-auto" /> Download the Jupyter notebook from GitHub</a></div>
 
 <video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/3DHP_Jupyter_Lab_Demo.mp4" />
