@@ -1,24 +1,28 @@
 ---
 title: "3D Hydrography Program (3DHP)"
-description: TODO
+description: Provide your CKAN instance with features from the 3D Hydrography Program.
 icon: Box
 ---
 
-TODO
+<img width="50%" alt="USGS logo" src="/media/logos/USGS_logo_green.png" />
 
-import { BlocksIcon, LibraryBigIcon, DownloadIcon, SparklesIcon, WrenchIcon } from 'lucide-react';
+The [3D National Hydrography Program (3DHP)](https://www.usgs.gov/3d-hydrography-program) is the latest systematic remapping of U.S. hydrography supported by the [U.S. Geological Survey](https://usgs.gov).
 
-<Cards>
-  <Card icon={<LibraryBigIcon />} href="/docs/geoconnex-integration/about-geoconnex" title="Learn about Geoconnex">
-    Explore Geoconnex and learn how specialists are mapping water data in a global knowledge graph.
-  </Card>
-  <Card icon={<SparklesIcon fill="#ffb703" />} href="/docs/geoconnex-integration/features" title="Explore CKAN-Geoconnex features">
-    Explore the Geoconnex features your CKAN instance receives when enabling the Geoconnex integration.
-  </Card>
-  <Card icon={<DownloadIcon fill="#81b29a" />} href="/docs/geoconnex-integration/install" title="Enable the Geoconnex integration">
-    Learn how to enable the Geoconnex integration for your CKAN instance to sync water data.
-  </Card>
-  <Card icon={<BlocksIcon fill="#bde0fe" />} href="/docs/geoconnex-integration/software-architecture" title="Software architecture">
-    Learn about the software systems running as infrastructure for the CKAN-Geoconnex integration.
-  </Card>
-</Cards>
+If you'd like to learn more about 3DHP from a past webinar by the USGS, you can view the [Understanding the Transition from NHDPlus HR to 3DHP](https://www.youtube.com/watch?v=iZRA25dSrXc) webinar on YouTube.
+
+## Jupyter Lab Tutorial
+
+In the Jupyter notebook below you can learn how to add a geospatial collection to your CKAN instance for your region based on 3DHP.
+
+Note that this process is based on the large [3DHP data download from ScienceBase](https://www.sciencebase.gov/catalog/item/69743a65d4be0260181a121e), which is about 20GB compressed and about 60GB when uncompressed as a GeoPackage file.
+
+Therefore we won't download the file in the interactive Jupyter Lab, there's an assumption that you'll run the notebook locally so you can also click the download button instead of the interactive Jupyter Lab to run the process on your local device.
+
+import { DownloadIcon, MicroscopeIcon } from "lucide-react";
+
+<div className="flex flex-row gap-4">
+  <div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://mybinder.org/v2/gh/dathere/ckanext-gztr/HEAD?urlpath=%2Fdoc%2Ftree%2Flab%2F3dhp%2F3dhp_tutorial.ipynb" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon className="mr-2 w-4 h-4 my-auto" /> Open Jupyter Lab</a></div>
+  <div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://github.com/dathere/ckanext-gztr/blob/main/lab/3dhp/3dhp_tutorial.ipynb" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><DownloadIcon className="mr-2 w-4 h-4 my-auto" /> Download the Jupyter notebook from GitHub</a></div>
+</div>
+
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/3DHP_Jupyter_Lab_Demo.mp4" />

@@ -338,7 +338,12 @@ If you're new to the STAC specification, here are a few resources you could get 
 
 As a sysadmin you'll provide GeoJSON files that are used throughout ckanext-gztr including for the public search gazetteer, the dataset publisher gazetteer, and the place keywords search functionality.
 
-<Callout title="Geospatial data sources" type="info">We provide guides on how to download and format data from various geospatial data sources in [the geospatial data section](/docs/geospatial-data) of this documentation. However **we still recommend reading through this section first** to understand how you can add custom geospatial collections for your CKAN instance.</Callout>
+<Callout title="Geospatial data sources" type="info">
+We provide guides (e.g. using Jupyter Lab) on how to download and format data from various geospatial data sources in [the geospatial data section](/docs/geospatial-data) of this documentation. However **we still recommend reading through this section first** to understand how you can add custom geospatial collections for your CKAN instance.
+
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/Geoconnex_Jupyter_Lab_Scroll_Demo.mp4" />
+
+</Callout>
 
 The GeoJSON files must be in a specific format so that ckanext-gztr can properly use them. Here are the conditions followed by an example GeoJSON file:
 
@@ -348,7 +353,7 @@ The GeoJSON files must be in a specific format so that ckanext-gztr can properly
 
 <Callout title="Unique ID is required!" type="warning">Make sure that each `Feature` in a `FeatureCollection` has a unique ID. This is required for ckanext-gztr to work properly. If you have multiple geospatial Polygon `Feature`s that are meant to be selected as one feature (e.g. a group of cities) then you may need to consolidate them into one `Feature` with a `MultiPolygon` geometry.</Callout>
 
-Here we provide a truncated part of a GeoJSON file `Public_Water_Systems.geojson` for NMWDC with data provided by [Geoconnex](/docs/geoconnex-integration) (we omit the value for `coordinates` here as it would be too long):
+Let's view part of a GeoJSON file `NM_HUC8_Sub_Basins.geojson` for NMWDC with data provided by [Geoconnex](/docs/geoconnex-integration) (we omit the value for `geometry` here as it would be too long):
 
 ```json
 {
@@ -356,25 +361,18 @@ Here we provide a truncated part of a GeoJSON file `Public_Water_Systems.geojson
   "features": [
     {
       "type": "Feature",
+      "id": "13020203", // [!code highlight]
+      "geometry": null,
       "properties": {
-        "pws_id": "063500110",
-        "title": "JEMEZ PUEBLO", // [!code highlight]
-        "source_url": "https://www.hydroshare.org/resource/b11b8982eebd4843833932f085f71d92/data/contents/temm.geojson",
-        "data_source": "SimpleLab",
-        "geoconnex_uri": "https://geoconnex.us/ref/pws/063500110"
-      },
-      "id": "063500110", // [!code highlight]
-      "geometry": {
-        "type": "MultiPolygon",
-        "coordinates": [...]
+        "geoconnex_uri": "https://geoconnex.us/ref/hu08/13020203",
+        "title": "Rio Grande-Albuquerque" // [!code highlight]
       }
-    },
-    ...
+    }
   ]
 }
 ```
 
-Notice that the ID is based on an existing ID system for public water systems in the USA provided by the EPA as described in `collections.json`. We also have `title` in the `properties` of the `Feature` which is a human-readable name describing the feature. You can add [other common metadata](https://github.com/radiantearth/stac-spec/blob/master/commons/common-metadata.md) such as a `description` and `geoconnex_uri` as described in the [Geoconnex integration](/docs/geoconnex-integration) documentation.
+Notice that the ID is based on an existing ID system for HUC8 Sub Basins in the USA provided by the USGS as described in `collections.json`. We also have `title` in the `properties` of the `Feature` which is a human-readable name describing the feature. You can add [other common metadata](https://github.com/radiantearth/stac-spec/blob/master/commons/common-metadata.md) such as a `description`. There is also a `geoconnex_uri` as described in the [Geoconnex integration](/docs/geoconnex-integration) documentation.
 
 You'll now need to upload the GeoJSON file to your `gztr` storage through the `gztr_collection_create` custom CKAN API Action endpoint which converts your GeoJSON file into a GeoParquet file. Since we're using the CKAN API, you should ensure your CKAN instance is running.
 
@@ -418,7 +416,7 @@ Now **copy the `location` stem** that is returned after uploading because we wil
 
 We need to define metadata about the geospatial data that is being stored by the CKAN instance and exposed through the STAC API. You'll need to define a [STAC Catalog](https://github.com/radiantearth/stac-spec/blob/master/catalog-spec/catalog-spec.md) as a `catalog.json` file which is a top-level description of your the geospatial data available from your CKAN instance using STAC. You'll also need to define a file `collections.json` that defines the [STAC Collections](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) available from your STAC API.
 
-We provide truncated examples in the clickable accordions below.
+We provide examples you can customize in the clickable accordions below.
 
 import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
 
@@ -448,17 +446,17 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
         "type": "application/json"
       },
       {
-        // [!code word:public_water_systems]
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+        // [!code word:nm_huc8_sub_basins]
+        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/nm_huc8_sub_basins",
         "rel": "child",
         "type": "application/json",
-        "title": "Public Water Systems"
+        "title": "HUC8 Sub Basins"
       }
     ]
   }
   ```
 
-  Notice that the returned ID value `public_water_systems` is used as one of the `child` links as a STAC Collection at the end in the `href` URL value. If we were using the HUC8 Sub basins file from the previous example, then the value would be `nm_huc8_sub_basins`.
+  Notice that the returned ID value `nm_huc8_sub_basins` is used as one of the `child` links as a STAC Collection at the end in the `href` URL value.
   </Accordion>
   <Accordion title="STAC Collections `collections.json` example">
   Next you'll need to define your geospatial collections as a [STAC Collection](https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md) in a `collections.json` file as a list of dictionaries, where each dictionary is the metadata for a single STAC Collection. Here's a truncated example for NMWDC:
@@ -466,80 +464,90 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
   ```json
   [
     {
-      // [!code word:public_water_systems]
-      "id": "public_water_systems",
-      "type": "Collection",
       "stac_version": "1.1.0",
-      "title": "Public Water Systems",
-      "description": "Public Water Systems as defined by the U.S. Environmental Protection Agency (EPA) which intersect with New Mexico.",
-      "providers": [
-        {
-          "name": "U.S. Environmental Protection Agency (EPA)",
-          "description": "Independent agency of the United States government focused on environmental protection concerns.",
-          "roles": [
-            "producer"
-          ],
-          "url": "https://epa.gov"
-        },
-        {
-          "name": "Geoconnex",
-          "description": "Geoconex Reference API hosting the public water systems geospatial data. The public water systems for New Mexico are a subset of the data hosted by Geoconnex.",
-          "roles": [
-            "host"
-          ],
-          "url": "https://reference.geoconnex.us/collections/pws"
-        }
-      ],
+      "type": "Collection",
+      // [!code word:nm_huc8_sub_basins]
+      "id": "nm_huc8_sub_basins",
+      "title": "HUC8 Sub Basins",
+      "description": "HUC08 Sub Basins intersecting with New Mexico.",
+      "license": "CC-BY-4.0",
       "extent": {
         "spatial": {
           "bbox": [
             [
-              -180.0,
-              -90.0,
-              180.0,
-              90.0
+              -110.5868102,
+              30.0536868,
+              -101.1041183,
+              38.0662415
             ]
           ]
         },
         "temporal": {
           "interval": [
             [
-              null,
+              "2026-08-30T17:01:54Z",
               null
             ]
           ]
         }
       },
-      "license": "proprietary",
       "links": [
         {
-          // [!code word:public_water_systems]
-          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+          // [!code word:nm_huc8_sub_basins]
+          "href": "http://localhost:5000/gztr/stac/collections/nm_huc8_sub_basins",
           "rel": "self",
           "type": "application/json"
         },
         {
-          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+          "href": "http://localhost:5000/gztr/stac/collections",
           "rel": "parent",
           "type": "application/json"
         },
         {
-          "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+          "href": "http://localhost:5000/gztr/stac",
           "rel": "root",
           "type": "application/json"
         },
         {
-          // [!code word:public_water_systems]
-          "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems/items",
+          // [!code word:nm_huc8_sub_basins]
+          "href": "http://localhost:5000/gztr/stac/collections/nm_huc8_sub_basins/items",
           "rel": "items",
           "type": "application/geo+json"
+        }
+      ],
+      "providers": [
+        {
+          "description": "An agency of the U.S. Department of the Interior. The USGS studies U.S. lands and resources and monitors, analyzes, and predicts Earth\u2019s changing systems while providing data for science.",
+          "name": "U.S. Geological Survey",
+          "roles": [
+            "producer"
+          ],
+          "url": "https://usgs.gov"
+        },
+        {
+          "description": "The Internet of Water Coalition is a group of organizations working together with federal, state, and local government partners to build foundational water data infrastructure across the US and create a community of people and organizations using water data to make better decisions.",
+          "name": "Internet of Water Coalition",
+          "roles": [
+            "licensor"
+          ],
+          "url": "https://internetofwater.org"
+        },
+        {
+          "description": "Operating out of the Lincoln Institute of Land Policy. CGS provides nonprofit geospatial solutions in various sector as a data solutions provider. Hosts the Geoconnex water data knowledge graph and Geoconnex reference collections API.",
+          "name": "Center for Geospatial Solutions",
+          "roles": [
+            "processor",
+            "licensor",
+            "host"
+          ],
+          "url": "https://cgsearth.org"
         }
       ]
     }
   ]
   ```
 
-  Notice that the `id` value `public_water_systems` for the Public Water Systems collection is from the previous upload step. If we were using the HUC8 Sub basins file from a previous example, then the value would be `nm_huc8_sub_basins`.
+  Notice that the `id` value `nm_huc8_sub_basins` is reused in several places.
   </Accordion>
 </Accordions>
 

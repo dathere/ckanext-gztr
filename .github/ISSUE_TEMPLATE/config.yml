@@ -1,0 +1,11 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Documentation
+    url: https://gztr.dathere.com
+    about: Please learn about ckanext-gztr through its documentation here.
+  - name: Discussions
+    url: https://github.com/dathere/ckanext-gztr/discussions
+    about: Please ask and answer questions here.
+  - name: Security
+    url: https://support.dathere.com
+    about: Please report security vulnerabilities here.

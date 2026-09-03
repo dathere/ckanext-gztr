@@ -1,12 +1,121 @@
 ---
 title: "Enable Geoconnex integration"
-description: Learn how to sync your CKAN instance with the Geoconnex global water data knowledge graph.
+description: Learn how to sync your CKAN instance with the Geoconnex water data knowledge graph.
 icon: Download
 ---
 
-TODO
+To allow for minting persistent identifiers for your CKAN datasets and properly indexing your CKAN dataset based on its geospatial metadata (e.g. to identify the Geoconnex reference features a CKAN dataset is about or related to), you'll need to enable syncing Geoconnex with your CKAN instance.
+
+We enable this CKAN --> Geoconnex sync using [github.com/dathere/ckan_geoconnex_bulk_runner](https://github.com/dathere/ckan_geoconnex_bulk_runner) which is a software system built with Rust.
+
+![CKAN to Geoconnex data flow diagram](/media/CKAN_Geoconnex_Data_Flow_Diagram.drawio.svg)
+
+## Enabling sync with GitHub
+
+To enable the sync, you'll need to have a [GitHub](https://github.com) account and follow the steps below.
+
+import { Step, Steps } from 'fumadocs-ui/components/steps';
+
+<Steps>
+<Step>
+
+## Fork the [internetofwater/geoconnex.us](https://github.com/internetofwater/geoconnex.us) repository and clone the fork to your local device
+
+Fork the [github.com/internetofwater/geoconnex.us](https://github.com/internetofwater/geoconnex.us) repository and then clone your fork to your local device.
+
+```bash
+git clone https://github.com/YOUR_GITHUB_USERNAME/geoconnex.us.git
+cd geoconnex.us
+```
+
+</Step>
+<Step>
+
+## Add a namespace for your CKAN instance in `namespaces/bulk/ckan`
+
+Add a namespace directory to the `namespaces/bulk/ckan` directory based on your CKAN instance's name. For example for the New Mexico Water Data Catalog, we'd add a directory with no spaces named `New_Mexico_Water_Data_Catalog`.
+
+```bash
+mkdir namespaces/bulk/ckan/New_Mexico_Water_Data_Catalog
+```
+
+</Step>
+<Step>
+
+## Add a `metadata.json` file
+
+Add a `metadata.json` file and modify the entries described in the table below. We use the New Mexico Water Data Catalog as an example.
+
+```bash
+cd namespaces/bulk/ckan/New_Mexico_Water_Data_Catalog
+touch metadata.json
+```
+
+<Callout title="Different semantics for 'datasets'">In the following `metadata.json` example, a "dataset" is not the same as a CKAN dataset. In this JSON example a "dataset" represents a collection of all of your web resources that are being synced with Geoconnex.</Callout>
+
+```json title="namespaces/bulk/ckan/New_Mexico_Water_Data_Catalog/metadata.json"
+{
+    "contact_email": "support@dathere.com",
+    "dataset_description": "New Mexico Water Data Catalog web resources",
+    "dataset_has_html_landing_pages": true,
+    "add_associated_mainstems": false,
+    "source_code_link": "https://github.com/dathere/ckan_geoconnex_bulk_runner",
+    "dataset_documentation_link": "https://catalog.newmexicowaterdata.org",
+    "bulk_container_image": "ghcr.io/dathere/ckan_geoconnex_bulk_runner:new_mexico_water_data_catalog"
+}
+```
+
+| Key | Value |
+| --- | ----- |
+| `contact_email` | The email that can be reached out to in case there are issues when attempting to sync Geoconnex with your CKAN instance's data.
+| `dataset_description` | A description about your CKAN instance. |
+| `dataset_documentation_link` | Your CKAN instance URL. |
+| `bulk_container_image` | Keep `ghcr.io/dathere/ckan_geoconnex_bulk_runner:` and then add the lowercase version of your namespace such as `new_mexico_water_data_catalog`. |
+
+You should keep the example's values for `dataset_has_html_landing_pages`, `add_associated_mainstems`, and `source_code_link`.
+
+</Step>
+<Step>
+
+## Add a `web_resources.csv` file
+
+You'll also need a CSV file that maps the newly minted Geoconnex persistent identifier URLs to your CKAN web resources URLs.
+
+```bash
+touch web_resources.csv
+```
+
+For now there is support for dataset-oriented web resources, so you can modify the following example:
+
+```csv title="namespaces/bulk/ckan/New_Mexico_Water_Data_Catalog/web_resources.csv"
+id,target
+https://geoconnex.us//ckan/New_Mexico_Water_Data_Catalog/([-a-zA-Z0-9_]+).*$,https://catalog.newmexicowaterdata.org/dataset/$1
+```
+
+- For the `id` value replace `New_Mexico_Water_Data_Catalog` with your namespace.
+- For the `target` value replace `https://catalog.newmexicowaterdata.org` with your CKAN instance site URL.
 
 
-1. Enable config value
-2. Fill and submit form below
-3. Add datasets and associate
+</Step>
+<Step>
+
+## Commit changes and submit your pull request
+
+By now you should have the following:
+
+- New namespace directory in `namespaces/bulk/ckan` based on your CKAN instance name
+- `metadata.json` file describing your CKAN instance as needed
+- CSV file (e.g. `web_resources.csv`) to map Geoconnex PIDs to your CKAN web resource URLs
+
+Now you'll need to stage, commit, and push your changes to your fork.
+
+```bash
+git add -A
+git commit -m "feat: add NMWDC CKAN bulk loader namespace"
+git push
+```
+
+Go to your fork on GitHub and create a new pull request. The geoconnex.us administrators should review your pull request and merge it if everything looks correct.
+
+</Step>
+</Steps>
