@@ -37,6 +37,16 @@ import {
   simplifyGeojson,
 } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
+import {
+  BanIcon,
+  MapPinnedIcon,
+  OctagonMinusIcon,
+  PencilIcon,
+  PencilOffIcon,
+  SaveIcon,
+  SaveOffIcon,
+  SquarePenIcon,
+} from "lucide-react";
 
 export type FeatureProperties = {
   id?: string;
@@ -107,7 +117,14 @@ function App() {
   );
   const gm = useFormMap((state) => state.gm);
   const disableApplyButton = useFormMap((state) => state.disableApplyButton);
+  const setDisableApplyButton = useFormMap(
+    (state) => state.setDisableApplyButton,
+  );
   const [fieldsAreInitialized, setFieldsAreInitialized] = useState(false);
+  const [drawFeaturesText, setDrawFeaturesText] = useState("Draw features");
+  const [editDrawnFeaturesText, setEditDrawnFeaturesText] = useState(
+    "Edit drawn features",
+  );
 
   // On first load of the widget (e.g. dataset publisher goes to Add Dataset or Edit Dataset page)
   useEffect(() => {
@@ -195,7 +212,7 @@ function App() {
               const featuresWithGeometry = spatialFullFeatures.map((f) => {
                 const identifiedFeature = itemCollections
                   ?.find((iC) => iC.collection_id === f.collection)
-                  ?.features.find((cf) => cf.properties.id === f.properties.id);
+                  ?.features.find((cf) => cf.id === f.id);
                 if (!f.geometry && identifiedFeature?.geometry) {
                   f.geometry = identifiedFeature?.geometry;
                 }
@@ -223,13 +240,25 @@ function App() {
               variant="outline"
               id="filter-click"
             >
-              {spatialFull && spatialFull.features.length > 0 ? "Edit" : "Add"}{" "}
-              Location Data
+              {spatialFull && spatialFull.features.length > 0 ? (
+                <>
+                  <SquarePenIcon /> Edit
+                </>
+              ) : (
+                <>
+                  <MapPinnedIcon />
+                  Add
+                </>
+              )}{" "}
+              location data
             </Button>
           </DialogTrigger>
           <DialogContent className="tw:sm:!max-w-[90%]">
             <DialogHeader>
-              <DialogTitle>Add Location Information</DialogTitle>
+              <DialogTitle>
+                <MapPinnedIcon className="tw:inline-block tw:mr-1 tw:mb-1" />
+                Add Location Information
+              </DialogTitle>
               <DialogDescription className="tw:text-md">
                 Use the tools below to specify the coverage area for this
                 dataset on the map.
@@ -253,13 +282,14 @@ function App() {
                             editFeaturesButton.toggleAttribute("disabled");
                           }
                           if (drawIsEnabled) {
-                            e.currentTarget.innerText = "Draw features";
+                            setDrawFeaturesText("Draw features");
                             e.currentTarget.classList.replace(
                               "btn-danger",
                               "btn-primary",
                             );
+                            setDisableApplyButton(false);
                           } else {
-                            e.currentTarget.innerText = "Stop drawing";
+                            setDrawFeaturesText("Stop drawing");
                             e.currentTarget.classList.replace(
                               "btn-primary",
                               "btn-danger",
@@ -268,13 +298,36 @@ function App() {
                         }
                       }}
                     >
-                      Draw features
+                      {drawFeaturesText === "Draw features" ? (
+                        <PencilIcon />
+                      ) : (
+                        <PencilOffIcon />
+                      )}
+                      {drawFeaturesText}
                     </Button>
                     <Button
                       className="btn btn-primary"
                       id="edit-drawn-features-button"
                       onClick={(e) => {
                         if (gm) {
+                          gm.features.forEach((featureData) => {
+                            if (
+                              !(
+                                // @ts-expect-error
+                                featureData._geoJson?.collection ===
+                                  "Drawn features" ||
+                                featureData._geoJson?.properties.collection ===
+                                  "Drawn features"
+                              )
+                            ) {
+                              // Disables editing for preset features
+                              // As per https://github.com/geoman-io/maplibre-geoman/pull/45
+                              featureData.updateProperties({
+                                __gm_disableEdit: true,
+                              });
+                            }
+                          });
+                          // Edit drawn features only
                           gm.toggleGlobalEditMode();
                           const addFeaturesButton = document.querySelector(
                             "#add-drawn-features-button",
@@ -285,13 +338,13 @@ function App() {
                           const button = e.currentTarget;
                           const currentInnerText = button.innerText;
                           if (currentInnerText === "Edit drawn features") {
-                            button.innerText = "Stop editing";
+                            setEditDrawnFeaturesText("Stop editing");
                             button.classList.replace(
                               "btn-primary",
                               "btn-danger",
                             );
                           } else {
-                            button.innerText = "Edit drawn features";
+                            setEditDrawnFeaturesText("Edit drawn features");
                             button.classList.replace(
                               "btn-danger",
                               "btn-primary",
@@ -300,7 +353,12 @@ function App() {
                         }
                       }}
                     >
-                      Edit drawn features
+                      {editDrawnFeaturesText === "Edit drawn features" ? (
+                        <SquarePenIcon />
+                      ) : (
+                        <BanIcon />
+                      )}
+                      {editDrawnFeaturesText}
                     </Button>
                   </div>
                   <div className="tw:flex tw:gap-2">
@@ -447,11 +505,12 @@ function App() {
                   }}
                   className="btn btn-danger"
                 >
+                  <SaveOffIcon />
                   Cancel
                 </Button>
               </DialogClose>
               <Button
-                className="btn btn-success"
+                className={`btn ${disableApplyButton ? "btn-warning" : "btn-success"}`}
                 disabled={disableApplyButton}
                 onClick={() => {
                   if (tempSpatialFull) {
@@ -477,6 +536,7 @@ function App() {
                   setCurrentStacCollection(undefined);
                 }}
               >
+                {disableApplyButton ? <OctagonMinusIcon /> : <SaveIcon />}
                 {disableApplyButton
                   ? "You must click the Stop button at the top left first"
                   : "Apply"}

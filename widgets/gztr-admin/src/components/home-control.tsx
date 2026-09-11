@@ -4,6 +4,7 @@ import { useMap } from "react-map-gl/maplibre";
 
 import { CustomControl } from "@/components/custom-control";
 
+// TODO: Customizable based on CKAN instance
 export const HomeControl = () => {
   const { current: map } = useMap();
 

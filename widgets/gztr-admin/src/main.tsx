@@ -1,6 +1,7 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
+import { TooltipProvider } from "@/components/ui/tooltip";
 import App from "./App.tsx";
 
 const datasetPublisherGazetteerWidgetRoot = document.getElementById(
@@ -10,7 +11,9 @@ const datasetPublisherGazetteerWidgetRoot = document.getElementById(
 if (datasetPublisherGazetteerWidgetRoot) {
   createRoot(datasetPublisherGazetteerWidgetRoot).render(
     <StrictMode>
-      <App />
+      <TooltipProvider>
+        <App />
+      </TooltipProvider>
     </StrictMode>,
   );
 }

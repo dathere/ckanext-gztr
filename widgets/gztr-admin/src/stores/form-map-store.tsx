@@ -39,6 +39,8 @@ interface FormMapState {
   setCurrentStacCollection: (
     currentStacCollection: StacCollection | undefined,
   ) => void;
+  downloadingCollection: string | undefined;
+  setDownloadingCollection: (downloadingCollection: string | undefined) => void;
   searchValue: string | undefined;
   setSearchValue: (searchValue: string) => void;
   statewideEnabled: boolean;
@@ -97,6 +99,9 @@ export const useFormMap = create<FormMapState>((set) => ({
   currentStacCollection: undefined,
   setCurrentStacCollection: (currentStacCollection) =>
     set(() => ({ currentStacCollection })),
+  downloadingCollection: undefined,
+  setDownloadingCollection: (downloadingCollection) =>
+    set(() => ({ downloadingCollection })),
   searchValue: undefined,
   setSearchValue: (searchValue) => set(() => ({ searchValue })),
   statewideEnabled: false,
