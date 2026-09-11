@@ -81,7 +81,7 @@ def stac_item_list(collection_id: str) -> Response:
             df = sd.sql(f"""
             SELECT {columns_to_query}, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item
             """)
-            df.to_pyogrio(buffer, driver="GeoJSON", geometry_name="geometry" if "geometry" in columns_to_query else None)
+            df.to_pyogrio(buffer, driver="GeoJSON", geometry_name="geometry" if "geometry" in columns_to_query else None, layer_options={"ID_FIELD": "id"})
             output = io.TextIOWrapper(buffer, encoding="utf-8").read()
             collection_items = json.loads(output)
             del collection_items["name"]
@@ -89,14 +89,12 @@ def stac_item_list(collection_id: str) -> Response:
                 del collection_items["crs"]
             for feature in collection_items["features"]:
                 feature["stac_version"] = "1.1.0"
-                # The id from original GeoJSON is prioritized by properties.id and if that doesn't exist then id is moved to properties
-                feature["id"] = feature["properties"]["id"]
                 feature["bbox"] = feature["properties"]["bbox"]
                 feature["collection"] = collection_id
                 feature["links"] = [
                     {
                         # TODO: id should already be available at the top-level for each Item, not specifically in properties
-                        "href": f"{ckan_site_url}/gztr/stac/collections/{collection_id}/items/{feature['properties']['id']}",
+                        "href": f"{ckan_site_url}/gztr/stac/collections/{collection_id}/items/{feature['id']}",
                         "rel": "self",
                         "type": "application/json"
                     },
@@ -139,11 +137,10 @@ def stac_item_show(collection_id: str, item_id: str) -> Response:
             if df.count() > 1:
                 log.error(f"Found more than one feature with the same ID {item_id} when IDs should be unique in Collection with ID {collection_id}.")
                 return tk.abort(500, "Internal server error")
-            df.to_pyogrio(buffer, driver="GeoJSON")
+            df.to_pyogrio(buffer, driver="GeoJSON", layer_options={"ID_FIELD": "id"})
             output = io.TextIOWrapper(buffer, encoding="utf-8").read()
             item = json.loads(output)["features"][0]
             item["stac_version"] = "1.1.0"
-            item["id"] = item["properties"]["id"]
             item["collection"] = collection_id
             item["bbox"] = item["properties"]["bbox"]
             item["links"] = [

@@ -1,10 +1,12 @@
-import GLMap, { Layer, Source } from "react-map-gl/maplibre";
+import * as turf from "@turf/turf";
+import GLMap, { Layer, type MapRef, Source } from "react-map-gl/maplibre";
 import "@/assets/maplibre-gl.css";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ItemCollection } from "@/App";
 import { useFormMap } from "@/stores/form-map-store";
 
 const ExampleMap = () => {
+  const mapRef = useRef<MapRef>(undefined);
   const stacCollections = useFormMap((state) => state.stacCollections);
   const itemCollections = useFormMap((state) => state.itemCollections);
   const quickRegionGeoJSON = useFormMap((state) => state.quickRegionGeoJSON);
@@ -39,6 +41,11 @@ const ExampleMap = () => {
           ).result,
         );
         setFeaturesWithGeometries(spatialFullWithGeometries);
+        const map = mapRef.current?.getMap();
+        if (map) {
+          // @ts-expect-error
+          map.fitBounds(turf.bbox(spatialFullWithGeometries));
+        }
       }
     })();
   }, [itemCollections, spatialFull]);
@@ -57,6 +64,8 @@ const ExampleMap = () => {
 
   return (
     <GLMap
+      // @ts-expect-error
+      ref={mapRef}
       initialViewState={{
         latitude: 34.307144,
         longitude: -106.018066,
