@@ -1,4 +1,6 @@
 {
+  "title": "API reference",
+  "icon": "Globe",
   "pages": [
     "---STAC---",
     "...stac",

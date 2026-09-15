@@ -4,6 +4,30 @@
 
 This directory includes a Next.js project built with [Fumadocs](https://github.com/fuma-nama/fumadocs) for documentation of ckanext-gztr. The documentation can be viewed at [gztr.dathere.com](https://gztr.dathere.com).
 
+## Generate the OpenAPI pages
+
+Make sure you are in the `docs` root directory, then run (with pnpm installed):
+
+```bash
+pnpx ts-node ./scripts/generate-api-reference.ts
+```
+
+Replace the content in `docs/content/docs/api-reference/meta.json` with:
+
+```json
+{
+  "title": "API reference",
+  "icon": "Globe",
+  "pages": ["---STAC---", "...stac", "---Action API---", "...action-api"]
+}
+```
+
+Then fix the spaces between capital letters in:
+
+- `docs/content/docs/api-reference/stac/meta.json`
+- `docs/content/docs/api-reference/action-api/meta.json`
+
+
 ## Development
 
 Run development server with [pnpm](https://pnpm.io):
