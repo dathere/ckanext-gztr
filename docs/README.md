@@ -6,10 +6,10 @@ This directory includes a Next.js project built with [Fumadocs](https://github.c
 
 ## Generate the OpenAPI pages
 
-Make sure you are in the `docs` root directory, then run (with pnpm installed):
+Make sure you are in the `docs` root directory, then run (with pnpm installed and development packages installed including `tsx`):
 
 ```bash
-pnpx ts-node ./scripts/generate-api-reference.ts
+pnpm tsx ./scripts/generate-api-reference.ts
 ```
 
 Replace the content in `docs/content/docs/api-reference/meta.json` with:

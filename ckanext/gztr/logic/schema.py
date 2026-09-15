@@ -32,3 +32,11 @@ def spatial_full_with_geometry(
     return {
         "spatial_full": [not_empty],
     }
+
+@tk.validator_args
+def geoconnex_dataset_jsonld(
+    not_empty: types.Validator,
+) -> types.Schema:
+    return {
+        "id": [not_empty],
+    }

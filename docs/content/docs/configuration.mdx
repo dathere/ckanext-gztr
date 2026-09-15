@@ -16,7 +16,7 @@ The extension provides multiple configuration options that can be defined in you
 
 If you use [ckanext-envvars](https://github.com/ckan/ckanext-envvars) then each configuration option should be modifiable by environment variable declarations. For example the `ckanext.gztr.enable_drawn_features` configuration option can have its value set by the environment variable `CKANEXT__GZTR__ENABLE_DRAWN_FEATURES`. This method can be useful when deploying CKAN with Docker or Docker Compose.
 
-<Callout title="Updating ckanext-gztr">As ckanext-gztr is developed over time, existing or new configuration changes may occur and therefore we recommend reviewing release notes for each release of ckanext-gztr to learn which configuration options you may have to update for your CKAN instance when updating ckanext-gztr.</Callout>
+<Callout title="Updating ckanext-gztr">As ckanext-gztr is developed over time, existing or new configuration changes may occur and therefore we recommend reviewing release notes for each release of ckanext-gztr to learn which configuration options you may have to update for your CKAN instance when updating ckanext-gztr. You can "Watch" the [GitHub repository](https://github.com/dathere/ckanext-gztr) to get notified by email for updates.</Callout>
 
 ## General options
 
@@ -43,10 +43,8 @@ CKANEXT__GZTR__MAP_TILE_SERVER=https://tiles.openfreemap.org/styles/liberty
 ## Public search gazetteer
 
 ```ini
-# Display or hide the address search feature which uses Nominatim.
-ckanext.gztr.search.enable_nominatim_search = true
-# Display or hide the feature collections preview dropdown.
-ckanext.gztr.search.enable_feature_categories_preview = true
+# Disable the address search feature which uses Nominatim.
+ckanext.gztr.search.disable_nominatim_search = true
 ```
 
 ## Dataset form configuration

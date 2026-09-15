@@ -102,7 +102,7 @@ const CommonStacCollectionInfo = ({
   </p>
 );
 
-const StacItemPopoverContent = ({
+export const StacItemPopoverContent = ({
   feature,
   geoconnexURI,
   featureWithoutGeometry,
@@ -241,15 +241,16 @@ export function FeatureCombobox() {
       }}
       // When user selection changes
       onValueChange={(value) => {
+        // @ts-expect-error
         const newTempSpatialFull: ItemCollection = {
           type: "FeatureCollection",
           features: value,
-          links: [],
         };
         setTempSpatialFull(newTempSpatialFull);
         // If user is removing a feature (clicks an already selected feature in the combobox)
         gm?.features.forEach((featureData) => {
-          if (!value.map((f) => f.id).includes(featureData.id.toString())) {
+          // @ts-expect-error
+          if (!value.map((f) => f.id).includes(featureData._geoJson.properties.id)) {
             gm.features.delete(featureData.id);
           }
         });

@@ -1,48 +1,44 @@
-[build-system]
-requires = ["setuptools>=61.0.0", "wheel"]
-build-backend = "setuptools.build_meta"
-
 [project]
 name = "ckanext-gztr"
 version = "0.1.0"
 description = "CKAN extension that adds general-purpose geospatial capabilities."
 readme = "README.md"
-authors = [
-    { name = "datHere", email = "support@dathere.com" }
-]
+authors = [{ name = "datHere", email = "support@dathere.com" }]
 license = { "text" = "AGPL-3.0-only" }
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Programming Language :: Python :: 3",
-    "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: GNU Affero General Public License v3",
+  "Programming Language :: Python :: 3",
 ]
-keywords = [ "CKAN", "extension"]
+keywords = ["CKAN", "extension"]
 dependencies = [
-    "shapely",
-    "apache-sedona[db]",
-    "geopandas",
-    "tomli>=2.4.1",
+  "apache-sedona[db]",
+  "geopandas",
+  "shapely",
+  "tomli>=2.4.1",
 ]
 requires-python = ">=3.10"
 
 [project.urls]
 Homepage = "https://gztr.dathere.com"
-Repository = "https://github.com/dathere/ckanext-gztr"
 Issues = "https://github.com/dathere/ckanext-gztr/issues"
+Repository = "https://github.com/dathere/ckanext-gztr"
+
+[project.entry-points."babel.extractors"]
+ckan = "ckan.lib.extract:extract_ckan"
 
 [project.entry-points."ckan.plugins"]
 gztr = "ckanext.gztr.plugin:GZTRPlugin"
 
-[project.entry-points."babel.extractors"]
-ckan = "ckan.lib.extract:extract_ckan"
+[dependency-groups]
+dev = ["ckan", "flask"]
+
+[build-system]
+requires = ["setuptools>=61.0.0", "wheel"]
+build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages]
 find = {}
 
 [tool.uv.sources]
 ckan = { git = "https://github.com/ckan/ckan.git", branch = "dev-v2.12" }
-
-[dependency-groups]
-dev = [
-    "ckan",
-]

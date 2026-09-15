@@ -7,12 +7,8 @@ import { useFormMap } from "@/stores/form-map-store";
 
 const ExampleMap = () => {
   const mapRef = useRef<MapRef>(undefined);
-  const stacCollections = useFormMap((state) => state.stacCollections);
   const itemCollections = useFormMap((state) => state.itemCollections);
   const quickRegionGeoJSON = useFormMap((state) => state.quickRegionGeoJSON);
-  const setQuickRegionGeoJSON = useFormMap(
-    (state) => state.setQuickRegionGeoJSON,
-  );
   const spatialFull = useFormMap((state) => state.spatialFull);
   const statewideEnabled = useFormMap((state) => state.statewideEnabled);
   const [featuresWithGeometries, setFeaturesWithGeometries] = useState<
@@ -51,16 +47,10 @@ const ExampleMap = () => {
   }, [itemCollections, spatialFull]);
 
   useEffect(() => {
-    const quickRegionCollection = stacCollections?.find(
-      (c) => c.quick_region_label,
-    );
-    if (quickRegionCollection)
-      setQuickRegionGeoJSON(
-        itemCollections?.find(
-          (iC) => iC.collection_id === quickRegionCollection.id,
-        ),
-      );
-  }, [stacCollections, setQuickRegionGeoJSON]);
+    if (!spatialFull) {
+      setFeaturesWithGeometries(undefined);
+    }
+  }, [spatialFull])
 
   return (
     <GLMap
