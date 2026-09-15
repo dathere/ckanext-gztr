@@ -136,3 +136,22 @@ paths:
                 spatial_full:
                   type: string
                   description: GeoJSON
+  /api/3/action/gztr_geoconnex_dataset_jsonld:
+    post:
+      tags:
+        - Action API
+      operationId: gztr_geoconnex_dataset_jsonld
+      summary: /api/3/action/gztr_geoconnex_dataset_jsonld
+      description: Provide a CKAN dataset ID, get its Geoconnex-compatible JSON-LD.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              required:
+                - id
+              type: object
+              properties:
+                id:
+                  type: string
+                  description: the id or name of the dataset
