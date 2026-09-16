@@ -34,9 +34,9 @@ def gztr_geoconnex_dataset_jsonld(dataset_metadata: dict[str, any]):
             if collection_id == "Drawn features":
                 continue
             stac_item = stac_item_show(collection_id, item_id).get_json()
-            geoconnex_uri = stac_item.get("properties").get("geoconnex_uri")
-            if geoconnex_uri:
-                about.append({"@id": geoconnex_uri})
+            geoconnex_pid = stac_item.get("properties").get("geoconnex_pid")
+            if geoconnex_pid:
+                about.append({"@id": geoconnex_pid})
 
         return json.dumps({
             "@context": {

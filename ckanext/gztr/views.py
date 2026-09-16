@@ -35,6 +35,9 @@ def stac() -> Response:
 def stac_collection_list() -> Response:
     """Returns a list of STAC Collections for the CKAN instance's geospatial data used by ckanext-gztr."""
     try:
+        # TODO: Handle scenario where collections.json doesn't exist
+        # For example when a sysadmin installs ckanext-gztr for the first time
+        # fk.exc.MissingFileError
         collections = gztr_json_file_as_dict("collections.json")
     except Exception:
         log.exception("Error while running /gztr/stac/collections endpoint")
