@@ -1,0 +1,8 @@
+version: 1
+groups:
+  - annotation: ckanext-gztr configuration
+    options:
+      - key: ckanext.gztr.default_latitude
+        editable: true
+        default: 34.0
+        description: Default map latitude for public search gazetteer and dataset publisher gazetteer.

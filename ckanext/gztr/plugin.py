@@ -1,15 +1,12 @@
 import json
 import logging
-import os
-from typing import Any
 
 import ckan.plugins.toolkit as tk
 import shapely
-import tomli
-from ckan import plugins
 from shapely.geometry import shape
 
 import ckanext.gztr.validators as gztr_validators
+from ckan import plugins
 
 from .views import stac_item_show
 
@@ -19,6 +16,7 @@ log = logging.getLogger(__name__)
 @tk.blanket.auth_functions
 @tk.blanket.blueprints
 @tk.blanket.cli
+@tk.blanket.config_declarations
 @tk.blanket.helpers
 class GZTRPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IConfigDeclaration)
@@ -26,13 +24,6 @@ class GZTRPlugin(plugins.SingletonPlugin):
     plugins.implements(plugins.IValidators)
     plugins.implements(plugins.IPackageController, inherit=True)
     plugins.implements(plugins.ITemplateHelpers)
-
-    # IConfigDeclaration
-    def declare_config_options(self, declaration: Any, key: Any):
-        # 2. Programmatically load standard static declaration file
-        here = os.path.dirname(__file__)
-        with open(os.path.join(here, "config_declaration.toml"), "rb") as src:
-            declaration.load_dict(tomli.load(src))
 
     # IConfigurer
     def update_config(self, config_):

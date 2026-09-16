@@ -15,7 +15,6 @@ dependencies = [
   "apache-sedona[db]",
   "geopandas",
   "shapely",
-  "tomli>=2.4.1",
 ]
 requires-python = ">=3.10"
 
