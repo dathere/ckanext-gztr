@@ -1,0 +1,16 @@
+{% ckan_extends %}
+
+{% block scripts %}
+
+  {{ super() }}
+
+  {% set geoconnex_config = h.gztr_get_geoconnex_config() | gztr_to_dict %}
+
+  {% if geoconnex_config["ckanext.gztr.geoconnex.enabled"] == "true" and geoconnex_config["ckanext.gztr.geoconnex.enable_dataset_jsonld"]  == "true" %}
+    <!-- Geoconnex-compatible JSON-LD -->
+    <script type="application/ld+json">
+      {{ h.gztr_geoconnex_dataset_jsonld(pkg) | safe }}
+    </script>
+  {% endif %}
+
+{% endblock %}

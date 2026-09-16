@@ -1,5 +1,10 @@
 {
   "title": "API reference",
   "icon": "Globe",
-  "pages": ["---STAC---", "...stac", "---Action API---", "...action-api"]
+  "pages": [
+    "---STAC---",
+    "...stac",
+    "---Action API---",
+    "...action-api"
+  ]
 }

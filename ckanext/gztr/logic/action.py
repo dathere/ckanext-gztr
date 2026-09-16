@@ -15,6 +15,7 @@ from ckan.lib.munge import munge_filename
 from ckan.logic import ValidationError
 from ckan.types import Context
 
+from ..helpers import gztr_geoconnex_dataset_jsonld as helper_gztr_geoconnex_dataset_jsonld
 from ..utils import gztr_json_file_as_dict
 from ..views import stac_item_show
 from . import schema
@@ -36,6 +37,22 @@ def gztr_spatial_full_with_geometry(context: types.Context, data_dict: dict[str,
                 if feature.get("collection") != "Drawn features" and feature.get("geometry") is None and feature.get("collection") in [collection.get("id") for collection in collections if collection.get("id") is not None]:
                     feature["geometry"] = stac_item_show(feature.get("collection"), feature.get("id")).get_json().get("geometry")
         return json.dumps(spatial_full)
+    except Exception:
+        log.exception("Error while running gztr_spatial_full_with_geometry.")
+
+
+@tk.validate_action_data(schema.geoconnex_dataset_jsonld)
+def gztr_geoconnex_dataset_jsonld(context: types.Context, data_dict: dict[str, Any]) -> dict[str, Any]:
+    """Provide a CKAN dataset ID, get its Geoconnex-compatible JSON-LD.
+    
+    :param id: CKAN dataset ID
+    :type id: str
+    """
+    try:
+        dataset_id = data_dict.get("id")
+        dataset_metadata = tk.get_action("package_show")(context, {"id": dataset_id})
+        geoconnex_dataset_jsonld = helper_gztr_geoconnex_dataset_jsonld(dataset_metadata)
+        return json.loads(geoconnex_dataset_jsonld)
     except Exception:
         log.exception("Error while running gztr_spatial_full_with_geometry.")
 

@@ -18,7 +18,7 @@ import {
   type GmEditFeatureEditEndEvent,
   type GmOptionsPartial,
 } from "@geoman-io/maplibre-geoman-free";
-import { XCircleIcon } from "lucide-react";
+import { InfoIcon, XCircleIcon } from "lucide-react";
 import type { Feature, Map as GLMapType } from "maplibre-gl";
 import { useEffect, useRef, useState } from "react";
 import type { StacItem } from "stac-ts";
@@ -28,6 +28,9 @@ import { Button } from "@/components/ui/button";
 import { getItemCollectionFromAPI, getItemFromAPI } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
 import { ZoomToFeaturesControl } from "@/components/zoom-to-features-control";
+import { StacItemPopoverContent } from "./feature-combobox";
+import { Popover, PopoverContent, PopoverTrigger } from "./ui/popover";
+import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
 
 const FormMap = () => {
   const mapRef = useRef<MapRef>(undefined);
@@ -119,7 +122,20 @@ const FormMap = () => {
                 ...currentItemCollection,
                 collection_id: currentStacCollection.id,
               });
-              setItemCollections(allItemCollections);
+              // Sort by STAC Collection title
+              setItemCollections(
+                // @ts-expect-error
+                allItemCollections.sort((a, b) =>
+                  // @ts-expect-error
+                  stacCollections
+                    ?.find((c) => c.id === a.collection_id)
+                    .title?.localeCompare(
+                      // @ts-expect-error
+                      stacCollections?.find((c) => c.id === b.collection_id)
+                        .title,
+                    ),
+                ),
+              );
               setDownloadingCollection(undefined);
             }
           }
@@ -274,6 +290,7 @@ const FormMap = () => {
                 collection: "Drawn features",
                 id: event.feature.id.toString(),
                 properties: {
+                  id: event.feature.id.toString(),
                   title: event.feature.id.toString(),
                 },
                 // We keep geometry since it is a drawn feature
@@ -391,72 +408,150 @@ const FormMap = () => {
                   <XCircleIcon />
                 </Button>
               </div>
-              {/* Select/Remove this feature button */}
-              <Button
-                className="btn btn-light"
-                onClick={async () => {
-                  // Add feature to tempSpatialFull
-                  const newTempSpatialFull: ItemCollection = tempSpatialFull
-                    ? structuredClone(tempSpatialFull)
-                    : {
-                        type: "FeatureCollection",
-                        features: [],
-                        links: [],
-                      };
-                  const featureToRemove = newTempSpatialFull?.features.find(
-                    (f) => f.id === selectedFeature.id.toString(),
-                  );
-                  // User clicked "Remove this feature"
-                  if (featureToRemove) {
-                    const featureToRemoveIndex =
-                      newTempSpatialFull?.features.findIndex(
-                        (f) => f.id === selectedFeature.id.toString(),
-                      );
-                    // If feature to remove exists in tempSpatialFull (undefined check is required here)
-                    if (
-                      featureToRemoveIndex !== undefined &&
-                      featureToRemoveIndex > -1
-                    ) {
-                      // Delete feature from tempSpatialFull
-                      newTempSpatialFull?.features.splice(
-                        featureToRemoveIndex,
-                        1,
-                      );
-                      setTempSpatialFull(newTempSpatialFull);
-                      // Delete feature from Geoman features
-                      gm?.features.delete(featureToRemove.id);
+              <div className="tw:flex tw:items-center">
+                {/* Select/Remove this feature button */}
+                <Button
+                  className="btn btn-light"
+                  onClick={async () => {
+                    // Add feature to tempSpatialFull
+                    // @ts-expect-error
+                    const newTempSpatialFull: ItemCollection = tempSpatialFull
+                      ? structuredClone(tempSpatialFull)
+                      : {
+                          type: "FeatureCollection",
+                          features: [],
+                        };
+                    const featureToRemove = newTempSpatialFull?.features.find(
+                      (f) => f.id === selectedFeature.properties.id,
+                    );
+                    // User clicked "Remove this feature"
+                    if (featureToRemove) {
+                      const featureToRemoveIndex =
+                        newTempSpatialFull?.features.findIndex(
+                          (f) => f.id === selectedFeature.properties.id,
+                        );
+                      // If feature to remove exists in tempSpatialFull (undefined check is required here)
+                      if (
+                        featureToRemoveIndex !== undefined &&
+                        featureToRemoveIndex > -1
+                      ) {
+                        // Delete feature from tempSpatialFull
+                        newTempSpatialFull?.features.splice(
+                          featureToRemoveIndex,
+                          1,
+                        );
+                        setTempSpatialFull(newTempSpatialFull);
+                        // Delete feature from Geoman features
+                        gm?.features.delete(featureToRemove.id);
+                      }
                     }
-                  }
-                  // User clicked "Select this feature"
-                  else {
-                    // TODO: Handle undefined scenarios
-                    // Get feature from itemCollections, not the map
-                    const stacItem = itemCollections
-                      ?.find(
-                        (c) =>
-                          c.collection_id ===
-                          // @ts-expect-error
-                          selectedFeature.collection,
-                      )
-                      ?.features.find(
-                        (f) => f.id === selectedFeature.id.toString(),
-                      );
-                    // @ts-expect-error
-                    newTempSpatialFull?.features.push(stacItem);
-                    setTempSpatialFull(newTempSpatialFull);
-                    // Add feature to Geoman features
-                    // @ts-expect-error
-                    gm?.features.importGeoJsonFeature(stacItem);
-                  }
-                }}
-              >
-                {tempSpatialFull?.features.find(
-                  (f) => f.id === selectedFeature.id.toString(),
-                )
-                  ? "Remove"
-                  : "Select"}{" "}
-                this feature
-              </Button>
+                    // User clicked "Select this feature"
+                    else {
+                      // TODO: Handle undefined scenarios
+                      // Get feature from itemCollections, not the map
+                      const stacItem = itemCollections
+                        ?.find(
+                          (c) =>
+                            c.collection_id ===
+                            // @ts-expect-error
+                            selectedFeature.collection,
+                        )
+                        ?.features.find(
+                          // Note: We use .properties.id throughout since .id may truncate the ID if it's a number (e.g. leading 0 removed)
+                          (f) => f.id === selectedFeature.properties.id,
+                        );
+                      // @ts-expect-error
+                      newTempSpatialFull?.features.push(stacItem);
+                      setTempSpatialFull(newTempSpatialFull);
+                      // Add feature to Geoman features
+                      // @ts-expect-error
+                      gm?.features.importGeoJsonFeature(stacItem);
+                    }
+                  }}
+                >
+                  {tempSpatialFull?.features.find(
+                    (f) => f.id === selectedFeature.properties.id,
+                  )
+                    ? "Remove"
+                    : "Select"}{" "}
+                  this feature
+                </Button>
+                <Popover>
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <PopoverTrigger>
+                        <Button
+                          className="tw:cursor-pointer rounded-circle"
+                          variant="ghost"
+                        >
+                          <InfoIcon />
+                        </Button>
+                      </PopoverTrigger>
+                    </TooltipTrigger>
+                    <TooltipContent>View STAC item info</TooltipContent>
+                  </Tooltip>
+                  <PopoverContent className="tw:w-full tw:h-full tw:max-w-[65vw] tw:ml-8">
+                    <StacItemPopoverContent
+                      // @ts-expect-error
+                      feature={itemCollections
+                        ?.find(
+                          (c) =>
+                            c.collection_id ===
+                            // @ts-expect-error
+                            selectedFeature.collection,
+                        )
+                        ?.features.find(
+                          (f) => f.id === selectedFeature.properties.id,
+                        )}
+                      featureWithoutGeometry={{
+                        ...itemCollections
+                          ?.find(
+                            (c) =>
+                              c.collection_id ===
+                              // @ts-expect-error
+                              selectedFeature.collection,
+                          )
+                          ?.features.find(
+                            (f) => f.id === selectedFeature.properties.id,
+                          ),
+                        geometry: null,
+                      }}
+                      featureStacLink={
+                        itemCollections
+                          ?.find(
+                            (c) =>
+                              c.collection_id ===
+                              // @ts-expect-error
+                              selectedFeature.collection,
+                          )
+                          ?.features.find(
+                            (f) => f.id === selectedFeature.properties.id,
+                          )?.links
+                          ? (
+                              // @ts-expect-error
+                              (
+                                itemCollections
+                                  ?.find(
+                                    (c) =>
+                                      c.collection_id ===
+                                      // @ts-expect-error
+                                      selectedFeature.collection,
+                                  )
+                                  ?.features.find(
+                                    (f) =>
+                                      f.id === selectedFeature.properties.id,
+                                  )
+                                  // @ts-expect-error
+                              ).links as StacLink[]
+                              // @ts-expect-error
+                            )?.find((link: StacLink) => link.rel === "self")
+                              ?.href
+                          : undefined
+                      }
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
             </div>
           </Popup>
         )}

@@ -79,7 +79,7 @@ function App({ config }: any) {
   }, []);
 
   return (
-    <div>
+    <div className="tw:hidden tw:md:block">
       <section className="module module-narrow module-shallow">
         <div className="module-heading tw:flex tw:justify-between">
           <span className="tw:w-full">
@@ -105,7 +105,7 @@ function App({ config }: any) {
                 Search by bounding box
               </Button>
             </DialogTrigger>
-            <DialogContent className="tw:sm:max-w-[90vw]">
+            <DialogContent className="tw:sm:max-w-[90vw] tw:sm:max-h-[90vh]">
               <DialogHeader>
                 <DialogTitle>Filter by Location</DialogTitle>
                 <DialogDescription className="tw:text-lg mb-0">

@@ -3,9 +3,20 @@ import { type ClassValue, clsx } from "clsx";
 import type { Map as FormMap } from "maplibre-gl";
 import { twMerge } from "tailwind-merge";
 import type { ItemCollection } from "@/App";
+import type { StacItem } from "stac-ts";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
+}
+
+export const filteredStacItem = (stacItem: StacItem) => {
+  return {
+    "type": "Feature",
+    "id": stacItem.id,
+    "collection": stacItem.collection,
+    "geometry": stacItem.collection === "Drawn features" ? stacItem.geometry : null,
+    "properties": {}
+  };
 }
 
 export const getItemCollectionFromAPI = async (collectionId: string) => {

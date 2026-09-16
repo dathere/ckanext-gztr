@@ -18,6 +18,8 @@ from .utils import gztr_get_collection, gztr_json_file_as_dict
 log = logging.getLogger(__name__)
 bp = Blueprint("gztr", __name__)
 
+bp.add_app_template_filter(lambda string: json.loads(string), name="gztr_to_dict")
+
 @bp.route("/gztr/stac", strict_slashes=False)
 def stac() -> Response:
     """Returns a STAC Catalog for the CKAN instance's geospatial data used by ckanext-gztr."""
@@ -72,16 +74,15 @@ def stac_item_list(collection_id: str) -> Response:
             df = sd.read_parquet(f.name)
             df.to_view("item")
             buffer = io.BytesIO()
+            if "bbox" not in df.columns:
+                df = sd.sql("""
+                SELECT *, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item
+                """)
             fields_query_param = request.args.get("fields", None)
-            columns_to_query = "*"
-            if fields_query_param and "-geometry" in fields_query_param.split(","):
-                # Quote each identifier: SedonaDB folds unquoted identifiers to lowercase,
-                # so uppercase parquet columns (OBJECTID, GEO_ID, ...) would not resolve.
-                columns_to_query = ",".join(['"{}"'.format(col.replace('"', '""')) for col in df.columns if col != "geometry"])
-            df = sd.sql(f"""
-            SELECT {columns_to_query}, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item
-            """)
-            df.to_pyogrio(buffer, driver="GeoJSON", geometry_name="geometry" if "geometry" in columns_to_query else None, layer_options={"ID_FIELD": "id"})
+            remove_geometry = fields_query_param and "-geometry" in fields_query_param.split(",")
+            if remove_geometry:
+                df = df.drop("geometry")
+            df.to_pyogrio(buffer, driver="GeoJSON", geometry_name="geometry" if "geometry" in df.columns else None, layer_options={"ID_FIELD": "id", "ID_TYPE": "String"})
             output = io.TextIOWrapper(buffer, encoding="utf-8").read()
             collection_items = json.loads(output)
             del collection_items["name"]
@@ -89,6 +90,11 @@ def stac_item_list(collection_id: str) -> Response:
                 del collection_items["crs"]
             for feature in collection_items["features"]:
                 feature["stac_version"] = "1.1.0"
+                # We copy (overwrite) feature.id to feature.properties.id to use when preserving the ID value
+                # For example if the ID is a number starting with 0 and our frontend code uses this feature
+                # then it may parse the feature.id as a number and remove leading zeroes which is not intended behavior
+                # so instead the feature.properties.id value should be unmodified when parsed and can be used instead
+                feature["properties"]["id"] = feature["id"]
                 feature["bbox"] = feature["properties"]["bbox"]
                 feature["collection"] = collection_id
                 feature["links"] = [
@@ -131,17 +137,19 @@ def stac_item_show(collection_id: str, item_id: str) -> Response:
             df = sd.read_parquet(f.name)
             df.to_view("item")
             buffer = io.BytesIO()
-            df = sd.sql(f"""
-            SELECT *, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item WHERE item.id = '{item_id}'
-            """)
+            if "bbox" not in df.columns:
+                df = sd.sql(f"""
+                SELECT *, [ST_XMIN(geometry), ST_YMIN(geometry), ST_XMAX(geometry), ST_YMAX(geometry)] as bbox FROM item WHERE item.id = '{item_id}'
+                """)
             if df.count() > 1:
                 log.error(f"Found more than one feature with the same ID {item_id} when IDs should be unique in Collection with ID {collection_id}.")
                 return tk.abort(500, "Internal server error")
-            df.to_pyogrio(buffer, driver="GeoJSON", layer_options={"ID_FIELD": "id"})
+            df.to_pyogrio(buffer, driver="GeoJSON", layer_options={"ID_FIELD": "id", "ID_TYPE": "String"})
             output = io.TextIOWrapper(buffer, encoding="utf-8").read()
             item = json.loads(output)["features"][0]
             item["stac_version"] = "1.1.0"
             item["collection"] = collection_id
+            item["properties"]["id"] = item["id"]
             item["bbox"] = item["properties"]["bbox"]
             item["links"] = [
                 {

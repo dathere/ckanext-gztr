@@ -32,9 +32,9 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Spinner } from "@/components/ui/spinner";
 import {
+  filteredStacItem,
   // getPlaceKeywordsFromSpatialFull,
   runAddressSearch,
-  simplifyGeojson,
 } from "@/lib/utils";
 import { useFormMap } from "@/stores/form-map-store";
 import {
@@ -73,7 +73,7 @@ export type FeatureCollectionProperties = {
   id_key?: string;
   // Key in a `Feature`'s `properties` that has the human-readable label/name (e.g. "NAMELSAD")
   label_key?: string;
-  quick_region_label?: string;
+  quick_region_extent?: boolean;
 };
 
 export type ItemCollection = {
@@ -88,7 +88,6 @@ export type ItemCollection = {
 function App() {
   const [open, setOpen] = useState<boolean>();
   const [openStatewideAlert, setOpenStatewideAlert] = useState<boolean>();
-  const [statewideChecked, setStatewideChecked] = useState<boolean>();
   const [searching, setSearching] = useState<boolean>();
   const formMap = useFormMap((state) => state.formMap);
   const setStacCollections = useFormMap((state) => state.setStacCollections);
@@ -104,9 +103,9 @@ function App() {
   const spatialFull = useFormMap((state) => state.spatialFull);
   const setSpatialFull = useFormMap((state) => state.setSpatialFull);
   const quickRegionGeoJSON = useFormMap((state) => state.quickRegionGeoJSON);
+  const setQuickRegionGeoJSON = useFormMap((state) => state.setQuickRegionGeoJSON);
   const tempSpatialFull = useFormMap((state) => state.tempSpatialFull);
   const setTempSpatialFull = useFormMap((state) => state.setTempSpatialFull);
-  // const multiSelectRef = useFormMap((state) => state.multiSelectRef);
   const statewideEnabled = useFormMap((state) => state.statewideEnabled);
   const setStatewideEnabled = useFormMap((state) => state.setStatewideEnabled);
   const addressSearchResults = useFormMap(
@@ -134,6 +133,9 @@ function App() {
         await fetch(`/gztr/stac/collections`)
       ).json();
       setStacCollections(stacCollections);
+      const quickRegionCollection = stacCollections?.find(
+        (c) => c.quick_region_extent,
+      );
       // Get all Items for each STAC collection
       // TODO: Optimize with only getting necessary ItemCollections instead of all on first page load
       const allItemCollections: ItemCollection[] = [];
@@ -143,17 +145,32 @@ function App() {
             `/gztr/stac/collections/${collection.id}/items?fields=-geometry`,
           )
         ).json();
+        if (collection.id === quickRegionCollection?.id) {
+          setQuickRegionGeoJSON(itemCollection);
+        }
         allItemCollections.push({
           ...itemCollection,
           collection_id: collection.id,
         });
       }
-      setItemCollections(allItemCollections);
+      // Sort by STAC Collection title
+      setItemCollections(
+        // @ts-expect-error
+        allItemCollections.sort((a, b) =>
+          // @ts-expect-error
+          stacCollections
+            ?.find((c) => c.id === a.collection_id)
+            .title?.localeCompare(
+              // @ts-expect-error
+              stacCollections?.find((c) => c.id === b.collection_id).title,
+            ),
+        ),
+      );
     })();
   }, []);
 
   useEffect(() => {
-    // Check quick region extent switch if a collection exists with quick_region_label
+    // Check quick region extent switch if a collection exists with quick_region_extent set to true
     const statewideSwitch = document.querySelector("#statewide-switch");
     if (
       spatialFull?.features.length === 1
@@ -516,15 +533,19 @@ function App() {
                   if (tempSpatialFull) {
                     const newTempSpatialFull = structuredClone(tempSpatialFull);
                     if (tempSpatialFull.features.length > 0) {
-                      // Remove geometry from spatialFull, exampleMap uses spatial, geometry added to tempSpatialFull.features
-                      // Should not remove geometry from drawn features
-                      const featuresNoGeometries =
-                        newTempSpatialFull.features.map((f) => {
-                          if (!(f.collection === "Drawn features"))
-                            f.geometry = null;
-                          return f;
-                        });
-                      newTempSpatialFull.features = featuresNoGeometries;
+                      // Here we remove unnecessary data before assigning it to spatialFull to save space.
+                      // If more data is necessary other than STAC Collection ID, STAC Item ID (except drawn features which include geometry),
+                      // Then the IDs can be used to retrieve the full metadata through the STAC API or Actions API
+                      // - Set geometry to null if not a drawn feature
+                      // - Keep geometry for drawn features
+                      // - Remove bbox array
+                      // - Remove links array (this is STAC Item data)
+                      // - Remove all properties except geoconnex_pid
+                      // - Remove stac_version
+                      const filteredFeatures =
+                        newTempSpatialFull.features.map((f) => filteredStacItem(f));
+                      // @ts-expect-error
+                      newTempSpatialFull.features = filteredFeatures;
                       setSpatialFull(newTempSpatialFull);
                     } else {
                       setSpatialFull(undefined);
@@ -555,15 +576,16 @@ function App() {
               <AlertDialogHeader>
                 <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
                 <AlertDialogDescription>
-                  This action cannot be undone.{" "}
-                  {tempSpatialFull && tempSpatialFull.features.length > 0 && (
+                  {spatialFull && spatialFull.features.length > 0 && (
                     <p>
-                      You currently have {tempSpatialFull.features.length}{" "}
+                      You currently have {spatialFull.features.length}{" "}
                       selected feature
-                      {tempSpatialFull.features.length > 1 ? "s" : ""}. If you
-                      continue, your selected feature
-                      {tempSpatialFull.features.length > 1 ? "s" : ""} will be
-                      removed and the statewide extent will be selected instead.
+                      {spatialFull.features.length > 1 ? "s" : ""}. If you
+                      press the Continue button, your selected feature
+                      {spatialFull.features.length > 1 ? "s" : ""} will be
+                      removed and the quick extent will be selected instead. You can press the Cancel button to keep your existing geospatial feature{spatialFull.features.length > 1 ? "s" : ""} instead of the quick extent region.
+                      <br />
+                      This action cannot be undone.
                     </p>
                   )}
                 </AlertDialogDescription>
@@ -578,12 +600,15 @@ function App() {
                 <AlertDialogAction
                   className="btn btn-success"
                   onClick={() => {
-                    setStatewideEnabled(true);
                     setOpenStatewideAlert(false);
-                    setStatewideChecked(true);
+                    setStatewideEnabled(true);
                     if (quickRegionGeoJSON) {
-                      setSpatialFull(quickRegionGeoJSON);
-                      setSpatial(simplifyGeojson(quickRegionGeoJSON));
+                      const filteredFeature = filteredStacItem(quickRegionGeoJSON.features[0]);
+                      setSpatialFull({
+                        "type": "FeatureCollection",
+                        // @ts-expect-error
+                        features: [filteredFeature]
+                      });
                     }
                   }}
                 >
@@ -594,34 +619,37 @@ function App() {
           </AlertDialog>
           <Input
             className="form-check-input"
-            checked={statewideChecked}
+            checked={statewideEnabled}
             type="checkbox"
             id="statewide-switch"
             onClick={(e) => {
-              // @ts-expect-error
-              const checked = e.target.checked;
+              const checked = e.currentTarget.checked;
               if (
-                tempSpatialFull &&
-                tempSpatialFull.features.length > 0 &&
+                spatialFull &&
+                spatialFull.features.length > 0 &&
                 !statewideEnabled
               ) {
                 e.preventDefault();
                 setOpenStatewideAlert(true);
               } else {
-                setStatewideEnabled(checked);
-                setStatewideChecked(checked);
                 if (checked && quickRegionGeoJSON) {
-                  setSpatialFull(quickRegionGeoJSON);
-                  setSpatial(simplifyGeojson(quickRegionGeoJSON));
+                  const filteredFeature = filteredStacItem(quickRegionGeoJSON.features[0]);
+                  setSpatialFull({
+                    "type": "FeatureCollection",
+                    // @ts-expect-error
+                    features: [filteredFeature]
+                  });
+                  setStatewideEnabled(true);
                 } else {
                   setSpatialFull(undefined);
                   setSpatial(undefined);
+                  setStatewideEnabled(false);
                 }
               }
             }}
           />
           <Label className="form-check-label" htmlFor="statewide-switch">
-            Statewide Extent?
+            Quick extent?
           </Label>
         </div>
       )}

@@ -19,7 +19,9 @@ Now let's explore the features for your CKAN instance added by ckanext-gztr!
 
 ## Public dataset search gazetteer
 
-Commonly, CKAN data catalogs have a search box where users may type their query for datasets they'd like to find. However, this can be cumbersome when it comes to geographic data, when there is no visual method to search and identify relevant regions. The public gazetteer helps resolve this issue by providing an interactive map where users can draw a bounding box to search for datasets that have geospatial features which intersect with their drawn bounding box.
+Commonly, CKAN data catalogs have a search box where users may type their query for datasets they'd like to find. However, this can be cumbersome when it comes to geographic data, when there is no visual method to search and identify relevant regions. The public gazetteer helps resolve this issue by providing an interactive map where users can draw a bounding box to search for datasets that have (simplified) geospatial features which intersect with their drawn bounding box.
+
+<Callout title="The search uses simplified geometries">Since the geospatial search relies on Apache Solr, the bounding box search runs against a **simplified** version of each CKAN dataset's geospatial features indexed in Apache Solr rather than the full geospatial representation.</Callout>
 
 <video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-public-gazetteer-search-demo.mp4" />
 
@@ -35,7 +37,7 @@ Here are things you can do with the public search gazetteer:
 
 ## Dataset publisher gazetteer
 
-Similar to the public gazetteer, the data curator gazetteer provides data curators a visual and interactive way to specify a dataset's relevant geographic features. Users can either select pre-loaded features or draw custom polygons. The selection is then saved and can be searched from the public dataset search page, either by drawing a bounding box using the public gazetteer or by searching a pre-loaded location's name, which is indexed as a “place keyword”.
+Similar to the public gazetteer, the dataset publisher gazetteer provides dataset publishers a visual and interactive way to specify a dataset's relevant geographic features. Users can either select pre-loaded features or draw custom polygons. The selection is then saved and can be searched from the public dataset search page, either by drawing a bounding box using the public gazetteer or by searching a pre-loaded location's name, which is indexed as a “place keyword”.
 
 <video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-data-publisher-gazetteer-demo.mp4" />
 
