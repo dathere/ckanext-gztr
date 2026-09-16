@@ -1,5 +1,6 @@
 include README.rst
 include LICENSE
 include requirements.txt
+include ckanext/gztr/config_declaration.yaml
 recursive-include ckanext/gztr *.html *.json *.js *.less *.css *.mo *.yml
 recursive-include ckanext/gztr/migration *.ini *.py *.mako
