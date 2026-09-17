@@ -54,7 +54,7 @@ def gztr_geoconnex_dataset_jsonld(context: types.Context, data_dict: dict[str, A
         geoconnex_dataset_jsonld = helper_gztr_geoconnex_dataset_jsonld(dataset_metadata)
         return json.loads(geoconnex_dataset_jsonld)
     except Exception:
-        log.exception("Error while running gztr_spatial_full_with_geometry.")
+        log.exception("Error while running gztr_geoconnex_dataset_jsonld.")
 
 # @tk.validate_action_data(schema.feature_batch_show)
 # def gztr_feature_batch_item_show(context: types.Context, data_dict: dict[str, Any]) -> dict[str, Any]:
