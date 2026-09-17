@@ -303,9 +303,9 @@ export function FeatureCombobox() {
                   )?.href
                 : undefined;
               const geoconnexURI =
-                feature.properties.geoconnex_uri &&
-                isValidHttpUrl(feature.properties.geoconnex_uri as string)
-                  ? (feature.properties.geoconnex_uri as string)
+                feature.properties.geoconnex_pid &&
+                isValidHttpUrl(feature.properties.geoconnex_pid as string)
+                  ? (feature.properties.geoconnex_pid as string)
                   : undefined;
               const itemPopoverHandle = PopoverPrimitive.createHandle();
               return (
@@ -730,11 +730,11 @@ export function FeatureCombobox() {
                             )?.href
                           : undefined;
                         const geoconnexURI =
-                          feature.properties.geoconnex_uri &&
+                          feature.properties.geoconnex_pid &&
                           isValidHttpUrl(
-                            feature.properties.geoconnex_uri as string,
+                            feature.properties.geoconnex_pid as string,
                           )
-                            ? (feature.properties.geoconnex_uri as string)
+                            ? (feature.properties.geoconnex_pid as string)
                             : undefined;
                         const itemPopoverHandle =
                           PopoverPrimitive.createHandle();

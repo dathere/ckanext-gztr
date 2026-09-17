@@ -390,7 +390,7 @@ Let's view part of a GeoJSON file `NM_HUC8_Sub_Basins.geojson` for NMWDC with da
       "id": "13020203", // [!code highlight]
       "geometry": null,
       "properties": {
-        "geoconnex_uri": "https://geoconnex.us/ref/hu08/13020203",
+        "geoconnex_pid": "https://geoconnex.us/ref/hu08/13020203",
         "title": "Rio Grande-Albuquerque" // [!code highlight]
       }
     }
@@ -398,7 +398,7 @@ Let's view part of a GeoJSON file `NM_HUC8_Sub_Basins.geojson` for NMWDC with da
 }
 ```
 
-Notice that the ID is based on an existing ID system for HUC8 Sub Basins in the USA provided by the USGS as described in `collections.json`. We also have `title` in the `properties` of the `Feature` which is a human-readable name describing the feature. You can add [other common metadata](https://github.com/radiantearth/stac-spec/blob/master/commons/common-metadata.md) such as a `description`. There is also a `geoconnex_uri` as described in the [Geoconnex integration](/docs/geoconnex-integration) documentation.
+Notice that the ID is based on an existing ID system for HUC8 Sub Basins in the USA provided by the USGS as described in `collections.json`. We also have `title` in the `properties` of the `Feature` which is a human-readable name describing the feature. You can add [other common metadata](https://github.com/radiantearth/stac-spec/blob/master/commons/common-metadata.md) such as a `description`. There is also a `geoconnex_pid` as described in the [Geoconnex integration](/docs/geoconnex-integration) documentation.
 
 You'll now need to upload the GeoJSON file to your `gztr` storage through the `gztr_collection_create` custom CKAN API Action endpoint which converts your GeoJSON file into a GeoParquet file. Since we're using the CKAN API, you should ensure your CKAN instance is running.
 

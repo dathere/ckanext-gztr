@@ -27,7 +27,7 @@ def gztr_geoconnex_dataset_jsonld(dataset_metadata: dict[str, any]):
         dataset_id = dataset_metadata.get("id")
         dataset_title = dataset_metadata.get("title")
         organization_name = dataset_metadata.get("organization").get("title")
-        # Get geoconnex_pid from STAC item lookup, removing the need to store geoconnex_uri in spatial_full
+        # Get geoconnex_pid from STAC item lookup, removing the need to store geoconnex_pid in spatial_full
         stac_items = [(feature.get("collection"), feature.get("id")) for feature in json.loads(dataset_metadata.get("spatial_full")).get("features")]
         about = []
         for collection_id, item_id in stac_items:
