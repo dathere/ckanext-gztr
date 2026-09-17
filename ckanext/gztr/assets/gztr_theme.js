@@ -5,46 +5,67 @@
 
 */
 
+// CKAN 2.10+ rejects cookie-authenticated API POSTs (logged-in users) without a CSRF token
+const getCsrfToken = () => {
+  const fieldName = document.querySelector("meta[name=csrf_field_name]")?.content;
+  return fieldName ? document.querySelector(`meta[name="${fieldName}"]`)?.content : undefined;
+};
+
 const createMapImage = async () => {
   const width = 125;
   const height = 125;
-  const datasetMaps = document.querySelectorAll(".dataset-item-map");
+  // Skip maps already rendered, since this also runs after htmx swaps in new search results
+  const datasetMaps = document.querySelectorAll(".dataset-item-map:not([data-gztr-rendered])");
 
   for (const [index, mapElement] of datasetMaps.entries()) {
-    const spatialFull = mapElement.getAttribute("data-package");
-    const spatialFullWithGeometry = (await (await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        "spatial_full": spatialFull
-      })
-    })).json()).result;
+    mapElement.setAttribute("data-gztr-rendered", "");
+    // One failing dataset must not stop the remaining thumbnails from rendering
+    try {
+      const spatialFull = mapElement.getAttribute("data-package");
+      const headers = { "Content-Type": "application/json" };
+      const csrfToken = getCsrfToken();
+      if (csrfToken) headers["X-CSRFToken"] = csrfToken;
+      const response = await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          "spatial_full": spatialFull
+        })
+      });
+      if (!response.ok) throw new Error(`gztr_spatial_full_with_geometry returned HTTP ${response.status}`);
+      const spatialFullWithGeometry = (await response.json()).result;
+      if (!spatialFullWithGeometry) throw new Error("gztr_spatial_full_with_geometry returned no result");
 
-    mapElement.style.width = `${width}px`;
-    mapElement.style.height = `${height}px`;
+      mapElement.style.width = `${width}px`;
+      mapElement.style.height = `${height}px`;
 
-    const map = L.map(mapElement, {
-      zoomControl: false,
-    });
+      const map = L.map(mapElement, {
+        zoomControl: false,
+      });
 
-    map.attributionControl.setPrefix(false);
+      map.attributionControl.setPrefix(false);
 
-    if (index === 0) {
-      L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
-      }).addTo(map)
-    } else {
-      L.tileLayer(
-        "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      }).addTo(map)
+      if (index === 0) {
+        L.tileLayer(
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+          attribution: "&copy; <a href=\"http://www.openstreetmap.org/copyright\">OpenStreetMap</a>"
+        }).addTo(map)
+      } else {
+        L.tileLayer(
+          "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        }).addTo(map)
+      }
+
+      const geoJSONLayer = L.geoJSON(JSON.parse(spatialFullWithGeometry)).addTo(map);
+      const bounds = geoJSONLayer.getBounds();
+      if (bounds.isValid()) {
+        map.fitBounds(bounds);
+      } else {
+        map.setView([0, 0], 0);
+      }
+    } catch (error) {
+      console.error("ckanext-gztr: could not render dataset map thumbnail", error);
     }
-
-    const geoJSONLayer = L.geoJSON(JSON.parse(spatialFullWithGeometry)).addTo(map);
-
-    map.fitBounds(geoJSONLayer.getBounds());
 
     // await new Promise(resolve => tileLayer.on("load", () => resolve()));
     // const dataURL = await domtoimage.toPng(mapElement, { width, height });
@@ -58,3 +79,5 @@ const createMapImage = async () => {
 };
 
 createMapImage();
+// CKAN 2.11+ swaps search results in place with htmx (facets, sorting, pagination)
+document.body.addEventListener("htmx:afterSettle", createMapImage);
