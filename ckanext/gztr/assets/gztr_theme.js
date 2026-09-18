@@ -9,13 +9,15 @@ const createMapImage = async () => {
   const width = 125;
   const height = 125;
   const datasetMaps = document.querySelectorAll(".dataset-item-map");
+  const csrf_token = document.querySelector("meta[name='_csrf_token']").getAttribute("content");
 
   for (const [index, mapElement] of datasetMaps.entries()) {
     const spatialFull = mapElement.getAttribute("data-package");
     const spatialFullWithGeometry = (await (await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "X-CSRFToken": csrf_token,
       },
       body: JSON.stringify({
         "spatial_full": spatialFull

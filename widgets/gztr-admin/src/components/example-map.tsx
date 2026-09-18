@@ -21,14 +21,19 @@ const ExampleMap = () => {
   useEffect(() => {
     (async () => {
       if (spatialFull?.features) {
+        const headers: { [id: string]: string } = {
+          "Content-Type": "application/json"
+        };
+        const csrf_token = document.querySelector("meta[name='_csrf_token']")?.getAttribute("content");
+        if (csrf_token) {
+          headers["X-CSRFToken"] = csrf_token;
+        }
         const spatialFullWithGeometries = JSON.parse(
           (
             await (
               await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
                 method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
+                headers,
                 body: JSON.stringify({
                   spatial_full: JSON.stringify(spatialFull),
                 }),
