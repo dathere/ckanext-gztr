@@ -16,21 +16,93 @@ Explore the multiple benefits that this synchronization has to offer here, and o
 
 ## Mint Persistent Identifiers (PIDs) for your CKAN instance's data
 
+![Mint Geoconnex PID example](/media/mint_geoconnex_pid_example.excalidraw.svg)
+
+By enabling the Geoconnex integration, your compatible CKAN datasets should be minted a Geoconnex persistent identifier (PID) as a new URL to link to your CKAN dataset's landing page. We use the CKAN dataset `id` value from the `/api/3/action/package_show` endpoint as the PID unique ID value, along with a namespace you'll define when enabling the Geoconnex integration such as `New_Mexico_Water_Data_Catalog`.
+
+For example review the following diagram then the bullet point list afterwards as they relate to the CKAN-Geoconnex integration:
+
 ![Geoconnex diagram](/media/geoconnex-diagram.png)
 
-{/* TODO: Description, diagram of mapping PID to CKAN dataset or feature collection */}
+- **Persistent IDs (URL) (on the left side)**: your CKAN dataset's minted PID (e.g. `https://geoconnex.us/ckan/New_Mexico_Water_Data_Catalog/2e27c468-37a6-435d-b57f-1b8f9cea3717`)
+- **Observed or Modeled Data**: a CKAN dataset
+- **Landing page**: a CKAN dataset's landing page (e.g. [https://catalog.newmexicowaterdata.org/dataset/2e27c468-37a6-435d-b57f-1b8f9cea3717](https://catalog.newmexicowaterdata.org/dataset/2e27c468-37a6-435d-b57f-1b8f9cea3717))
+- **Structured/Linked Data (JSON-LD)**: JSON-LD that describes the CKAN dataset and includes reference PIDs that the CKAN dataset is about
+- **Persistent IDs (URL) (on the right side)**: Geoconnex reference feature PID(s) based on geospatial features you've selected in the dataset publisher gazetteer (e.g. Santa Fe, so the PID is [https://geoconnex.us/ref/places/3570500](https://geoconnex.us/ref/places/3570500))
 
 ## Associate real-world features/locations with your CKAN datasets
 
+As mentioned in the previous section, there are real-world geospatial features/locations that you can associate with your CKAN datasets. This association is achieved through the dataset publisher gazetteer.
+
 <video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-data-publisher-gazetteer-demo.mp4" />
 
-{/* TODO: Description, Diagram of how the association works */}
+You may review the [Geoconnex reference collections](/docs/geospatial-data/data-sources/water-data/geoconnex-reference-collections) lab to learn how to import water data geospatial collections from the Geoconnex reference API to access the data from the dataset publisher gazetteer while also ensuring the imported data is compatible with the Geoconnex integration.
+
+import { MicroscopeIcon } from "lucide-react";
+
+<div className="flex flex-row items-center justify-center gap-4 flex-wrap w-fit"><a href="https://mybinder.org/v2/gh/dathere/ckanext-gztr/HEAD?urlpath=%2Fdoc%2Ftree%2Flab%2Fgeoconnex%2Fgeoconnex_huc08_subbasins.ipynb" class="inline-flex justify-center px-5 py-3 rounded-full font-medium tracking-tight transition-colors border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent max-sm:text-sm"><MicroscopeIcon className="mr-2 w-4 h-4 my-auto" /> Open Jupyter Lab</a></div>
+
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/Geoconnex_Jupyter_Lab_Scroll_Demo.mp4" />
+
+{/* TODO: Diagram of how the association works */}
 
 ## Expose Geoconnex-compatible JSON-LD linked data on CKAN dataset landing pages
 
+With the Geoconnex integration enabled along with the relevant configuration values:
+
+```ini tab="INI"
+# == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
+ckanext.gztr.geoconnex.enabled = true
+# The namespace that should exist in the namespaces/bulk/ckan directory at https://github.com/internetofwater/geoconnex.us
+ckanext.gztr.geoconnex.namespace = New_Mexico_Water_Data_Catalog
+# Embeds Geoconnex-compatible JSON-LD within each compatible CKAN dataset's landing page
+ckanext.gztr.geoconnex.enable_dataset_jsonld = true
+```
+
+```dotenv tab="ckanext-envvars"
+# == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
+CKANEXT__GZTR__GEOCONNEX__ENABLED=true
+# The namespace that should exist in the namespaces/bulk/ckan directory at https://github.com/internetofwater/geoconnex.us
+CKANEXT__GZTR__GEOCONNEX__NAMESPACE=New_Mexico_Water_Data_Catalog
+# Embeds Geoconnex-compatible JSON-LD within each compatible CKAN dataset's landing page
+CKANEXT__GZTR__GEOCONNEX__ENABLE_DATASET_JSONLD=true
+```
+
+Your compatible CKAN datasets should include JSON-LD embedded in each landing page's HTML. For example the JSON-LD may look similar to the following:
+
+```json
+{
+  "@context": {
+    "@vocab": "https://schema.org/",
+    "gsp": "http://www.opengis.net/ont/geosparql#"
+  },
+  "@id": "https://geoconnex.us/ckan/New_Mexico_Water_Data_Catalog/2e27c468-37a6-435d-b57f-1b8f9cea3717",
+  "@type": "Dataset",
+  "about": [
+    {
+      "@id": "https://geoconnex.us/ref/places/3570500"
+    }
+  ],
+  "name": "Northwest Well and City Wellfield Water Level Monitoring Program",
+  "provider": {
+    "@type": "Organization",
+    "name": "City of Santa Fe"
+  },
+  "url": "https://catalog.newmexicowaterdata.org/dataset/2e27c468-37a6-435d-b57f-1b8f9cea3717"
+}
+```
+
 {/* TODO: Description, diagram, and sample code */}
 
+## Explore the Geoconnex web UI for your geospatial features
+
+When your geospatial collections have `geoconnex_pid` in a feature's `properties` value, the Geoconnex URI can be accessed from a geospatial feature's information modal by clicking the information modal button.
+
+<video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/geoconnex_stac_uri_demo.mp4" />
+
 ## Sync your geospatial collections with Geoconnex reference features
+
+TODO: Description explaining how Geoconnex sysadmins can automate retrieving up-to-date data similar to how it was described in the lab but with an orchestration tool. Also actual implementation of examples.
 
 {/* TODO: Description */}
 
@@ -43,16 +115,16 @@ Explore the multiple benefits that this synchronization has to offer here, and o
 
 ## Find your CKAN instance's data linked on the Geoconnex Explorer
 
-TODO
+TODO: Identify if this is currently possible, to display dataset-oriented web resources on the Geoconnex explorer. If so, then CGS imports a CKAN instance's data-oriented web resources into Geoconnex. Then we identify the data on the explorer.
 
 ## Query for your CKAN instance's data with SPARQL against the Geoconnex knowledge graph
 
-TODO
+TODO: Identify if this is currently possible, to retrieve dataset-oriented web resources from a SPARQL query. If so, design a SPARQL query that would fulfill this expectation. Then CGS imports a CKAN instance's data-oriented web resources into Geoconnex. Then we run the SPARQL query and add a test(s) to the testing suite to verify the SPARQL query works.
 
 ### Run a SPARQL query with the SPARQL Helper
 
-TODO
+TODO: Complete previous TODO then demonstrate with a GIF/MP4 and example query/link that a public user can copy and run.
 
 ### Run a SPARQL query using Python
 
-TODO
+TODO: Complete previous TODO then demonstrate with a GIF/MP4 and example query code that a public user can copy and run.
