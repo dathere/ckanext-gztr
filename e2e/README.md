@@ -27,6 +27,16 @@ export DOCKER_COMPOSE_PATH="/home/rzmk/programming/gztr-docker-demo/docker-compo
 export CARGO_MANIFEST_PATH="/home/rzmk/programming/ckanext-gztr/e2e/Cargo.toml"
 ```
 
+4. Replace the value of `ports` in `gztr-docker-demo/docker-compose.dev.yml` to just `"5000"` so that an arbitrary host port can be used for running multiple tests simultaneously and comment out the existing `ports` value:
+
+```yml
+    ports:
+      # Map the container's port 5000 to a random available port on the host
+      - "5000"
+    # For serial or manual tests, map the container's port 5000 to host port 5000
+      # - "0.0.0.0:${CKAN_PORT_HOST}:5000"
+```
+
 5. Now run the interactive `e2e` suite:
 
 ```bash
