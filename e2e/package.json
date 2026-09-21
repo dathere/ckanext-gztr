@@ -12,14 +12,14 @@
 	"devEngines": {
 		"packageManager": {
 			"name": "pnpm",
-			"version": "^11.10.0",
+			"version": "^12.5.1",
 			"onFail": "download"
 		}
 	},
 	"type": "module",
 	"devDependencies": {
-		"@playwright/test": "^1.61.1",
-		"@types/node": "^26.1.1",
+		"@playwright/test": "^1.63.0",
+		"@types/node": "^26.6.2",
 		"typescript": "^6.0.3"
 	}
 }

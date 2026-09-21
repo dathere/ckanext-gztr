@@ -20,6 +20,10 @@ pub async fn get_service_port(compose: &DockerCompose, service: &str, port: u16)
         .await?)
 }
 
+pub fn get_ckan_service_name() -> &'static str {
+    "ckan-dev"
+}
+
 pub fn assert_str_true(string: String) {
     assert_eq!(string, "true");
 }
@@ -39,7 +43,7 @@ pub async fn jaq_dangerous(command: String, object: &serde_json::Value) -> Resul
         .read()?)
 }
 
-pub async fn get_env_var(
+pub async fn get_container_env_var(
     compose: &DockerCompose,
     service: String,
     env_var_name: String,
@@ -63,13 +67,13 @@ pub async fn get_env_var(
     bail!("Could not find environment variable.");
 }
 
-pub async fn ckan_command(
+pub async fn ckan_container_command(
     compose: &DockerCompose,
     cmd: impl IntoIterator<Item = impl Into<String>>,
 ) -> Result<String> {
     Ok(String::from_utf8(
         compose
-            .service("ckan")
+            .service(get_ckan_service_name())
             .unwrap()
             .exec(ExecCommand::new(cmd))
             .await?
@@ -78,17 +82,29 @@ pub async fn ckan_command(
     )?)
 }
 
+pub async fn get_ckan_config_path(compose: &DockerCompose) -> Result<String> {
+    Ok(format!(
+        "{}/ckan.ini",
+        get_container_env_var(
+            &compose,
+            get_ckan_service_name().to_string(),
+            "APP_DIR".to_string()
+        )
+        .await?
+    ))
+}
+
 pub async fn generate_token(
     compose: &DockerCompose,
     user: &str,
     token_name: &str,
 ) -> Result<String> {
-    Ok(ckan_command(
+    Ok(ckan_container_command(
         &compose,
         [
             "ckan",
             "-c",
-            "/app/production.ini",
+            get_ckan_config_path(compose).await?.as_str(),
             "user",
             "token",
             "add",
