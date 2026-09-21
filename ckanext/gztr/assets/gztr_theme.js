@@ -5,17 +5,13 @@
 
 */
 
-// CKAN 2.10+ rejects cookie-authenticated API POSTs (logged-in users) without a CSRF token
-const getCsrfToken = () => {
-  const fieldName = document.querySelector("meta[name=csrf_field_name]")?.content;
-  return fieldName ? document.querySelector(`meta[name="${fieldName}"]`)?.content : undefined;
-};
-
 const createMapImage = async () => {
   const width = 125;
   const height = 125;
   // Skip maps already rendered, since this also runs after htmx swaps in new search results
   const datasetMaps = document.querySelectorAll(".dataset-item-map:not([data-gztr-rendered])");
+  // CKAN 2.10+ rejects cookie-authenticated API POSTs (logged-in users) without a CSRF token
+  const csrf_token = document.querySelector("meta[name='_csrf_token']")?.getAttribute("content");
 
   for (const [index, mapElement] of datasetMaps.entries()) {
     mapElement.setAttribute("data-gztr-rendered", "");
@@ -23,8 +19,7 @@ const createMapImage = async () => {
     try {
       const spatialFull = mapElement.getAttribute("data-package");
       const headers = { "Content-Type": "application/json" };
-      const csrfToken = getCsrfToken();
-      if (csrfToken) headers["X-CSRFToken"] = csrfToken;
+      if (csrf_token) headers["X-CSRFToken"] = csrf_token;
       const response = await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
         method: "POST",
         headers,
