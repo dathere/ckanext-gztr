@@ -1,12 +1,16 @@
 {% ckan_extends %}
 
-{% block package_item %}
-    <div class="dataset-content d-flex gap-3">
+{# Wrap the item's content rather than the whole <li>, so the map stays inside
+   the list item and the <ul> only ever contains <li> children. #}
+{% block content %}
+    <div class="d-flex gap-3 align-items-start">
         {# Map thumbnail for datasets with spatial data #}
         {% if package.spatial_full %}
-        <div style="min-width: 125; min-height: 125px; width: 125px; height: 125px;" data-package="{{ package.spatial_full }}" class="dataset-item-map rounded"></div>
+        <div style="width: 125px; height: 125px;" data-package="{{ package.spatial_full }}" class="dataset-item-map rounded flex-shrink-0"></div>
         {% endif %}
-        {{ super() }}
+        <div class="flex-grow-1" style="min-width: 0;">
+            {{ super() }}
+        </div>
     </div>
 {% endblock %}
 
