@@ -9,7 +9,8 @@ use tempfile::NamedTempFile;
 use testcontainers::core::ExecCommand;
 
 use crate::utils::{
-    assert_str_true, ckan_command, generate_token, get_compose, get_env_var, get_service_port, jaq,
+    assert_str_true, ckan_container_command, generate_token, get_ckan_config_path,
+    get_ckan_service_name, get_compose, get_container_env_var, get_service_port, jaq,
     jaq_dangerous,
 };
 
@@ -17,7 +18,7 @@ use crate::utils::{
 async fn test_status_show_success_no_jaq() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
     let ckan = CKAN::builder()
         .url(format!("http://localhost:{ckan_port}").as_str())
         .build();
@@ -59,7 +60,7 @@ async fn test_status_show_success_no_jaq() -> Result<()> {
 async fn test_status_show_success() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
     let ckan = CKAN::builder()
         .url(format!("http://localhost:{ckan_port}").as_str())
         .build();
@@ -75,7 +76,7 @@ async fn test_status_show_success() -> Result<()> {
 async fn test_status_show_extensions() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
     let ckan = CKAN::builder()
         .url(format!("http://localhost:{ckan_port}").as_str())
         .build();
@@ -99,14 +100,23 @@ async fn test_status_show_extensions() -> Result<()> {
 async fn test_gztr_storage_dir_exists() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let mut gztr_storage_dir =
-        get_env_var(&compose, "ckan".to_string(), "APP_DIR".to_string()).await?;
-    gztr_storage_dir.push_str("/data/gztr");
+    let mut gztr_storage_dir = get_container_env_var(
+        &compose,
+        get_ckan_service_name().to_string(),
+        "CKAN_STORAGE_PATH".to_string(),
+    )
+    .await?;
+    gztr_storage_dir.push_str("/storage/uploads");
     let output = String::from_utf8(
         compose
-            .service("ckan")
+            .service(get_ckan_service_name())
             .unwrap()
-            .exec(ExecCommand::new(["ls", "-w", "1", "/app/data"]))
+            .exec(ExecCommand::new([
+                "ls",
+                "-w",
+                "1",
+                gztr_storage_dir.as_str(),
+            ]))
             .await?
             .stdout_to_vec()
             .await?,
@@ -123,7 +133,7 @@ async fn test_gztr_storage_dir_exists() -> Result<()> {
 async fn test_file_create_fail_no_auth() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
     let ckan = CKAN::builder()
         .url(format!("http://localhost:{ckan_port}").as_str())
         .build();
@@ -162,7 +172,16 @@ async fn test_file_create_fail_no_auth() -> Result<()> {
 async fn test_ckan_help_command_in_container() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let output = ckan_command(&compose, ["ckan", "-c", "/app/production.ini", "--help"]).await?;
+    let output = ckan_container_command(
+        &compose,
+        [
+            "ckan",
+            "-c",
+            get_ckan_config_path(&compose).await?.as_str(),
+            "--help",
+        ],
+    )
+    .await?;
     assert!(output.starts_with("Usage: ckan"));
 
     Ok(())
@@ -173,8 +192,19 @@ async fn test_ckan_help_command_in_container() -> Result<()> {
 async fn test_file_create_success_with_sysadmin_auth() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
-    let api_token = generate_token(&compose, "rzmk", "file_token").await?;
+    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
+    let api_token = generate_token(
+        &compose,
+        get_container_env_var(
+            &compose,
+            get_ckan_service_name().to_string(),
+            "CKAN_SYSADMIN_NAME".to_string(),
+        )
+        .await?
+        .as_str(),
+        "file_token",
+    )
+    .await?;
     let ckan = CKAN::builder()
         .url(format!("http://localhost:{ckan_port}").as_str())
         .token(api_token)
@@ -213,8 +243,19 @@ async fn test_file_create_success_with_sysadmin_auth() -> Result<()> {
 async fn test_file_create_success_demo_files() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
-    let api_token = generate_token(&compose, "rzmk", "file_token").await?;
+    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
+    let api_token = generate_token(
+        &compose,
+        get_container_env_var(
+            &compose,
+            get_ckan_service_name().to_string(),
+            "CKAN_SYSADMIN_NAME".to_string(),
+        )
+        .await?
+        .as_str(),
+        "file_token",
+    )
+    .await?;
     let ckan = CKAN::builder()
         .url(format!("http://localhost:{ckan_port}").as_str())
         .token(api_token)
@@ -249,7 +290,7 @@ async fn test_file_create_success_demo_files() -> Result<()> {
 async fn test_playwright_basic() -> Result<()> {
     let mut compose = get_compose().await?;
     compose.up().await?;
-    let ckan_port = get_service_port(&compose, "ckan", 5000).await?;
+    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
 
     duct_sh::sh("pnpm test playwright/example.spec.ts")
         .env("CKAN_PORT", ckan_port.to_string())

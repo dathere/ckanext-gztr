@@ -14,23 +14,27 @@ This directory contains a Rust project for running tests based on Docker contain
 
 Make sure `cargo`, `docker`, and `jaq` are available from the `PATH` environment variable so that the tests can use them for commands.
 
-2. Clone the `docker-ckan` repo on the `dev/gztr` branch to a separate folder:
+2. Clone the `gztr-docker-demo` repository to a separate folder:
 
 ```bash
-git clone --single-branch --branch dev/gztr https://github.com/dathere/docker-ckan.git
+git clone https://github.com/dathere/gztr-docker-demo.git
 ```
 
-3. Make a copy of `ckanext-gztr` within `docker-ckan` so that `docker-ckan/images/ckan/2.11/gztr.Dockerfile` can identify it within the context. For example:
+3. Set the environment variable `DOCKER_COMPOSE_PATH` to the absolute path of the `docker-compose.yml` file in `gztr-docker-demo/docker-compose.dev.yml`. Also set `CARGO_MANIFEST_PATH` to the absolute path of the `Cargo.toml` file. For example:
 
 ```bash
-cp -r ./ckanext-gztr ./docker-ckan/images/ckan/2.11/ckanext-gztr
-```
-
-4. Set the environment variable `DOCKER_COMPOSE_PATH` to the absolute path of the `docker-compose.yml` file in `docker-ckan/compose/docker-compose.yml`. Also set `CARGO_MANIFEST_PATH` to the absolute path of the `Cargo.toml` file. For example:
-
-```bash
-export DOCKER_COMPOSE_PATH="/home/rzmk/programming/docker-ckan/compose/docker-compose.yml";
+export DOCKER_COMPOSE_PATH="/home/rzmk/programming/gztr-docker-demo/docker-compose.dev.yml";
 export CARGO_MANIFEST_PATH="/home/rzmk/programming/ckanext-gztr/e2e/Cargo.toml"
+```
+
+4. Replace the value of `ports` in `gztr-docker-demo/docker-compose.dev.yml` to just `"5000"` so that an arbitrary host port can be used for running multiple tests simultaneously and comment out the existing `ports` value:
+
+```yml
+    ports:
+        # Map the container's port 5000 to a random available port on the host
+      - "5000"
+        # For serial or manual tests, map the container's port 5000 to host port 5000
+      # - "0.0.0.0:${CKAN_PORT_HOST}:5000"
 ```
 
 5. Now run the interactive `e2e` suite:

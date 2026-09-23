@@ -266,7 +266,7 @@ Add the following lines to your CKAN configuration and customize it as needed:
 
 # == ckanext-gztr | Storage options ==
 ckan.files.storage.gztr.type = ckan:fs
-ckan.files.storage.gztr.path = /var/ckan/storage/uploads/gztr
+ckan.files.storage.gztr.path = /var/lib/ckan/storage/uploads/gztr
 ckan.files.storage.gztr.initialize = true # Creates the `gztr` directory if it doesn't exist.
 ckan.files.storage.gztr.public = true # Makes the source GeoParquet files publicly downloadable and adds potential for more efficient geospatial capabilities.
 
@@ -337,7 +337,7 @@ CKANEXT__GZTR__GEOCONNEX__NAMESPACE=
 CKANEXT__GZTR__GEOCONNEX__ENABLE_DATASET_JSONLD=false
 ```
 
-The new `gztr` directory should be made in your filesystem at `/var/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoParquet files will be stored, along with the `catalog.json` and `collections.json` files we'll set up soon. They'll also be publicly available at `{your_instance_domain}/file/public-download/gztr/{file_location}` such as `http://localhost:5000/file/public-download/gztr/catalog.json`.
+The new `gztr` directory should be made in your filesystem at `/var/lib/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoParquet files will be stored, along with the `catalog.json` and `collections.json` files we'll set up soon. They'll also be publicly available at `{your_instance_domain}/file/public-download/gztr/{file_location}` such as `http://localhost:5000/file/public-download/gztr/catalog.json`.
 
 You can view other available configuration options in [the Configuration section](/docs/configuration) of this documentation.
 
