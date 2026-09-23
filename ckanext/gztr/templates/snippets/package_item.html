@@ -4,7 +4,7 @@
     <div class="dataset-content d-flex gap-3">
         {# Map thumbnail for datasets with spatial data #}
         {% if package.spatial_full %}
-        <div style="min-width: 125; min-height: 125px; width: 125px; height: 125px;" data-package="{{ package.spatial_full }}" class="dataset-item-map rounded"></div>
+        <div style="width: 125px; height: 125px;" data-package="{{ package.spatial_full }}" class="dataset-item-map flex-shrink-0 rounded"></div>
         {% endif %}
         {{ super() }}
     </div>
