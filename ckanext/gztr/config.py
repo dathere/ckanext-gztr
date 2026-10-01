@@ -42,11 +42,8 @@ def dataset_publisher_gazetteer_config() -> dict:
         config[DISABLE_DRAWN_FEATURES] = False
     DIALOG_MAP_HEIGHT = "ckanext.gztr.dataset_publisher.dialog_map_height"
     config[DIALOG_MAP_HEIGHT] = tk.config.get(DIALOG_MAP_HEIGHT, "60vh")
-    DISABLE_DUCKDB_ENGINE = "ckanext.gztr.dataset_publisher.disable_duckdb_engine"
-    if tk.config.get(DISABLE_DUCKDB_ENGINE) == True:
-        config[DISABLE_DUCKDB_ENGINE] = True
-    else:
-        config[DISABLE_DUCKDB_ENGINE] = False
+    GEOPARQUET_ENGINE = "ckanext.gztr.dataset_publisher.geoparquet_engine"
+    config[GEOPARQUET_ENGINE] = tk.config.get(GEOPARQUET_ENGINE, "hyparquet")
     return config
 
 

@@ -519,7 +519,7 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
   ]
   ```
 
-  Notice that the `id` value `nm_huc8_sub_basins` is reused in several places. We also add a collection-level `assets` object to enable potential [STAC GeoParquet](https://radiantearth.github.io/stac-geoparquet-spec/latest/#referencing-a-stac-geoparquet-collections-in-a-stac-collection-json) capabilities (e.g. speed optimization with DuckDB WASM) along with making a download button accessible from the frontend gazetteers (if enabled).
+  Notice that the `id` value `nm_huc8_sub_basins` is reused in several places. We also add a collection-level `assets` object to enable potential [STAC GeoParquet](https://radiantearth.github.io/stac-geoparquet-spec/latest/#referencing-a-stac-geoparquet-collections-in-a-stac-collection-json) capabilities (e.g. speed optimization with hyparquet or DuckDB WASM) along with making a download button accessible from the frontend gazetteers (if enabled).
   </Accordion>
 </Accordions>
 

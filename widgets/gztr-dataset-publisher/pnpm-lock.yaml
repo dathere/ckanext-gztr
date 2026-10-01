@@ -62,6 +62,12 @@ importers:
       fuse.js:
         specifier: ^7.5.0
         version: 7.5.0
+      hyparquet:
+        specifier: ^1.31.2
+        version: 1.31.2
+      hyparquet-compressors:
+        specifier: ^1.1.2
+        version: 1.1.2
       immer:
         specifier: ^11.1.15
         version: 11.1.15
@@ -2460,6 +2466,9 @@ packages:
     resolution: {integrity: sha512-sQtrEfA+ez/3G0cCZecF70oqpCRttCexYUG4mUrtWL49ULUzUyxokt5kyqwtKzj1270RaKih+hcP3qLcumccow==}
     engines: {node: '>=10'}
 
+  fzstd@0.1.1:
+    resolution: {integrity: sha512-dkuVSOKKwh3eas5VkJy1AW1vFpet8TA/fGmVA5krThl8YcOVE/8ZIoEA1+U1vEn5ckxxhLirSdY837azmbaNHA==}
+
   geojson-equality-ts@1.0.2:
     resolution: {integrity: sha512-h3Ryq+0mCSN/7yLs0eDgrZhvc9af23o/QuC4aTiuuzP/MRCtd6mf5rLsLRY44jX0RPUfM8c4GqERQmlUxPGPoQ==}
 
@@ -2524,6 +2533,15 @@ packages:
 
   html-void-elements@3.0.0:
     resolution: {integrity: sha512-bEqo66MRXsUGxWHV5IP0PUiAWwoEjba4VCzg0LjFJBpchPaTfyfCKTG6bc5F8ucKec3q5y6qOdGyYTSBEvhCrg==}
+
+  hyparquet-compressors@1.1.2:
+    resolution: {integrity: sha512-0Hx6w0ZpVpNCefKy5xBYLTp6rKeZn/tsUzuliNzfKqSCdLcTQSfwATEoeedS703Y17k1qNS61HwRME5aOeNkPg==}
+
+  hyparquet@1.31.2:
+    resolution: {integrity: sha512-dpVTCGkPPIdfDExa7YZGaJpuBTmLFDKGeZ6meHUj1mz/Q3qmaQHGLLqCyPBkQjfxrYNb08YTax682qeGO+zkVA==}
+
+  hysnappy@1.1.1:
+    resolution: {integrity: sha512-/V9XcN2NtRyWjR4LYMfvnvasVVF8jbT/ej0eofBQjZel91E3D813FQ3mQC6gDSMMTCq/FJh28XHeyqr3I/oBRw==}
 
   ignore@5.3.2:
     resolution: {integrity: sha512-hsBTNUqQTDwkWtcdYI2i06Y/nUBEsNEDJKjWdigLvegy8kDuJAS8uRlpkkcQpyEXL0Z/pjDy5HBmMjRCJ2gq+g==}
@@ -6431,6 +6449,8 @@ snapshots:
 
   fuse.js@7.5.0: {}
 
+  fzstd@0.1.1: {}
+
   geojson-equality-ts@1.0.2:
     dependencies:
       '@types/geojson': 7946.0.16
@@ -6502,6 +6522,15 @@ snapshots:
       '@types/hast': 3.0.5
 
   html-void-elements@3.0.0: {}
+
+  hyparquet-compressors@1.1.2:
+    dependencies:
+      fzstd: 0.1.1
+      hysnappy: 1.1.1
+
+  hyparquet@1.31.2: {}
+
+  hysnappy@1.1.1: {}
 
   ignore@5.3.2: {}
 

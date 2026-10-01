@@ -232,9 +232,6 @@ export function FeatureCombobox() {
   const gm = useFormMap((state) => state.gm);
   const stacCollections = useFormMap((state) => state.stacCollections);
   const itemCollections = useFormMap((state) => state.itemCollections);
-  const currentStacCollection = useFormMap(
-    (state) => state.currentStacCollection,
-  );
   const setCurrentStacCollection = useFormMap(
     (state) => state.setCurrentStacCollection,
   );
@@ -475,7 +472,9 @@ export function FeatureCombobox() {
                     }
                   }}
                 >
-                  <div className={`tw:flex tw:items-center tw:pl-2 tw:hover:bg-sky-200 tw:rounded${openCollapsibles === collection.collection_id ? " tw:bg-blue-200" : ""}`}>
+                  <div
+                    className={`tw:flex tw:items-center tw:pl-2 tw:hover:bg-sky-200 tw:rounded${openCollapsibles === collection.collection_id ? " tw:bg-blue-200" : ""}`}
+                  >
                     {/* STAC Collection information button */}
                     <Popover handle={collectionPopoverHandle}>
                       <Tooltip delayDuration={0}>
