@@ -17,25 +17,36 @@ def dataset_publisher_gazetteer_config() -> dict:
     MAX_BOUNDS = "ckanext.gztr.dataset_publisher.max_bounds"
     config[MAX_BOUNDS] = tk.config.get(MAX_BOUNDS)
     DISABLE_ADDRESS_SEARCH = "ckanext.gztr.dataset_publisher.disable_address_search"
-    config[DISABLE_ADDRESS_SEARCH] = bool(tk.config.get(DISABLE_ADDRESS_SEARCH, False))
+    if tk.config.get(DISABLE_ADDRESS_SEARCH) == True:
+        config[DISABLE_ADDRESS_SEARCH] = True
+    else:
+        config[DISABLE_ADDRESS_SEARCH] = False
     ENABLE_STAC_COLLECTION_JSON_BUTTON = (
         "ckanext.gztr.dataset_publisher.enable_stac_collection_json_button"
     )
-    config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = bool(
-        tk.config.get(ENABLE_STAC_COLLECTION_JSON_BUTTON, False)
-    )
+    if tk.config.get(ENABLE_STAC_COLLECTION_JSON_BUTTON) == True:
+        config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = True
+    else:
+        config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = False
     ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON = (
         "ckanext.gztr.dataset_publisher.enable_stac_collection_download_button"
     )
-    config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = bool(
-        tk.config.get(ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON, True)
-    )
+    if tk.config.get(ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON) == True:
+        config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = True
+    else:
+        config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = False
     DISABLE_DRAWN_FEATURES = "ckanext.gztr.dataset_publisher.disable_drawn_features"
-    config[DISABLE_DRAWN_FEATURES] = bool(tk.config.get(DISABLE_DRAWN_FEATURES, False))
+    if tk.config.get(DISABLE_DRAWN_FEATURES) == True:
+        config[DISABLE_DRAWN_FEATURES] = True
+    else:
+        config[DISABLE_DRAWN_FEATURES] = False
     DIALOG_MAP_HEIGHT = "ckanext.gztr.dataset_publisher.dialog_map_height"
     config[DIALOG_MAP_HEIGHT] = tk.config.get(DIALOG_MAP_HEIGHT, "60vh")
     DISABLE_DUCKDB_ENGINE = "ckanext.gztr.dataset_publisher.disable_duckdb_engine"
-    config[DISABLE_DUCKDB_ENGINE] = bool(tk.config.get(DISABLE_DUCKDB_ENGINE, False))
+    if tk.config.get(DISABLE_DUCKDB_ENGINE) == True:
+        config[DISABLE_DUCKDB_ENGINE] = True
+    else:
+        config[DISABLE_DUCKDB_ENGINE] = False
     return config
 
 
@@ -52,19 +63,24 @@ def public_search_gazetteer_config() -> dict:
     config[TILES_URL] = tk.config.get(TILES_URL)
 
     DISABLE_ADDRESS_SEARCH = "ckanext.gztr.public_search.disable_address_search"
-    config[DISABLE_ADDRESS_SEARCH] = bool(tk.config.get(DISABLE_ADDRESS_SEARCH, False))
+    if tk.config.get(DISABLE_ADDRESS_SEARCH) == True:
+        config[DISABLE_ADDRESS_SEARCH] = True
+    else:
+        config[DISABLE_ADDRESS_SEARCH] = False
     ENABLE_STAC_COLLECTION_JSON_BUTTON = (
         "ckanext.gztr.public_search.enable_stac_collection_json_button"
     )
-    config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = bool(
-        tk.config.get(ENABLE_STAC_COLLECTION_JSON_BUTTON, False)
-    )
+    if tk.config.get(ENABLE_STAC_COLLECTION_JSON_BUTTON) == True:
+        config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = True
+    else:
+        config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = False
     ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON = (
         "ckanext.gztr.public_search.enable_stac_collection_download_button"
     )
-    config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = bool(
-        tk.config.get(ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON, True)
-    )
+    if tk.config.get(ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON) == True:
+        config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = True
+    else:
+        config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = False
     return config
 
 
@@ -88,11 +104,15 @@ def geoconnex_config() -> dict:
     """Returns all relevant configuration entries for the Geoconnex integration."""
     config = {}
     GEOCONNEX_ENABLED = "ckanext.gztr.geoconnex.enabled"
-    config[GEOCONNEX_ENABLED] = bool(tk.config.get(GEOCONNEX_ENABLED, False))
+    if tk.config.get(GEOCONNEX_ENABLED) == True:
+        config[GEOCONNEX_ENABLED] = True
+    else:
+        config[GEOCONNEX_ENABLED] = False
     GEOCONNEX_NAMESPACE = "ckanext.gztr.geoconnex.namespace"
     config[GEOCONNEX_NAMESPACE] = tk.config.get(GEOCONNEX_NAMESPACE)
     GEOCONNEX_ENABLE_DATASET_JSONLD = "ckanext.gztr.geoconnex.enable_dataset_jsonld"
-    config[GEOCONNEX_ENABLE_DATASET_JSONLD] = bool(
-        tk.config.get(GEOCONNEX_ENABLE_DATASET_JSONLD, False)
-    )
+    if tk.config.get(GEOCONNEX_ENABLE_DATASET_JSONLD) == True:
+        config[GEOCONNEX_ENABLE_DATASET_JSONLD] = True
+    else:
+        config[GEOCONNEX_ENABLE_DATASET_JSONLD] = False
     return config
