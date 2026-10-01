@@ -60,3 +60,13 @@ export const simplifyGeojson = (str: string) => {
     console.error("Error while simplifying GeoJSON: ", String(e));
   }
 };
+
+export const isValidHttpUrl = (url: string | undefined) => {
+  if (!url) return false;
+  try {
+    const newUrl = new URL(url);
+    return newUrl.protocol === "http:" || newUrl.protocol === "https:";
+  } catch {
+    return false;
+  }
+};

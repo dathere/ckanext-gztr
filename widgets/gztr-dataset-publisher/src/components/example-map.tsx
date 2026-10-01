@@ -1,0 +1,114 @@
+import * as turf from "@turf/turf";
+import GLMap, { Layer, type MapRef, Source } from "react-map-gl/maplibre";
+import "@/assets/maplibre-gl.css";
+import { useEffect, useRef, useState } from "react";
+import type { ItemCollection } from "@/App";
+import { useFormMap } from "@/stores/form-map-store";
+
+const ExampleMap = ({ config }: any) => {
+  const mapRef = useRef<MapRef>(undefined);
+  const itemCollections = useFormMap((state) => state.itemCollections);
+  const quickRegionGeoJSON = useFormMap((state) => state.quickRegionGeoJSON);
+  const spatialFull = useFormMap((state) => state.spatialFull);
+  const statewideEnabled = useFormMap((state) => state.statewideEnabled);
+  const [featuresWithGeometries, setFeaturesWithGeometries] = useState<
+    ItemCollection | undefined
+  >(undefined);
+
+  // Get geometry values from itemCollections for each selected feature
+  // Then display all selected and drawn features on the example map
+  // TODO: (Optimization) Check if geometry exist in itemCollection for each geometry, if not then API action call
+  useEffect(() => {
+    (async () => {
+      if (spatialFull?.features) {
+        const headers: { [id: string]: string } = {
+          "Content-Type": "application/json",
+        };
+        const csrf_token = document
+          .querySelector("meta[name='_csrf_token']")
+          ?.getAttribute("content");
+        if (csrf_token) {
+          headers["X-CSRFToken"] = csrf_token;
+        }
+        const spatialFullWithGeometries = JSON.parse(
+          (
+            await (
+              await fetch(`/api/3/action/gztr_spatial_full_with_geometry`, {
+                method: "POST",
+                headers,
+                body: JSON.stringify({
+                  spatial_full: JSON.stringify(spatialFull),
+                }),
+              })
+            ).json()
+          ).result,
+        );
+        setFeaturesWithGeometries(spatialFullWithGeometries);
+        const map = mapRef.current?.getMap();
+        if (map) {
+          // @ts-expect-error
+          map.fitBounds(turf.bbox(spatialFullWithGeometries));
+        }
+      }
+    })();
+  }, [itemCollections, spatialFull]);
+
+  useEffect(() => {
+    if (!spatialFull) {
+      setFeaturesWithGeometries(undefined);
+    }
+  }, [spatialFull]);
+
+  return (
+    <GLMap
+      // @ts-expect-error
+      ref={mapRef}
+      initialViewState={{
+        latitude: 34.307144,
+        longitude: -106.018066,
+        zoom: 5,
+      }}
+      style={{ width: "100%", height: 400, borderRadius: "1rem" }}
+      mapStyle={config["ckanext.gztr.dataset_publisher.tiles_url"]}
+      maxBounds={
+        config["ckanext.gztr.dataset_publisher.max_bounds"]?.split(
+          " ",
+        ) ?? [-134.428711, 14.349548, -61.611328, 52.536273]
+      }
+    >
+      {featuresWithGeometries && (
+        // @ts-expect-error
+        <Source type="geojson" data={featuresWithGeometries}>
+          <Layer
+            type="fill"
+            paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}
+          />
+          <Layer
+            type="line"
+            paint={{
+              "line-color": "rgba(80, 120, 255, 1)",
+              "line-width": 1,
+            }}
+          />
+        </Source>
+      )}
+      {statewideEnabled && quickRegionGeoJSON && (
+        <Source type="geojson" data={quickRegionGeoJSON}>
+          <Layer
+            type="fill"
+            paint={{ "fill-color": "rgba(102, 170, 238, 0.5)" }}
+          />
+          <Layer
+            type="line"
+            paint={{
+              "line-color": "rgba(80, 120, 255, 1)",
+              "line-width": 1,
+            }}
+          />
+        </Source>
+      )}
+    </GLMap>
+  );
+};
+
+export { ExampleMap };

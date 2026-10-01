@@ -2,37 +2,97 @@ from __future__ import annotations
 
 import ckan.plugins.toolkit as tk
 
-DEFAULT_LATITUDE = "ckanext.gztr.default_latitude"
-DEFAULT_LONGITUDE = "ckanext.gztr.default_longitude"
-DEFAULT_ZOOM = "ckanext.gztr.default_zoom"
-MAP_TILE_SERVER = "ckanext.gztr.map_tile_server"
 
-def dataset_publisher_widget_config() -> dict:
-    """Returns all relevant configuration entries for the dataset publisher gazetteer widget."""
+def dataset_publisher_gazetteer_config() -> dict:
+    """Returns all relevant configuration entries for the dataset publisher gazetteer."""
     config = {}
-    config[DEFAULT_LATITUDE] = float(tk.config[DEFAULT_LATITUDE])
-    config[DEFAULT_LONGITUDE] = float(tk.config[DEFAULT_LONGITUDE])
-    config[DEFAULT_ZOOM] = tk.config[DEFAULT_ZOOM]
-    config[MAP_TILE_SERVER] = tk.config[MAP_TILE_SERVER]
+    TILES_URL = "ckanext.gztr.dataset_publisher.tiles_url"
+    config[TILES_URL] = tk.config.get(TILES_URL)
+    DEFAULT_LATITUDE = "ckanext.gztr.dataset_publisher.default_latitude"
+    config[DEFAULT_LATITUDE] = float(tk.config.get(DEFAULT_LATITUDE, 34.307144))
+    DEFAULT_LONGITUDE = "ckanext.gztr.dataset_publisher.default_longitude"
+    config[DEFAULT_LONGITUDE] = float(tk.config.get(DEFAULT_LONGITUDE, -106.018066))
+    DEFAULT_ZOOM = "ckanext.gztr.dataset_publisher.default_zoom"
+    config[DEFAULT_ZOOM] = int(tk.config.get(DEFAULT_ZOOM, 5))
+    MAX_BOUNDS = "ckanext.gztr.dataset_publisher.max_bounds"
+    config[MAX_BOUNDS] = tk.config.get(MAX_BOUNDS)
+    DISABLE_ADDRESS_SEARCH = "ckanext.gztr.dataset_publisher.disable_address_search"
+    config[DISABLE_ADDRESS_SEARCH] = bool(tk.config.get(DISABLE_ADDRESS_SEARCH, False))
+    ENABLE_STAC_COLLECTION_JSON_BUTTON = (
+        "ckanext.gztr.dataset_publisher.enable_stac_collection_json_button"
+    )
+    config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = bool(
+        tk.config.get(ENABLE_STAC_COLLECTION_JSON_BUTTON, False)
+    )
+    ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON = (
+        "ckanext.gztr.dataset_publisher.enable_stac_collection_download_button"
+    )
+    config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = bool(
+        tk.config.get(ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON, True)
+    )
+    DISABLE_DRAWN_FEATURES = "ckanext.gztr.dataset_publisher.disable_drawn_features"
+    config[DISABLE_DRAWN_FEATURES] = bool(tk.config.get(DISABLE_DRAWN_FEATURES, False))
+    DIALOG_MAP_HEIGHT = "ckanext.gztr.dataset_publisher.dialog_map_height"
+    config[DIALOG_MAP_HEIGHT] = tk.config.get(DIALOG_MAP_HEIGHT, "60vh")
+    DISABLE_DUCKDB_ENGINE = "ckanext.gztr.dataset_publisher.disable_duckdb_engine"
+    config[DISABLE_DUCKDB_ENGINE] = bool(tk.config.get(DISABLE_DUCKDB_ENGINE, False))
     return config
 
-def public_search_widget_config() -> dict:
-    """Returns all relevant configuration entries for the public search gazetteer widget."""
+
+def public_search_gazetteer_config() -> dict:
+    """Returns all relevant configuration entries for the public search gazetteer."""
     config = {}
-    config[DEFAULT_LATITUDE] = float(tk.config[DEFAULT_LATITUDE])
-    config[DEFAULT_LONGITUDE] = float(tk.config[DEFAULT_LONGITUDE])
-    config[DEFAULT_ZOOM] = tk.config[DEFAULT_ZOOM]
-    config[MAP_TILE_SERVER] = tk.config[MAP_TILE_SERVER]
+    DEFAULT_LATITUDE = "ckanext.gztr.public_search.default_latitude"
+    config[DEFAULT_LATITUDE] = float(tk.config.get(DEFAULT_LATITUDE, 34.0))
+    DEFAULT_LONGITUDE = "ckanext.gztr.public_search.default_longitude"
+    config[DEFAULT_LONGITUDE] = float(tk.config.get(DEFAULT_LONGITUDE, -106.018066))
+    DEFAULT_ZOOM = "ckanext.gztr.public_search.default_zoom"
+    config[DEFAULT_ZOOM] = int(tk.config.get(DEFAULT_ZOOM, 5))
+    TILES_URL = "ckanext.gztr.public_search.tiles_url"
+    config[TILES_URL] = tk.config.get(TILES_URL)
+
+    DISABLE_ADDRESS_SEARCH = "ckanext.gztr.public_search.disable_address_search"
+    config[DISABLE_ADDRESS_SEARCH] = bool(tk.config.get(DISABLE_ADDRESS_SEARCH, False))
+    ENABLE_STAC_COLLECTION_JSON_BUTTON = (
+        "ckanext.gztr.public_search.enable_stac_collection_json_button"
+    )
+    config[ENABLE_STAC_COLLECTION_JSON_BUTTON] = bool(
+        tk.config.get(ENABLE_STAC_COLLECTION_JSON_BUTTON, False)
+    )
+    ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON = (
+        "ckanext.gztr.public_search.enable_stac_collection_download_button"
+    )
+    config[ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON] = bool(
+        tk.config.get(ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON, True)
+    )
     return config
 
-GEOCONNEX_ENABLED = "ckanext.gztr.geoconnex.enabled"
-GEOCONNEX_NAMESPACE = "ckanext.gztr.geoconnex.namespace"
-GEOCONNEX_ENABLE_DATASET_JSONLD = "ckanext.gztr.geoconnex.enable_dataset_jsonld"
+
+def public_search_minimap_config() -> dict:
+    """Returns all relevant configuration entries for public search result minimaps."""
+    config = {}
+    TILES_URL = "ckanext.gztr.public_search_minimap.tiles_url"
+    config[TILES_URL] = tk.config.get(TILES_URL)
+    TILES_TYPE = "ckanext.gztr.public_search_minimap.tiles_type"
+    config[TILES_TYPE] = tk.config.get(TILES_TYPE)
+    ATTRIBUTION_HTML = "ckanext.gztr.public_search_minimap.attribution_html"
+    config[ATTRIBUTION_HTML] = tk.config.get(ATTRIBUTION_HTML)
+    MAX_BOUNDS = "ckanext.gztr.public_search_minimap.max_bounds"
+    config[MAX_BOUNDS] = tk.config.get(MAX_BOUNDS)
+    MAX_ZOOM = "ckanext.gztr.public_search_minimap.max_zoom"
+    config[MAX_ZOOM] = int(tk.config.get(MAX_ZOOM)) if tk.config.get(MAX_ZOOM) else 10
+    return config
+
 
 def geoconnex_config() -> dict:
     """Returns all relevant configuration entries for the Geoconnex integration."""
     config = {}
-    config[GEOCONNEX_ENABLED] = tk.config[GEOCONNEX_ENABLED]
-    config[GEOCONNEX_NAMESPACE] = tk.config[GEOCONNEX_NAMESPACE]
-    config[GEOCONNEX_ENABLE_DATASET_JSONLD] = tk.config[GEOCONNEX_ENABLE_DATASET_JSONLD]
+    GEOCONNEX_ENABLED = "ckanext.gztr.geoconnex.enabled"
+    config[GEOCONNEX_ENABLED] = bool(tk.config.get(GEOCONNEX_ENABLED, False))
+    GEOCONNEX_NAMESPACE = "ckanext.gztr.geoconnex.namespace"
+    config[GEOCONNEX_NAMESPACE] = tk.config.get(GEOCONNEX_NAMESPACE)
+    GEOCONNEX_ENABLE_DATASET_JSONLD = "ckanext.gztr.geoconnex.enable_dataset_jsonld"
+    config[GEOCONNEX_ENABLE_DATASET_JSONLD] = bool(
+        tk.config.get(GEOCONNEX_ENABLE_DATASET_JSONLD, False)
+    )
     return config

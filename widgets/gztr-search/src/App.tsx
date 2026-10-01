@@ -92,28 +92,27 @@ function App({ config }: any) {
           )}
         </div>
         <div className="tw:relative">
-          <Dialog>
+          <Dialog modal={false}>
             <DialogTrigger
               asChild
               className="tw:absolute tw:top-1 tw:right-1 tw:z-10 tw:border-2 tw:border-solid"
             >
-              <Button
-                className="tw:rounded-lg tw:shadow-xl p-2"
-                variant="secondary"
-              >
+              <Button className="rounded tw:shadow-xl p-2" variant="secondary">
                 <SearchIcon />
                 Search by bounding box
               </Button>
             </DialogTrigger>
             <DialogContent className="tw:sm:max-w-[90vw] tw:sm:max-h-[90vh]">
               <DialogHeader>
-                <DialogTitle>Filter by Location</DialogTitle>
+                <DialogTitle>
+                  Search datasets by bounding box intersection
+                </DialogTitle>
                 <DialogDescription className="tw:text-lg mb-0">
                   <strong>
                     Please use the bounding box tool to draw a rectangle
                   </strong>{" "}
-                  to filter by location for datasets intersecting with your
-                  drawn region.
+                  to search for datasets that have simplified geospatial
+                  metadata intersecting with your drawn region.
                   <br />
                   You may also use the address search and feature preview tools
                   to help find a location first.
@@ -157,104 +156,108 @@ function App({ config }: any) {
                       Draw a bounding box
                     </Button>
                   )}
-                  <CategoryCombobox />
+                  <CategoryCombobox config={config} />
                 </div>
-                <InputGroup className="tw:max-w-xl">
-                  <InputGroupAddon>
-                    <MapPinIcon />
-                  </InputGroupAddon>
-                  <InputGroupInput
-                    placeholder="Enter an address to search for here..."
-                    onChange={(e) => setSearchValue(e.target.value)}
-                    onKeyDown={async (e) => {
-                      if (e.key === "Enter") {
-                        if (searchMap) {
-                          setSearching(true);
-                          await runAddressSearch(
-                            config,
-                            searchValue,
-                            searchMap,
-                            setAddressSearchResults,
-                            setSearchResultMarkerLngLat,
-                          );
-                          setSearching(false);
-                        }
-                      } else {
-                        setAddressSearchResults([]);
-                      }
-                    }}
-                  />
-                  <InputGroupAddon align="inline-end">
-                    <InputGroupButton
-                      className="btn btn-primary py-0 px-1"
-                      disabled={searching}
-                      variant="secondary"
-                      onClick={async () => {
-                        if (searchMap) {
-                          setSearching(true);
-                          await runAddressSearch(
-                            config,
-                            searchValue,
-                            searchMap,
-                            setAddressSearchResults,
-                            setSearchResultMarkerLngLat,
-                          );
-                          setSearching(false);
+                {!config[
+                  "ckanext.gztr.public_search.disable_address_search"
+                ] && (
+                  <InputGroup className="tw:max-w-xl">
+                    <InputGroupAddon>
+                      <MapPinIcon />
+                    </InputGroupAddon>
+                    <InputGroupInput
+                      placeholder="Enter an address to search for here..."
+                      onChange={(e) => setSearchValue(e.target.value)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Enter") {
+                          if (searchMap) {
+                            setSearching(true);
+                            await runAddressSearch(
+                              config,
+                              searchValue,
+                              searchMap,
+                              setAddressSearchResults,
+                              setSearchResultMarkerLngLat,
+                            );
+                            setSearching(false);
+                          }
+                        } else {
+                          setAddressSearchResults([]);
                         }
                       }}
-                    >
-                      {searching ? (
-                        <>
-                          Searching... <Spinner data-icon="inline-end" />
-                        </>
-                      ) : (
-                        "Search"
-                      )}
-                    </InputGroupButton>
-                  </InputGroupAddon>
-                  {addressSearchResults.length > 0 && (
+                    />
                     <InputGroupAddon align="inline-end">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <InputGroupButton className="!pr-1.5 text-xs">
-                            View results...{" "}
-                            <ChevronDownIcon className="size-1" />
-                          </InputGroupButton>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="[--radius:0.95rem]"
-                        >
-                          <DropdownMenuGroup>
-                            {addressSearchResults.map((address, idx) => (
-                              <DropdownMenuItem
-                                className="tw:w-full tw:justify-start tw:cursor-pointer"
-                                onClick={() => {
-                                  if (searchMap) {
-                                    searchMap.fitBounds(
-                                      [
-                                        [address.lon, address.lat],
-                                        [address.lon, address.lat],
-                                      ],
-                                      { zoom: 10 },
-                                    );
-                                    setSearchResultMarkerLngLat({
-                                      lon: address.lon,
-                                      lat: address.lat,
-                                    });
-                                  }
-                                }}
-                                key={idx}
-                              >
-                                {address.display_name}
-                              </DropdownMenuItem>
-                            ))}
-                          </DropdownMenuGroup>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                      <InputGroupButton
+                        className="btn btn-primary py-0 px-1"
+                        disabled={searching}
+                        variant="secondary"
+                        onClick={async () => {
+                          if (searchMap) {
+                            setSearching(true);
+                            await runAddressSearch(
+                              config,
+                              searchValue,
+                              searchMap,
+                              setAddressSearchResults,
+                              setSearchResultMarkerLngLat,
+                            );
+                            setSearching(false);
+                          }
+                        }}
+                      >
+                        {searching ? (
+                          <>
+                            Searching... <Spinner data-icon="inline-end" />
+                          </>
+                        ) : (
+                          "Search"
+                        )}
+                      </InputGroupButton>
                     </InputGroupAddon>
-                  )}
-                </InputGroup>
+                    {addressSearchResults.length > 0 && (
+                      <InputGroupAddon align="inline-end">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <InputGroupButton className="!pr-1.5 text-xs">
+                              View results...{" "}
+                              <ChevronDownIcon className="size-1" />
+                            </InputGroupButton>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="[--radius:0.95rem]"
+                          >
+                            <DropdownMenuGroup>
+                              {addressSearchResults.map((address, idx) => (
+                                <DropdownMenuItem
+                                  className="tw:w-full tw:justify-start tw:cursor-pointer"
+                                  onClick={() => {
+                                    if (searchMap) {
+                                      searchMap.fitBounds(
+                                        [
+                                          [address.lon, address.lat],
+                                          [address.lon, address.lat],
+                                        ],
+                                        { zoom: 10 },
+                                      );
+                                      setSearchResultMarkerLngLat({
+                                        lon: address.lon,
+                                        lat: address.lat,
+                                      });
+                                    }
+                                  }}
+                                  key={idx}
+                                >
+                                  {address.display_name}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuGroup>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </InputGroupAddon>
+                    )}
+                  </InputGroup>
+                )}
               </div>
               <SearchMap config={config} />
             </DialogContent>

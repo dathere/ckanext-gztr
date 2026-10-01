@@ -83,7 +83,7 @@ const StacCatalogGenerator = () => {
                   <FieldLabel htmlFor="catalog_id">Catalog ID</FieldLabel>
                   <FieldDescription className="mb-0!">
                     Provide a basic lowercase alphabetical ID (can be
-                    hyphenated)
+                    hyphenated or underscored)
                   </FieldDescription>
                   <Input
                     {...form.register("catalog_id")}
@@ -131,13 +131,13 @@ const StacCatalogGenerator = () => {
                   </FieldLabel>
                   <FieldDescription className="mb-0!">
                     Provide a lowercase ID for your STAC Collection (can be
-                    hyphenated)
+                    hyphenated or underscored)
                   </FieldDescription>
                   <Input
                     {...form.register("collection_id")}
                     id="collection_id"
                     type="text"
-                    placeholder="public-water-systems"
+                    placeholder="huc8-sub-basins"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -160,7 +160,7 @@ const StacCatalogGenerator = () => {
                     {...form.register("collection_title")}
                     id="collection_title"
                     type="text"
-                    placeholder="Public Water Systems"
+                    placeholder="HUC8 Sub Basins"
                   />
                   {fieldState.invalid && (
                     <FieldError errors={[fieldState.error]} />
@@ -178,7 +178,7 @@ const StacCatalogGenerator = () => {
   "stac_version": "1.1.0",
   "type": "Catalog",
   "title": ${ckan_instance_name ? `"${ckan_instance_name}"` : `"New Mexico Water Data Catalog"`},
-  "description": "${`Geospatial collections and features used for dataset publishing and search by the ${ckan_instance_name ?? "New Mexico Water Data Catalog"}, organized through the SpatioTemporal Asset Catalogs (STAC) specification.`}",
+  "description": "${`Geospatial collections and features used for dataset publishing and search by the ${ckan_instance_name ?? "New Mexico Water Data Catalog"}, organized through the SpatioTemporal Asset Catalogs (STAC) specification suite.`}",
   "links": [
     {
       "href": "${`${ckan_instance_url ?? "https://catalog.newmexicowaterdata.org"}/gztr/stac`}",
@@ -196,10 +196,10 @@ const StacCatalogGenerator = () => {
       "type": "application/json"
     },
     {
-      "href": "${`${ckan_instance_url ?? "https://catalog.newmexicowaterdata.org"}/gztr/stac/collections/${collection_id ?? "public-water-systems"}`}",
+      "href": "${`${ckan_instance_url ?? "https://catalog.newmexicowaterdata.org"}/gztr/stac/collections/${collection_id ?? "nm_huc8_sub_basins"}`}",
       "rel": "child",
       "type": "application/json",
-      "title": "${collection_title ?? "Public Water Systems"}"
+      "title": "${collection_title ?? "HUC8 Sub Basins"}"
     }
   ]
 }

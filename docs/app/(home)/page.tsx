@@ -81,7 +81,7 @@ export default function HomePage() {
               className="font-medium text-blue-400"
               rel="noopener"
             >
-              Privacy Policy
+              Website Privacy Policy
             </a>
             .
           </p>
@@ -486,7 +486,7 @@ function WhyInteractive(props: {
           from {
             width: 0px;
           }
-          
+
           to {
             width: 100%;
           }

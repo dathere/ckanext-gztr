@@ -2,7 +2,7 @@
 
 {% set gw = field.field_name if field.field_name else None %}
 
-<div id="gazetteer-widget-root"></div>
+<div  data-config="{{ h.gztr_get_dataset_publisher_gazetteer_config() }}" id="dataset-publisher-gazetteer-root"></div>
 
 <div class="control-group" data-module="gazetteer">
     <div class="row">
@@ -29,5 +29,5 @@
     </div>
 </div>
 
-{% asset 'ckanext-gztr/gazetteer_widget-react-js' %}
+{% asset 'ckanext-gztr/gazetteer_dataset_publisher-react-js' %}
 {% asset 'ckanext-gztr/place_keywords-js' %}

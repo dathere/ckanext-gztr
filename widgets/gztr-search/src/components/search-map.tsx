@@ -47,11 +47,9 @@ const SearchMap = ({ config }: any) => {
       if (currentCollection && collections) {
         if (popupRef.current) popupRef.current.remove();
         // Get FeatureCollection of the specified collection
-        const data = (
-          await (
-            await fetch(`/gztr/stac/collections/${currentCollection.id}/items`)
-          ).json()
-        );
+        const data = await (
+          await fetch(`/gztr/stac/collections/${currentCollection.id}/items`)
+        ).json();
         setCurrentGeojson(data);
         if (searchMap) {
           // Add popups for each GeoJSON feature with details and select button
@@ -93,11 +91,6 @@ const SearchMap = ({ config }: any) => {
           const maxx = coordinates[0][2][0];
           const maxy = coordinates[0][2][1];
           const ext_bbox = `${minx},${miny},${maxx},${maxy}`;
-          // const default_spatial_query =
-          //   "{{!field f=spatial}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))";
-          // const fq_list = encodeURIComponent(
-          //   "[{{!field f=spatial}}Intersects(ENVELOPE({minx}, {maxx}, {maxy}, {miny}))]",
-          // );
           window.location.href = `/dataset?q=&sort=score+desc%2C+metadata_modified+desc&ext_bbox=${encodeURIComponent(ext_bbox)}`;
         });
       }}
@@ -106,8 +99,13 @@ const SearchMap = ({ config }: any) => {
         longitude: config["ckanext.gztr.default_longitude"] ?? -106.018066,
         zoom: config["ckanext.gztr.default_zoom"] ?? 5,
       }}
-      style={{ width: "100%", height: 400, borderRadius: "1rem" }}
-      mapStyle={config["ckanext.gztr.map_tile_server"] ?? "https://tiles.openfreemap.org/styles/liberty"}
+      style={{ width: "100%", height: 400 }}
+      mapStyle={config["ckanext.gztr.public_search.tiles_url"] ?? undefined}
+      maxBounds={
+        config["ckanext.gztr.public_search.max_bounds"]?.split(
+          " ",
+        ) ?? [-134.428711, 14.349548, -61.611328, 52.536273]
+      }
     >
       <NavigationControl position="top-left" />
       <ScaleControl />

@@ -1,31 +1,23 @@
-gztr_theme-js:
-    #filter: rjsmin
-  output: ckanext-gztr_theme/%(version)s-gztr_theme.js
+quick_extent_switch-js:
+  filter: rjsmin
+  output: ckanext-gztr/%(version)s-quick_extent_switch.js
   contents:
-    - leaflet.js
-    - gztr_theme.js
-    - statewide-search.js
+    - quick-extent-switch.js
   extra:
     preload:
       - base/main
 
-gztr_theme-css:
-  filter: cssrewrite
-  output: ckanext-gztr_theme/%(version)s-gztr_theme.css
-  contents:
-    - leaflet.css
-
-gazetteer_widget-react-js:
+gazetteer_dataset_publisher-react-js:
   filter: rjsmin
   output: ckanext-gztr/%(version)s-gazetteer_widget.js
   contents:
-    - gztr-react/assets/index.js
+    - gztr-dataset-publisher/assets/index.js
 
-gztr_search_widget-react-js:
+gztr_public_search-react-js:
   filter: rjsmin
   output: ckanext-gztr/%(version)s-gztr_search_widget.js
   contents:
-    - gztr-search/assets/index.js
+    - gztr-public-search/assets/index.js
 
 place_keywords-js:
   filter: rjsmin

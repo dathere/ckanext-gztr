@@ -1,24 +1,90 @@
 {
-  "id": "nmwdc",
+  "id": "sandbox",
   "stac_version": "1.1.0",
   "type": "Catalog",
-  "title": "New Mexico Water Data Catalog STAC API",
-  "description": "Geospatial collections and features used for dataset publishing and search by the New Mexico Water Data Catalog, organized through the SpatioTemporal Asset Catalogs (STAC) specification.",
+  "title": "Sandbox STAC API",
+  "description": "Geospatial collections used for dataset publishing and search on the datHere sandbox CKAN instance.",
   "links": [
     {
-      "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+      "href": "http://localhost:5000/gztr/stac",
       "rel": "self",
       "type": "application/json"
     },
     {
-      "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+      "href": "http://localhost:5000/gztr/stac",
       "rel": "root",
       "type": "application/json"
     },
     {
-      "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
-      "rel": "data",
+      "href": "http://localhost:5000/gztr/stac/collections",
+      "rel": "collections",
       "type": "application/json"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_state",
+      "rel": "child",
+      "type": "application/json",
+      "title": "New Mexico"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_counties",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Counties"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_census_designated_places",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Census Designated Places"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_aiannh",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Tribal Lands"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_huc8_sub_basins",
+      "rel": "child",
+      "type": "application/json",
+      "title": "HUC8 Sub-Basins"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_public_water_systems",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Public Water Systems"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_irrigation_districts",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Irrigation Districts"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_ose_declared_groundwater_basins",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Declared Groundwater Basins"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_ose_districts",
+      "rel": "child",
+      "type": "application/json",
+      "title": "OSE Districts"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/nm_soil_water_conservation_districts",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Soil and Water Conservation Districts"
+    },
+    {
+      "href": "http://localhost:5000/gztr/stac/collections/usgs_principle_aquifers",
+      "rel": "child",
+      "type": "application/json",
+      "title": "Principal Aquifers"
     }
   ]
 }
