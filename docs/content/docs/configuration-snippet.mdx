@@ -1,0 +1,268 @@
+---
+title: "Configuration snippet"
+description: The snippet of configuration values for ckanext-gztr usage in a CKAN instance.
+---
+
+```ini tab="INI"
+# ckanext-gztr configuration (more info at https://gztr.dathere.com/docs/configuration)
+
+# == ckanext-gztr | ckanext-scheming options ==
+
+# (mandatory)
+ckan.scheming.presets = ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
+# (mandatory)
+ckan.scheming.dataset.schemas = ckanext.gztr:schemas/dataset.yaml
+
+# == ckanext-gztr | SOLR options ==
+
+# (mandatory)
+ckan.search.solr_allowed_query_parsers = field
+
+# == ckanext-gztr | Storage options (more info at https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) ==
+
+# The gztr storage type, in this case based on the filesystem.
+# (mandatory)
+ckan.files.storage.gztr.type = ckan:fs
+# The path to the gztr storage on the filesystem.
+# (mandatory)
+ckan.files.storage.gztr.path = /var/lib/ckan/storage/uploads/gztr
+# Creates the `gztr` directory if it doesn't exist.
+# (mandatory)
+ckan.files.storage.gztr.initialize = true
+# Makes all gztr storage files publicly downloadable.
+# (mandatory)
+ckan.files.storage.gztr.public = true
+
+# == ckanext-gztr | Dataset publisher gazetteer options ==
+
+# Vector tile server URL.
+# Raster tiles and PMTiles are not currently supported.
+# (mandatory)
+ckanext.gztr.dataset_publisher.tiles_url = 
+# The default center latitude of the map.
+# (recommended)
+ckanext.gztr.dataset_publisher.default_latitude = 34.307144
+# The default center longitude of the map.
+# (recommended)
+ckanext.gztr.dataset_publisher.default_longitude = -106.018066
+# The initial zoom level of the map.
+# (recommended)
+ckanext.gztr.dataset_publisher.default_zoom = 5
+# The space-separated boundaries of the map (e.g. continental USA)
+# (recommended)
+ckanext.gztr.dataset_publisher.max_bounds = -134.428711 14.349548 -61.611328 52.536273
+# Disable drawing custom polygons for dataset publishers.
+# Set this to true if you want data publishers to only use preset features provided by the sysadmin.
+# (optional)
+ckanext.gztr.dataset_publisher.disable_drawn_features = false
+# Modify the height of the map shown in the modal (note that there is already a fullscreen button if needed).
+# (optional)
+ckanext.gztr.dataset_publisher.dialog_map_height = 60vh
+# Disable the address search feature which uses the external Nominatim API.
+# (optional)
+ckanext.gztr.dataset_publisher.disable_address_search = false
+# Disable using DuckDB WASM from jsdelivr.com and instead use the default Apache SedonaDB and STAC API implementation.
+# Note that setting this to true might result in slower gazetteer loading times and higher bandwidth throughput,
+# but can be better for data privacy reasons (until ckanext-gztr implements optional custom DuckDB WASM instantiation).
+# (optional)
+ckanext.gztr.dataset_publisher.disable_duckdb_engine = false
+# In a geospatial collection's info modal, display a clickable JSON file icon button to open the corresponding STAC collection page.
+# (optional)
+ckanext.gztr.dataset_publisher.enable_stac_collection_json_button = true
+# In a geospatial collection's info modal, display a clickable download icon button to download the collection as a file (e.g. GeoParquet).
+# (optional)
+ckanext.gztr.dataset_publisher.enable_stac_collection_download_button = true
+
+# == ckanext-gztr | Public search gazetteer options ==
+
+# Vector tile server URL.
+# Raster tiles and PMTiles are not currently supported.
+# (mandatory)
+ckanext.gztr.public_search.tiles_url = 
+# The default center latitude of the maps.
+# (recommended)
+ckanext.gztr.public_search.default_latitude = 34.307144
+# The default center longitude of the maps.
+# (recommended)
+ckanext.gztr.public_search.default_longitude = -106.018066
+# The initial zoom level of the maps.
+# (recommended)
+ckanext.gztr.public_search.default_zoom = 5
+# The space-separated boundaries of the map (e.g. continental USA)
+# (recommended)
+ckanext.gztr.public_search.max_bounds = -134.428711 14.349548 -61.611328 52.536273
+# Disable the address search feature which uses Nominatim.
+# (optional)
+ckanext.gztr.public_search.disable_address_search = false
+# Allow public users to click a JSON info icon button to open the STAC collection info JSON page.
+# (optional)
+ckanext.gztr.public_search.enable_stac_collection_json_button = false
+# Allow public users to click a download icon button to download a geospatial collection (e.g. GeoParquet file).
+# (optional)
+ckanext.gztr.public_search.enable_stac_collection_download_button = true
+
+# == ckanext-gztr | Public search minimap options ==
+
+# MapLibre-specific config about the source data
+# Refer to https://maplibre.org/maplibre-style-spec/sources for more info
+
+# Vector, Raster, or PMTiles (using the pmtiles:// protocol) server URL.
+# (mandatory)
+ckanext.gztr.public_search_minimap.tiles_url =
+# The type of the source, either vector or raster
+# (mandatory)
+ckanext.gztr.public_search_minimap.tiles_type = vector
+# Attribution HTML (e.g. an HTML anchor tag with a link using href)
+# NOTE: As a sysadmin, make sure this is safe HTML!
+# (recommended)
+ckanext.gztr.public_search_minimap.attribution_html =
+# The space-separated boundaries of the minimap (e.g. continental USA)
+# (recommended)
+ckanext.gztr.public_search_minimap.max_bounds = -134.428711 14.349548 -61.611328 52.536273
+# The maximum zoom level that the tiles would be retrieved for
+# (optional)
+ckanext.gztr.public_search_minimap.max_zoom = 19
+
+# == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
+
+# (optional)
+ckanext.gztr.geoconnex.enabled = false
+# The namespace that should exist in the namespaces/bulk/ckan directory at https://github.com/internetofwater/geoconnex.us
+# (optional)
+ckanext.gztr.geoconnex.namespace = 
+# Embeds Geoconnex-compatible JSON-LD within each compatible CKAN dataset's landing page
+# (optional)
+ckanext.gztr.geoconnex.enable_dataset_jsonld = false
+```
+
+```dotenv tab="ckanext-envvars"
+# ckanext-gztr configuration (more info at https://gztr.dathere.com/docs/configuration)
+
+# == ckanext-gztr | ckanext-scheming options ==
+
+# (mandatory)
+CKAN___SCHEMING__PRESETS=ckanext.scheming:presets.json ckanext.gztr:schemas/presets.yaml
+# (mandatory)
+CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.gztr:schemas/dataset.yaml
+
+# == ckanext-gztr | SOLR options ==
+
+# (mandatory)
+CKAN__SEARCH__SOLR_ALLOWED_QUERY_PARSERS=field
+
+# == ckanext-gztr | Storage options (more info at https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) ==
+
+# The gztr storage type, in this case based on the filesystem.
+# (mandatory)
+CKAN__FILES__STORAGE__GZTR__TYPE=ckan:fs
+# The path to the gztr storage on the filesystem.
+# (mandatory)
+CKAN__FILES__STORAGE__GZTR__PATH=/var/lib/ckan/storage/uploads/gztr
+# Creates the `gztr` directory if it doesn't exist.
+# (mandatory)
+CKAN__FILES__STORAGE__GZTR__INITIALIZE=true
+# Makes all gztr storage files publicly downloadable.
+# (mandatory)
+CKAN__FILES__STORAGE__GZTR__PUBLIC=true
+
+# == ckanext-gztr | Dataset publisher gazetteer options ==
+
+# Vector tile server URL.
+# Raster tiles and PMTiles are not currently supported.
+# (mandatory)
+CKANEXT__GZTR__DATASET_PUBLISHER__TILES_URL=
+# The default center latitude of the map.
+# (recommended)
+CKANEXT__GZTR__DATASET_PUBLISHER__DEFAULT_LATITUDE=34.307144
+# The default center longitude of the map.
+# (recommended)
+CKANEXT__GZTR__DATASET_PUBLISHER__DEFAULT_LONGITUDE=-106.018066
+# The initial zoom level of the map.
+# (recommended)
+CKANEXT__GZTR__DATASET_PUBLISHER__DEFAULT_ZOOM=5
+# The space-separated boundaries of the map (e.g. continental USA)
+# (recommended)
+CKANEXT__GZTR__DATASET_PUBLISHER__MAX_BOUNDS=-134.428711 14.349548 -61.611328 52.536273
+# Disable drawing custom polygons for dataset publishers.
+# Set this to true if you want data publishers to only use preset features provided by the sysadmin.
+# (optional)
+CKANEXT__GZTR__DATASET_PUBLISHER__DISABLE_DRAWN_FEATURES=false
+# Modify the height of the map shown in the modal (note that there is already a fullscreen button if needed).
+# (optional)
+CKANEXT__GZTR__DATASET_PUBLISHER__DIALOG_MAP_HEIGHT=60vh
+# Disable the address search feature which uses the external Nominatim API.
+# (optional)
+CKANEXT__GZTR__DATASET_PUBLISHER__DISABLE_ADDRESS_SEARCH=false
+# Disable using DuckDB WASM from jsdelivr.com and instead use the default Apache SedonaDB and STAC API implementation.
+# Note that setting this to true might result in slower gazetteer loading times and higher bandwidth throughput,
+# but can be better for data privacy reasons (until ckanext-gztr implements optional custom DuckDB WASM instantiation).
+# (optional)
+CKANEXT__GZTR__DATASET_PUBLISHER__DISABLE_DUCKDB_ENGINE=false
+# In a geospatial collection's info modal, display a clickable JSON file icon button to open the corresponding STAC collection page.
+# (optional)
+CKANEXT__GZTR__DATASET_PUBLISHER__ENABLE_STAC_COLLECTION_JSON_BUTTON=false
+# In a geospatial collection's info modal, display a clickable download icon button to download the collection as a file (e.g. GeoParquet).
+# (optional)
+CKANEXT__GZTR__DATASET_PUBLISHER__ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON=true
+
+# == ckanext-gztr | Public search gazetteer options ==
+
+# Vector tile server URL.
+# Raster tiles and PMTiles are not currently supported.
+# (mandatory)
+CKANEXT__GZTR__PUBLIC_SEARCH__TILES_URL=
+# The default center latitude of the maps.
+# (recommended)
+CKANEXT__GZTR__PUBLIC_SEARCH__DEFAULT_LATITUDE=34.307144
+# The default center longitude of the maps.
+# (recommended)
+CKANEXT__GZTR__PUBLIC_SEARCH__DEFAULT_LONGITUDE=-106.018066
+# The initial zoom level of the maps.
+# (recommended)
+CKANEXT__GZTR__PUBLIC_SEARCH__DEFAULT_ZOOM=5
+# The space-separated boundaries of the map (e.g. continental USA)
+# (recommended)
+CKANEXT__GZTR__PUBLIC_SEARCH__MAX_BOUNDS=-134.428711 14.349548 -61.611328 52.536273
+# Disable the address search feature which uses Nominatim.
+# (optional)
+CKANEXT__GZTR__PUBLIC_SEARCH__DISABLE_ADDRESS_SEARCH=false
+# Allow public users to click a JSON info icon button to open the STAC collection info JSON page.
+# (optional)
+CKANEXT__GZTR__PUBLIC_SEARCH__ENABLE_STAC_COLLECTION_JSON_BUTTON=false
+# Allow public users to click a download icon button to download a geospatial collection (e.g. GeoParquet file).
+# (optional)
+CKANEXT__GZTR__PUBLIC_SEARCH__ENABLE_STAC_COLLECTION_DOWNLOAD_BUTTON=true
+
+# == ckanext-gztr | Public search minimap options ==
+
+# MapLibre-specific config about the source data
+# Refer to https://maplibre.org/maplibre-style-spec/sources for more info
+
+# Vector, Raster, or PMTiles (using the pmtiles:// protocol) server URL.
+# (mandatory)
+CKANEXT__GZTR__PUBLIC_SEARCH_MINIMAP__TILES_URL=
+# The type of the source, either vector or raster
+# (mandatory)
+CKANEXT__GZTR__PUBLIC_SEARCH_MINIMAP__TILES_TYPE=vector
+# Attribution HTML (e.g. an HTML anchor tag with a link using href)
+# NOTE: As a sysadmin, make sure this is safe HTML!
+# (recommended)
+CKANEXT__GZTR__PUBLIC_SEARCH_MINIMAP__ATTRIBUTION_HTML=
+# The space-separated boundaries of the minimap (e.g. continental USA)
+# (recommended)
+CKANEXT__GZTR__PUBLIC_SEARCH_MINIMAP__MAX_BOUNDS=-134.428711 14.349548 -61.611328 52.536273
+# The maximum zoom level that the tiles would be retrieved for
+# (optional)
+CKANEXT__GZTR__PUBLIC_SEARCH_MINIMAP__MAX_ZOOM=19
+
+# == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
+
+# (optional)
+CKANEXT__GZTR__GEOCONNEX__ENABLED=false
+# The namespace that should exist in the namespaces/bulk/ckan directory at https://github.com/internetofwater/geoconnex.us
+# (optional)
+CKANEXT__GZTR__GEOCONNEX__=
+# Embeds Geoconnex-compatible JSON-LD within each compatible CKAN dataset's landing page
+# (optional)
+CKANEXT__GZTR__GEOCONNEX__ENABLE_DATASET_JSONLD=false
+```

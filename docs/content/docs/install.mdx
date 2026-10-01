@@ -33,6 +33,10 @@ If you ever have any issues installing ckanext-gztr, please:
 If you need further support reach out to datHere at [support.dathere.com](https://support.dathere.com).
 </Callout>
 
+<Callout title="✨️ Try out the ckanext-gztr Docker Compose demo!" type="info">
+Want to explore ckanext-gztr on your local device first before going through the installation? Check out the ckanext-gztr Docker Compose demo at [github.com/dathere/gztr-docker-demo](https://github.com/dathere/gztr-docker-demo#gztr-docker-demo)! Clone the repo, update the environment variables, & launch a local CKAN instance with ckanext-gztr installed. Follow the steps in the README to get started.
+</Callout>
+
 In this installation guide we'll use a CKAN source install set up for development on Ubuntu 24.04 and we'll refer to the default installation location of `/usr/lib/ckan/default/src/ckan` during these steps along with the configuration file at `/etc/ckan/default/ckan.ini`.
 
 You can also adapt the installation steps for your setup, such as modifying your Docker Compose or Kubernetes and Helm setup.
@@ -255,93 +259,23 @@ Dataset search error: ("Local parameters are not supported in param 'fq'.",)
 
 <Step>
 
-## Set up the `gztr` storage and configuration
+## Configure your CKAN instance and set up the `gztr` storage
 
-With CKAN 2.12 there are now [configurable storages](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages), which are objects that can store files in a local filesystem, cloud, database, or elsewhere. This allows you to customize where you want to store GeoParquet files that are used throughout your installation of ckanext-gztr.
+There are a plethora of configuration options with ckanext-gztr for your CKAN instance. We've divded them into **mandatory**, **recommended**, and **optional**.
 
-Add the following lines to your CKAN configuration and customize it as needed:
+Add the following lines to your CKAN configuration and customize it as needed. Ensure that you provide the configuration values labeled as **mandatory**.
 
-```ini tab="INI"
-# ckanext-gztr configuration (more info at https://gztr.dathere.com/docs/configuration)
+<Callout title="You might be able to skip some sections!" type="warning">
+If you have been following the steps so far then you've already filled out the ckanext-scheming and SOLR options sections at the top of the following code block which you can skip.
+</Callout>
 
-# == ckanext-gztr | Storage options ==
-ckan.files.storage.gztr.type = ckan:fs
-ckan.files.storage.gztr.path = /var/lib/ckan/storage/uploads/gztr
-ckan.files.storage.gztr.initialize = true # Creates the `gztr` directory if it doesn't exist.
-ckan.files.storage.gztr.public = true # Makes the source GeoParquet files publicly downloadable and adds potential for more efficient geospatial capabilities.
-
-# == ckanext-gztr | General options ==
-# Default map configuration for gazetteers (for example here we use New Mexico's location).
-ckanext.gztr.default_latitude = 34.0
-ckanext.gztr.default_longitude = -106.018066
-ckanext.gztr.default_zoom = 5
-# URL to map tile server whose tiles are rendered on the maps.
-ckanext.gztr.map_tile_server = https://tiles.openfreemap.org/styles/liberty
-
-# == ckanext-gztr | Public search gazetteer options ==
-# Disable the address search feature which uses Nominatim.
-ckanext.gztr.public_search.disable_address_search = false
-
-# == ckanext-gztr | Dataset publisher gazetteer options ==
-# Disable drawing custom polygons for dataset publishers.
-# Set this to true if you want data publishers to only use preset features provided by the sysadmin.
-ckanext.gztr.dataset_publisher.disable_drawn_features = false
-# Modify the height of the map shown in the modal (note that there is a fullscreen button if needed).
-ckanext.gztr.dataset_publisher.dialog_map_height = 60vh
-# Disable the address search feature which uses Nominatim.
-ckanext.gztr.dataset_publisher.disable_address_search = false
-
-# == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
-ckanext.gztr.geoconnex.enabled = false
-# The namespace that should exist in the namespaces/bulk/ckan directory at https://github.com/internetofwater/geoconnex.us
-ckanext.gztr.geoconnex.namespace = 
-# Embeds Geoconnex-compatible JSON-LD within each compatible CKAN dataset's landing page
-ckanext.gztr.geoconnex.enable_dataset_jsonld = false
-```
-
-```dotenv tab="ckanext-envvars"
-# ckanext-gztr configuration (more at https://gztr.dathere.com/docs/configuration)
-
-# == ckanext-gztr | Storage options ==
-CKAN__FILES__STORAGE__GZTR__TYPE=ckan:fs
-CKAN__FILES__STORAGE__GZTR__PATH=/var/lib/ckan/storage/uploads/gztr
-CKAN__FILES__STORAGE__GZTR__INITIALIZE=true # Creates the `gztr` directory if it doesn't exist.
-CKAN__FILES__STORAGE__GZTR__PUBLIC=true # Makes the source GeoParquet files publicly downloadable and adds potential for more efficient geospatial capabilities.
-
-# == ckanext-gztr | General options ==
-# Default map configuration for gazetteers (for example here we use New Mexico's location).
-CKANEXT__GZTR__DEFAULT_LATITUDE=34.0
-CKANEXT__GZTR__DEFAULT_LONGITUDE=-106.018066
-CKANEXT__GZTR__DEFAULT_ZOOM=5
-# URL to map tile server whose tiles are rendered on the maps.
-CKANEXT__GZTR__MAP_TILE_SERVER=https://tiles.openfreemap.org/styles/liberty
-
-# == ckanext-gztr | Public search gazetteer options ==
-# Disable the address search feature which uses Nominatim.
-CKANEXT__GZTR__PUBLIC_SEARCH__DISABLE_ADDRESS_SEARCH=false
-
-# == ckanext-gztr | Dataset publisher gazetteer options ==
-# Disable drawing custom polygons for dataset publishers.
-# Set this to true if you want data publishers to only use preset features provided by the sysadmin.
-CKANEXT__GZTR__DATASET_PUBLISHER__DISABLE_DRAWN_FEATURES=false
-# Modify the height of the map shown in the modal (note that there is a fullscreen button if needed).
-CKANEXT__GZTR__DATASET_PUBLISHER__DIALOG_MAP_HEIGHT=60vh
-# Disable the address search feature which uses Nominatim.
-CKANEXT__GZTR__DATASET_PUBLISHER__DISABLE_ADDRESS_SEARCH=false
-
-# == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
-CKANEXT__GZTR__GEOCONNEX__ENABLED=false
-# The namespace that should exist in the namespaces/bulk/ckan directory at https://github.com/internetofwater/geoconnex.us
-CKANEXT__GZTR__GEOCONNEX__NAMESPACE=
-# Embeds Geoconnex-compatible JSON-LD within each compatible CKAN dataset's landing page
-CKANEXT__GZTR__GEOCONNEX__ENABLE_DATASET_JSONLD=false
-```
+<include>./configuration-snippet.mdx</include>
 
 The new `gztr` directory should be made in your filesystem at `/var/lib/ckan/storage/uploads/gztr` once you run your CKAN instance. This is where the GeoParquet files will be stored, along with the `catalog.json` and `collections.json` files we'll set up soon. They'll also be publicly available at `{your_instance_domain}/file/public-download/gztr/{file_location}` such as `http://localhost:5000/file/public-download/gztr/catalog.json`.
 
-You can view other available configuration options in [the Configuration section](/docs/configuration) of this documentation.
+You can view other available configuration options in [the Configuration section](/docs/configuration) of this documentation. If you're installing ckanext-gztr on your CKAN instance, make sure to stay notified of new releases published to the [ckanext-gztr](https://github.com/dathere/ckanext-gztr) GitHub repository that may mention any new or updated configuration options by "watching" it.
 
-<Callout title="Using S3 instead of the filesystem" type="info">If you prefer to use a cloud storage service that is S3-compatible, you can learn how to set up the `gztr` storage with an S3-compatible cloud storage adapter on the [CKAN file storages documentation](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) (you may need to scroll down a bit) which uses the [ckanext-file-keeper-cloud](https://github.com/ckan/ckanext-file-keeper-cloud) CKAN extension. However note that with how ckanext-gztr is currently implemented, you'll want to verify how much bandwidth is used by calling your S3 storage first. You may want to instead periodically sync from an external S3 bucket to the filesystem storage to remove the calls from your CKAN instance's server to the external S3 storage and instead read from the filesystem.</Callout>
+<Callout title="Using S3 instead of the filesystem" type="info">If you prefer to use a cloud storage service that is S3-compatible, you can learn how to set up the `gztr` storage with an S3-compatible cloud storage adapter on the [CKAN file storages documentation](https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) (you may need to scroll down a bit) which uses the [ckanext-file-keeper-cloud](https://github.com/ckan/ckanext-file-keeper-cloud) CKAN extension. You'll want to monitor your S3 usage though when using ckanext-gztr, especially if you have large geospatial collections. You may want to instead periodically sync from an external S3 bucket to the filesystem storage to remove the calls from your CKAN instance's server to the external S3 storage and instead read from the filesystem to reduce potential bandwidth costs and latency.</Callout>
 
 ### Storing the files in S3
 
@@ -598,7 +532,7 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
           "roles": [
             "producer"
           ],
-          "url": "https://usgs.gov"
+          "url": "https://www.usgs.gov"
         },
         {
           "description": "The Internet of Water Coalition is a group of organizations working together with federal, state, and local government partners to build foundational water data infrastructure across the US and create a community of people and organizations using water data to make better decisions.",
@@ -623,7 +557,7 @@ import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
   ]
   ```
 
-  Notice that the `id` value `nm_huc8_sub_basins` is reused in several places. We also add a collection-level `assets` object to enable potential [STAC GeoParquet](https://radiantearth.github.io/stac-geoparquet-spec/latest/#referencing-a-stac-geoparquet-collections-in-a-stac-collection-json) capabilities.
+  Notice that the `id` value `nm_huc8_sub_basins` is reused in several places. We also add a collection-level `assets` object to enable potential [STAC GeoParquet](https://radiantearth.github.io/stac-geoparquet-spec/latest/#referencing-a-stac-geoparquet-collections-in-a-stac-collection-json) capabilities (e.g. speed optimization with DuckDB WASM) along with making a download button accessible from the frontend gazetteers (if enabled).
   </Accordion>
 </Accordions>
 
@@ -733,7 +667,7 @@ import { ConfettiSideCannons } from "@/components/confetti-side-cannons";
 
 <ConfettiSideCannons />
 
-There's plenty more to explore with ckanext-gztr. In particular you'll want to [**customize your configuration**](/docs/configuration) such as setting the default map location, zoom, and your basemaps. We also recommend "watching" [the GitHub repository](https://github.com/dathere/ckanext-gztr) to ensure you get notified when a new release is made and learn steps for updating your extension.
+There's plenty more to explore with ckanext-gztr. In particular you'll want to [**customize your configuration**](/docs/configuration) such as setting the default map location, zoom, and your map tiles. We also recommend "watching" [the GitHub repository](https://github.com/dathere/ckanext-gztr) to ensure you get notified when a new release is made and learn steps for updating your extension.
 
 <Cards>
   <Card icon={<WrenchIcon fill="#bde0fe" />} href="/docs/configuration" title="Configuration">

@@ -19,7 +19,7 @@ Now let's explore the features for your CKAN instance added by ckanext-gztr!
 
 ## Public dataset search gazetteer
 
-Commonly, CKAN data catalogs have a search box where users may type their query for datasets they'd like to find. However, this can be cumbersome when it comes to geographic data, when there is no visual method to search and identify relevant regions. The public gazetteer helps resolve this issue by providing an interactive map where users can draw a bounding box to search for datasets that have (simplified) geospatial features which intersect with their drawn bounding box.
+Commonly, CKAN data catalogs have a search box where users may type their query for datasets they'd like to find. However, this can be cumbersome when it comes to geographic data, when there is no visual method to search and identify relevant regions. The **public search gazetteer** helps resolve this issue by providing an interactive map where users can draw a bounding box to search for datasets that have (simplified) geospatial features which intersect with their drawn bounding box.
 
 <Callout title="The search uses simplified geometries">Since the geospatial search relies on Apache Solr, the bounding box search runs against a **simplified** version of each CKAN dataset's geospatial features indexed in Apache Solr rather than the full geospatial representation.</Callout>
 
@@ -31,22 +31,19 @@ Here are things you can do with the public search gazetteer:
 - Identify various named places as features on a map (e.g. cities, counties, etc.)
 - View datasets with geographic data using interactive thumbnails
 - Explore an interactive map of a preset region
-- Filter between excluding and including statewide datasets
+- Filter between excluding and including datasets about a common "quick extent" region (e.g. statewide)
 - Search for an address using the [Nominatim API](https://nominatim.org/)
-- Filter datasets by a named place keyword
+- Search datasets by a named place keyword (e.g. a city name)
 
 ## Dataset publisher gazetteer
 
-Similar to the public gazetteer, the dataset publisher gazetteer provides dataset publishers a visual and interactive way to specify a dataset's relevant geographic features. Users can either select pre-loaded features or draw custom polygons. The selection is then saved and can be searched from the public dataset search page, either by drawing a bounding box using the public gazetteer or by searching a pre-loaded location's name, which is indexed as a “place keyword”.
+A signature feature of ckanext-gztr, the **dataset publisher gazetteer** provides dataset publishers a visual and interactive way to specify a dataset's relevant geographic features. Users can either select pre-loaded features or draw custom polygons. The selection is then saved and can be searched from the public dataset search page, either by drawing a bounding box using the public search gazetteer or by searching a pre-loaded location's name, which can be indexed as a “place keyword”.
 
 <video style={{ borderRadius: "1rem" }} autoPlay muted loop controls={false} src="/media/nmwdc-data-publisher-gazetteer-demo.mp4" />
 
-- Selecting a named place using the category and place selectors.
-- Jumping to a selected place and drawing/editing a custom polygon.
+## Public search minimaps
 
-## Dataset minimaps and previews
-
-Once a dataset publisher associates a dataset with geospatial data using the data publisher gazetteer, a minimap can be displayed on the CKAN instance's dataset search page along with a map on each dataset's individual page.
+Once a dataset publisher associates a dataset with geospatial data using the data publisher gazetteer and publishes the dataset, a **minimap** can be displayed on each dataset with an association in the search results and also on the dataset landing page.
 
 For example here is a datasets page, where there is a minimap depicting the selected geospatial region by the data publisher on the left of each dataset that appears in the search results:
 
@@ -56,17 +53,19 @@ Here's a closer look at a single dataset search result:
 
 ![ckanext-gztr minimap demo](/media/minimap-demo.png)
 
-The minimap can help with visually identifying datasets that have specific geospatial features as a public user.
+This minimap feature can help visually identify datasets that have specific geospatial features as a public user.
 
-A minimap can also be added on dataset landing pages (e.g. when clicking on a dataset in the search results). For example here is a dataset's  landing page, where there is a minimap in the metadata section at the bottom:
+Here is the minimap that can also be displayed on a dataset's landing page (i.e. when clicking on a dataset in the search results). For example here is a dataset's  landing page, where there is a minimap in the metadata section at the bottom:
 
 ![ckanext-gztr individual dataset page](/media/individual-dataset-page.png)
 
 ## Place keywords search
 
-When a sysadmin of a CKAN instance provides preset feature categories for associating datasets with geospatial features, users can query by the feature names (if configured by the sysadmin).
+When a sysadmin of a CKAN instance provides preset geospatial collection for associating datasets with geospatial features, users can query by the geospatial feature's human-readable names.
 
 For example if a dataset publisher selects the "Counties" geospatial feature collection and then selects "County A" and "County B", then the the user can search for those counties by name in the default CKAN dataset search page.
+
+As with various features throughout ckanext-gztr, the place keywords search can be enabled or disabled by the CKAN instance's sysadmin(s).
 
 ## STAC API
 
@@ -86,17 +85,39 @@ One of the benefits of this implementation is exposing a STAC API for your geosp
 
 Currently the STAC API `/search` endpoint and validation are not implemented with ckanext-gztr.
 
-**Visit the API reference section in the navigation sidebar/menu** to view the available API endpoints along with using an interactive Postman-like GUI.
+You can visit the **API reference section in the navigation sidebar/menu** to view the available API endpoints along with using an interactive Postman-like GUI.
 
 {/* TODO: Example users can explore, and GIF "browse your geospatial collections by pointing to your STAC API" */}
 
 <Callout title="Note">ckanext-gztr and datHere are not affiliated with the STAC specification maintainers.</Callout>
 
-## Convenience Action API endpoint `gztr_collection_create`
+## `gztr_*` Action API endpoints
+
+There are several CKAN Action API endpoints added with ckanext-gztr installed on your CKAN instance.
+
+### `gztr_collection_create` - Upload a geospatial collection as GeoJSON to store as GeoParquet
 
 ![gztr_collection_create flow](/media/gztr_collection_create_flow.excalidraw.png)
 
-The custom `/api/3/action/gztr_collection_create` CKAN Action API endpoint is provided for convenience and is used as documented in the installation section. This endpoint is based on the CKAN `/api/3/action/file_create` CKAN API Action but also adds a conversion step as it expects a GeoJSON file storing a `FeatureCollection` as input and then converts the data to GeoParquet and stores it in the `gztr` storage.
+The `/api/3/action/gztr_collection_create` CKAN Action API endpoint is provided for convenience and is used as documented in the installation section. This endpoint is based on the CKAN `/api/3/action/file_create` CKAN API Action but also adds a conversion step as it expects a GeoJSON file storing a `FeatureCollection` as input and then converts the data to GeoParquet and stores it in the `gztr` storage. You can learn more about how it's used in the installation section up next.
+
+
+import { Accordion, Accordions } from 'fumadocs-ui/components/accordion';
+
+<Accordions type="multiple">
+  <Accordion title="gztr_spatial_full_with_geometry - Fill a GeoJSON FeatureCollection with corresponding geometry data based on collection ID and item ID">
+
+  The `/api/3/action/gztr_spatial_full_with_geometry` CKAN Action API endpoint is used automatically when visiting the datasets search page since we refer to the GeoParquet files that the CKAN sysadmin(s) upload as the "single source of truth" storing the geometry data and in each CKAN dataset's metadata ckanext-gztr stores just the STAC collection ID and item ID. Custom drawn features however have their geometry stored in the CKAN dataset's metadata since their geometry values are not from the preset GeoParquet files.
+
+  </Accordion>
+  <Accordion title="gztr_geoconnex_dataset_jsonld - Construct Geoconnex-compatible JSON-LD for a CKAN dataset">
+
+  The `/api/3/action/gztr_geoconnex_dataset_jsonld` CKAN Action API endpoint is used when the Geoconnex integration is enabled for your CKAN instance. It embeds Geoconnex-compatible JSON-LD within a CKAN dataset's landing page and is used to sync a CKAN instance's compatible datasets with the Geoconnex knowledge graph.
+
+  Ultimately this can be useful for discoverability of your CKAN datasets.
+
+  </Accordion>
+</Accordions>
 
 ## Geoconnex integration
 

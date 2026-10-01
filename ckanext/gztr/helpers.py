@@ -8,16 +8,30 @@ from .views import stac_item_show
 
 log = logging.getLogger(__name__)
 
-def gztr_get_public_config():
-    return json.dumps({
-        "public_search_widget": config.public_search_widget_config()
-    })
+
+def gztr_get_public_search_gazetteer_config():
+    return json.dumps(
+        {"public_search_gazetteer": config.public_search_gazetteer_config()}
+    )
+
+
+def gztr_get_dataset_publisher_gazetteer_config():
+    return json.dumps(
+        {"dataset_publisher_gazetteer": config.dataset_publisher_gazetteer_config()}
+    )
+
+
+def gztr_get_public_search_minimap_config():
+    return json.dumps({"public_search_minimap": config.public_search_minimap_config()})
+
 
 def gztr_get_geoconnex_config():
     return json.dumps(config.geoconnex_config())
 
+
 def gztr_geoconnex_enabled():
     return tk.config["ckanext.gztr.geoconnex.enabled"]
+
 
 def gztr_geoconnex_dataset_jsonld(dataset_metadata: dict[str, any]):
     """Construct Geoconnex-compatible JSON-LD based on a CKAN dataset's /api/3/action/package_show metadata."""
@@ -28,7 +42,12 @@ def gztr_geoconnex_dataset_jsonld(dataset_metadata: dict[str, any]):
         dataset_title = dataset_metadata.get("title")
         organization_name = dataset_metadata.get("organization").get("title")
         # Get geoconnex_pid from STAC item lookup, removing the need to store geoconnex_pid in spatial_full
-        stac_items = [(feature.get("collection"), feature.get("id")) for feature in json.loads(dataset_metadata.get("spatial_full")).get("features")]
+        stac_items = [
+            (feature.get("collection"), feature.get("id"))
+            for feature in json.loads(dataset_metadata.get("spatial_full")).get(
+                "features"
+            )
+        ]
         about = []
         for collection_id, item_id in stac_items:
             if collection_id == "Drawn features":
@@ -38,22 +57,21 @@ def gztr_geoconnex_dataset_jsonld(dataset_metadata: dict[str, any]):
             if geoconnex_pid:
                 about.append({"@id": geoconnex_pid})
 
-        return json.dumps({
-            "@context": {
-                "@vocab": "https://schema.org/",
-                "gsp": "http://www.opengis.net/ont/geosparql#",
-            },
-            "@id": f"https://geoconnex.us/ckan/{namespace}/{dataset_id}",
-            "@type": "Dataset",
-            # Human-readable label for the dataset, not the dataset ID
-            "name": dataset_title,
-            "provider": {
-                "@type": "Organization",
-                "name": organization_name
-            },
-            "url": f"{ckan_site_url}/dataset/{dataset_id}",
-            # Geoconnex reference URIs
-            "about": about
-        })
+        return json.dumps(
+            {
+                "@context": {
+                    "@vocab": "https://schema.org/",
+                    "gsp": "http://www.opengis.net/ont/geosparql#",
+                },
+                "@id": f"https://geoconnex.us/ckan/{namespace}/{dataset_id}",
+                "@type": "Dataset",
+                # Human-readable label for the dataset, not the dataset ID
+                "name": dataset_title,
+                "provider": {"@type": "Organization", "name": organization_name},
+                "url": f"{ckan_site_url}/dataset/{dataset_id}",
+                # Geoconnex reference URIs
+                "about": about,
+            }
+        )
     except Exception:
         log.exception("Error while running gztr_geoconnex_dataset_jsonld helper.")

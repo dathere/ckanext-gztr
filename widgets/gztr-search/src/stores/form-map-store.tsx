@@ -1,7 +1,7 @@
 import type { Geoman } from "@geoman-io/maplibre-geoman-free";
 import type { Map as GLMap } from "maplibre-gl";
-import { create } from "zustand";
 import type { StacCollection } from "stac-ts";
+import { create } from "zustand";
 
 interface FormMapState {
   searchMap: GLMap | undefined;
@@ -58,7 +58,8 @@ export const useFormMap = create<FormMapState>((set) => ({
   collections: undefined,
   setCollections: (collections) => set(() => ({ collections })),
   currentCollection: undefined,
-  setCurrentCollection: (currentCollection) => set(() => ({ currentCollection })),
+  setCurrentCollection: (currentCollection) =>
+    set(() => ({ currentCollection })),
   searchValue: undefined,
   setSearchValue: (searchValue) => set(() => ({ searchValue })),
   features: [],

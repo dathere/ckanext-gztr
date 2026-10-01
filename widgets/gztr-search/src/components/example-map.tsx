@@ -22,7 +22,12 @@ const ExampleMap = ({ config }: any) => {
         zoom: config["ckanext.gztr.default_zoom"] ?? 5,
       }}
       style={{ width: "100%", height: 400 }}
-      mapStyle={config["ckanext.gztr.map_tile_server"] ?? "https://tiles.openfreemap.org/styles/liberty"}
+      mapStyle={config["ckanext.gztr.public_search.tiles_url"]}
+      maxBounds={
+        config["ckanext.gztr.public_search.max_bounds"]?.split(
+          " ",
+        ) ?? [-134.428711, 14.349548, -61.611328, 52.536273]
+      }
       onLoad={(e) => {
         const map = e.target;
         // Display drawn bounding box if ext_bbox exists in URL query parameters

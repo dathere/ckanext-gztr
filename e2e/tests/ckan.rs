@@ -1,17 +1,17 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 
-mod utils;
-
 use anyhow::{Result, bail};
 use ckanaction::CKAN;
 use std::{io::Write, path::PathBuf};
 use tempfile::NamedTempFile;
 use testcontainers::core::ExecCommand;
 
-use crate::utils::{
-    assert_str_true, ckan_container_command, generate_token, get_ckan_config_path,
-    get_ckan_service_name, get_compose, get_container_env_var, get_service_port, jaq,
-    jaq_dangerous,
+mod utils;
+
+use utils::{
+    action_api_endpoint_success, assert_str_true, ckan_container_command, generate_token,
+    get_ckan_config_path, get_ckan_service_name, get_compose, get_container_env_var,
+    get_service_port, jaq, jaq_dangerous, verify_extensions_installed,
 };
 
 #[tokio::test]
@@ -24,33 +24,8 @@ async fn test_status_show_success_no_jaq() -> Result<()> {
         .build();
 
     let status_show = ckan.status_show().await?;
-    // Verify success is true
-    if let Some(success_value) = status_show.get("success") {
-        if let Some(success) = success_value.as_bool() {
-            assert!(success);
-        } else {
-            bail!("Received None for status_show.success when running as_bool().");
-        }
-    } else {
-        bail!("Received None for status_show.success.");
-    }
-    // Verify scheming_datasets and gztr are in the result.extensions array
-    let Some(result_value) = status_show.get("result") else {
-        bail!("Received None for status_show.result")
-    };
-    let Some(result) = result_value.as_object() else {
-        bail!("Received None for status_show.result as_object()");
-    };
-    let Some(extensions_value) = result.get("extensions") else {
-        bail!("Received None for status_show.result.extensions");
-    };
-    let Some(extensions) = extensions_value.as_array() else {
-        bail!("Received None for status_show.result.extensions as_array()");
-    };
-    assert!(
-        extensions.contains(&serde_json::to_value("scheming_datasets").unwrap())
-            && extensions.contains(&serde_json::to_value("gztr").unwrap())
-    );
+    action_api_endpoint_success(&status_show, "status_show").await?;
+    verify_extensions_installed(&status_show).await?;
     println!("[GET | http://localhost:{ckan_port}/api/3/action/status_show]\n{status_show:#?}");
 
     Ok(())
@@ -298,5 +273,3 @@ async fn test_playwright_basic() -> Result<()> {
 
     Ok(())
 }
-
-// TODO: Test with S3 storage

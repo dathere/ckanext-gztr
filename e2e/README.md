@@ -20,12 +20,13 @@ Make sure `cargo`, `docker`, and `jaq` are available from the `PATH` environment
 git clone https://github.com/dathere/gztr-docker-demo.git
 ```
 
-3. Set the environment variable `DOCKER_COMPOSE_PATH` to the absolute path of the `docker-compose.yml` file in `gztr-docker-demo/docker-compose.dev.yml`. Also set `CARGO_MANIFEST_PATH` to the absolute path of the `Cargo.toml` file. For example:
+3. Set the environment variable `DOCKER_COMPOSE_PATH` to the absolute path of the `docker-compose.dev.yml` file in `gztr-docker-demo/docker-compose.dev.yml`. For example:
 
 ```bash
 export DOCKER_COMPOSE_PATH="/home/rzmk/programming/gztr-docker-demo/docker-compose.dev.yml";
-export CARGO_MANIFEST_PATH="/home/rzmk/programming/ckanext-gztr/e2e/Cargo.toml"
 ```
+
+You could also instead place the entry in a `.env` file.
 
 4. Replace the value of `ports` in `gztr-docker-demo/docker-compose.dev.yml` to just `"5000"` so that an arbitrary host port can be used for running multiple tests simultaneously and comment out the existing `ports` value:
 
@@ -41,4 +42,25 @@ export CARGO_MANIFEST_PATH="/home/rzmk/programming/ckanext-gztr/e2e/Cargo.toml"
 
 ```bash
 cargo run --release
+```
+
+## Playwright tests
+
+For in-browser tests, you may find some info here useful.
+
+You can [interactively generate code](https://playwright.dev/docs/codegen-intro) with:
+
+```bash
+pnpx playwright codegen localhost:5000
+```
+
+When debugging a specific Playwright test, the following scripts may help:
+
+```bash
+CKAN_PORT=5000 pnpm run testui ./playwright/geoconnex/dataset_landing_page_jsonld.spec.ts
+```
+
+```bash
+docker compose -f docker-compose.dev.yml down --volume
+docker compose -f docker-compose.dev.yml up
 ```

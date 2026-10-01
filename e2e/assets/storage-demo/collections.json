@@ -1,24 +1,312 @@
 [
   {
-    "id": "public_water_systems",
+    "id": "nm_state",
     "type": "Collection",
     "stac_version": "1.1.0",
-    "title": "Public Water Systems",
-    "description": "Public Water Systems as defined by the U.S. Environmental Protection Agency (EPA) which intersect with New Mexico.",
+    "title": "New Mexico",
+    "description": "State of New Mexico",
+    "license": "proprietary",
     "providers": [
       {
-        "name": "U.S. Environmental Protection Agency (EPA)",
-        "description": "Independent agency of the United States government focused on environmental protection concerns.",
+        "name": "U.S. Census TIGER/Line Shapefiles",
         "roles": [
           "producer"
         ],
-        "url": "https://epa.gov"
+        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.050173,
+            31.332301,
+            -103.001964,
+            37.000232
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_state",
+        "rel": "self",
+        "type": "application/json"
       },
       {
-        "name": "Geoconnex",
-        "description": "Geoconnex Reference API hosting the public water systems geospatial data. The public water systems for New Mexico are a subset of the data hosted by Geoconnex.",
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_state/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ],
+    "quick_region_extent": true
+  },
+  {
+    "id": "nm_counties",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Counties",
+    "description": "Counties of New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "U.S. Census TIGER/Line Shapefiles",
         "roles": [
-          "host"
+          "producer"
+        ],
+        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.05043,
+            31.332231,
+            -103.00204,
+            37.000233
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_counties",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_counties/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_census_designated_places",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Census Designated Places",
+    "description": "Census designated places in New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "U.S. Census TIGER/Line Shapefiles",
+        "roles": [
+          "producer"
+        ],
+        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.04917,
+            31.783148,
+            -103.04356,
+            37.000014
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_census_designated_places",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_census_designated_places/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_aiannh",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Tribal Lands",
+    "description": "American Indian, Alaska Native and Native Hawaiian areas in New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "U.S. Census TIGER/Line Shapefiles",
+        "roles": [
+          "producer"
+        ],
+        "url": "https://www.census.gov/geographies/mapping-files/time-series/geo/tiger-line-file.html"
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.046794,
+            32.24006,
+            -105.31622,
+            37.000152
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_aiannh",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_aiannh/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_huc8_sub_basins",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "HUC8 Sub-Basins",
+    "description": "Hydrologic unit code 8 sub-basins in and around New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "USGS Watershed Boundary Dataset",
+        "roles": [
+          "producer"
+        ],
+        "url": "https://www.usgs.gov/national-hydrography/watershed-boundary-dataset"
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.049572,
+            31.332071,
+            -103.001488,
+            37.00028
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_huc8_sub_basins",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_huc8_sub_basins/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_public_water_systems",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Public Water Systems",
+    "description": "Public water systems in and around New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "United States EPA Safe Drinking Water Information System",
+        "roles": [
+          "producer"
         ],
         "url": "https://reference.geoconnex.us/collections/pws"
       }
@@ -26,38 +314,332 @@
     "extent": {
       "spatial": {
         "bbox": [
-          -180.0,
-          -90.0,
-          180.0,
-          90.0
+          [
+            -109.046259,
+            31.783805,
+            -103.043607,
+            37.000013
+          ]
         ]
       },
       "temporal": {
         "interval": [
-          null,
-          null
+          [
+            null,
+            null
+          ]
         ]
       }
     },
-    "license": "proprietary",
     "links": [
       {
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems",
+        "href": "http://localhost:5000/gztr/stac/collections/nm_public_water_systems",
         "rel": "self",
         "type": "application/json"
       },
       {
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections",
+        "href": "http://localhost:5000/gztr/stac/collections",
         "rel": "parent",
         "type": "application/json"
       },
       {
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac",
+        "href": "http://localhost:5000/gztr/stac",
         "rel": "root",
         "type": "application/json"
       },
       {
-        "href": "https://catalog.newmexicowaterdata.org/gztr/stac/collections/public_water_systems/items",
+        "href": "http://localhost:5000/gztr/stac/collections/nm_public_water_systems/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_irrigation_districts",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Irrigation Districts",
+    "description": "Irrigation districts of New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "New Mexico Office of the State Engineer",
+        "roles": [
+          "producer"
+        ]
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -108.25147,
+            31.796324,
+            -103.401247,
+            36.99972
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_irrigation_districts",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_irrigation_districts/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_ose_declared_groundwater_basins",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Declared Groundwater Basins",
+    "description": "Groundwater basins declared by the New Mexico Office of the State Engineer",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "New Mexico Office of the State Engineer",
+        "roles": [
+          "producer"
+        ]
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.050181,
+            31.332177,
+            -103.00212,
+            37.000239
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_ose_declared_groundwater_basins",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_ose_declared_groundwater_basins/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_ose_districts",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "OSE Districts",
+    "description": "New Mexico Office of the State Engineer district offices",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "New Mexico Office of the State Engineer",
+        "roles": [
+          "producer"
+        ]
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.050181,
+            31.332177,
+            -103.00212,
+            37.000239
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_ose_districts",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_ose_districts/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "nm_soil_water_conservation_districts",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Soil and Water Conservation Districts",
+    "description": "Soil and water conservation districts of New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "New Mexico Department of Agriculture",
+        "roles": [
+          "producer"
+        ]
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.049957,
+            31.332323,
+            -103.002127,
+            37.000262
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_soil_water_conservation_districts",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/nm_soil_water_conservation_districts/items",
+        "rel": "items",
+        "type": "application/geo+json"
+      }
+    ]
+  },
+  {
+    "id": "usgs_principle_aquifers",
+    "type": "Collection",
+    "stac_version": "1.1.0",
+    "title": "Principal Aquifers",
+    "description": "USGS principal aquifers intersecting New Mexico",
+    "license": "proprietary",
+    "providers": [
+      {
+        "name": "U.S. Geological Survey Principal Aquifers",
+        "roles": [
+          "producer"
+        ],
+        "url": "https://www.usgs.gov/mission-areas/water-resources/science/principal-aquifers"
+      }
+    ],
+    "extent": {
+      "spatial": {
+        "bbox": [
+          [
+            -109.050183,
+            31.332177,
+            -103.001973,
+            37.000299
+          ]
+        ]
+      },
+      "temporal": {
+        "interval": [
+          [
+            null,
+            null
+          ]
+        ]
+      }
+    },
+    "links": [
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/usgs_principle_aquifers",
+        "rel": "self",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections",
+        "rel": "parent",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac",
+        "rel": "root",
+        "type": "application/json"
+      },
+      {
+        "href": "http://localhost:5000/gztr/stac/collections/usgs_principle_aquifers/items",
         "rel": "items",
         "type": "application/geo+json"
       }

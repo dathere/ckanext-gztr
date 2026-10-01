@@ -11,6 +11,8 @@ use std::{
 fn main() -> Result<()> {
     intro("ckanext-gztr E2E test suite")?;
 
+    dotenvy::dotenv()?;
+
     cliclack::log::info("Checking for environment variables...")?;
     let Ok(docker_compose_path) = std::env::var("DOCKER_COMPOSE_PATH") else {
         bail!("Missing DOCKER_COMPOSE_PATH environment variable.");

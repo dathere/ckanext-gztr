@@ -6,7 +6,7 @@
     <div class="d-flex gap-3 align-items-start">
         {# Map thumbnail for datasets with spatial data #}
         {% if package.spatial_full %}
-        <div style="width: 125px; height: 125px;" data-package="{{ package.spatial_full }}" class="dataset-item-map rounded flex-shrink-0"></div>
+        <div style="width: 125px; height: 125px;" data-config="{{ h.gztr_get_public_search_minimap_config() }}" data-package="{{ package.spatial_full }}" class="dataset-item-map flex-shrink-0 rounded"></div>
         {% endif %}
         <div class="flex-grow-1" style="min-width: 0;">
             {{ super() }}
