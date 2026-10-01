@@ -71,9 +71,9 @@ const ExampleMap = ({ config }: any) => {
       style={{ width: "100%", height: 400, borderRadius: "1rem" }}
       mapStyle={config["ckanext.gztr.dataset_publisher.tiles_url"]}
       maxBounds={
-        config["ckanext.gztr.dataset_publisher.max_bounds"]?.split(
-          " ",
-        ) ?? [-134.428711, 14.349548, -61.611328, 52.536273]
+        config["ckanext.gztr.dataset_publisher.max_bounds"]?.split(" ") ?? [
+          -134.428711, 14.349548, -61.611328, 52.536273,
+        ]
       }
     >
       {featuresWithGeometries && (

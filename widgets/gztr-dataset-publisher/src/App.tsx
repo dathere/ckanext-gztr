@@ -47,6 +47,7 @@ import {
   filteredStacItem,
   getItemCollectionFromAPI,
   getItemCollectionFromAPIDuckDBWASM,
+  getItemCollectionFromAPIWithHyparquet,
   // getPlaceKeywordsFromSpatialFull,
   runAddressSearch,
 } from "@/lib/utils";
@@ -147,21 +148,9 @@ function App({ config }: any) {
         (c) => c.quick_region_extent,
       );
       const allItemCollections: ItemCollection[] = [];
-      if (config["ckanext.gztr.dataset_publisher.disable_duckdb_engine"]) {
-        // Get all Items for each STAC collection using default Apache SedonaDB and STAC API implementation
-        for (const collection of stacCollections!) {
-          const itemCollection: ItemCollection = await getItemCollectionFromAPI(
-            collection.id,
-          );
-          if (collection.id === quickRegionCollection?.id) {
-            setQuickRegionGeoJSON(itemCollection);
-          }
-          allItemCollections.push({
-            ...itemCollection,
-            collection_id: collection.id,
-          });
-        }
-      } else {
+      if (
+        config["ckanext.gztr.dataset_publisher.geoparquet_engine"] === "duckdb"
+      ) {
         const ddbConfig: DuckDBConfig = {
           query: {
             /**
@@ -184,6 +173,36 @@ function App({ config }: any) {
         for (const collection of stacCollections!) {
           const itemCollection: ItemCollection =
             await getItemCollectionFromAPIDuckDBWASM(collection.id, conn);
+          if (collection.id === quickRegionCollection?.id) {
+            setQuickRegionGeoJSON(itemCollection);
+          }
+          allItemCollections.push({
+            ...itemCollection,
+            collection_id: collection.id,
+          });
+        }
+      } else if (
+        config["ckanext.gztr.dataset_publisher.geoparquet_engine"] ===
+        "sedonadb"
+      ) {
+        // Get all Items for each STAC collection using default Apache SedonaDB and STAC API implementation
+        for (const collection of stacCollections!) {
+          const itemCollection: ItemCollection = await getItemCollectionFromAPI(
+            collection.id,
+          );
+          if (collection.id === quickRegionCollection?.id) {
+            setQuickRegionGeoJSON(itemCollection);
+          }
+          allItemCollections.push({
+            ...itemCollection,
+            collection_id: collection.id,
+          });
+        }
+      } else {
+        for (const collection of stacCollections!) {
+          // @ts-expect-error
+          const itemCollection: ItemCollection =
+            await getItemCollectionFromAPIWithHyparquet(collection.id);
           if (collection.id === quickRegionCollection?.id) {
             setQuickRegionGeoJSON(itemCollection);
           }

@@ -1,6 +1,8 @@
 import type { AsyncDuckDBConnection } from "@duckdb/duckdb-wasm";
 import * as turf from "@turf/turf";
 import { type ClassValue, clsx } from "clsx";
+import { asyncBufferFromUrl, parquetReadObjects } from "hyparquet";
+import { compressors } from "hyparquet-compressors";
 import type { Map as FormMap } from "maplibre-gl";
 import type { StacItem } from "stac-ts";
 import { twMerge } from "tailwind-merge";
@@ -19,6 +21,58 @@ export const filteredStacItem = (stacItem: StacItem) => {
       stacItem.collection === "Drawn features" ? stacItem.geometry : null,
     properties: {},
   };
+};
+
+export const getItemCollectionFromAPIWithHyparquet = async (
+  collectionId: string,
+) => {
+  try {
+    const collectionFileName = `${collectionId}.parquet`;
+    const collectionFileURL = `/file/public-download/gztr/${collectionFileName}`;
+    const file = await asyncBufferFromUrl({ url: collectionFileURL });
+    const data = await parquetReadObjects({
+      file,
+      compressors,
+      geoparquet: true,
+    });
+    const ckanSiteURL = window.location.origin;
+    const stacItems = data.map((row) => {
+      const links = [
+        {
+          href: `${ckanSiteURL}/gztr/stac/collections/${collectionId}/items/${row.id}`,
+          rel: "self",
+          type: "application/json",
+        },
+        {
+          href: `${ckanSiteURL}/gztr/stac/collections/${collectionId}`,
+          rel: "collection",
+          type: "application/json",
+        },
+      ];
+      if (typeof row.id === "bigint") {
+        row.id = Number(row.id);
+      }
+      return {
+        stac_version: "1.1.0",
+        type: "Feature",
+        id: row.id,
+        collection: collectionId,
+        links: links,
+        geometry: row.geometry,
+        properties: {
+          bbox: turf.bbox(row.geometry),
+          ...row,
+        },
+      };
+    });
+    const stacItemCollection = {
+      type: "FeatureCollection",
+      features: stacItems,
+    };
+    return stacItemCollection;
+  } catch (e) {
+    console.log(e);
+  }
 };
 
 export const getItemCollectionFromAPIDuckDBWASM = async (

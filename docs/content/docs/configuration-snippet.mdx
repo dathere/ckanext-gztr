@@ -61,11 +61,12 @@ ckanext.gztr.dataset_publisher.dialog_map_height = 60vh
 # Disable the address search feature which uses the external Nominatim API.
 # (optional)
 ckanext.gztr.dataset_publisher.disable_address_search = false
-# Disable using DuckDB WASM from jsdelivr.com and instead use the default Apache SedonaDB and STAC API implementation.
-# Note that setting this to true might result in slower gazetteer loading times and higher bandwidth throughput,
-# but can be better for data privacy reasons (until ckanext-gztr implements optional custom DuckDB WASM instantiation).
-# (optional)
-ckanext.gztr.dataset_publisher.disable_duckdb_engine = false
+# Select an engine for parsing GeoParquet for usage in the gazetteers.
+# - hyparquet: recommended (enabled by default) for lowest bandwidth costs through cloud-native geospatial methodology
+# - duckdb: downloads DuckDB WASM from jsdelivr.com which is slow on first request then cached on subsequent requests
+# - sedonadb: not recommended, slowest implementation as it converts GeoParquet to GeoJSON and the user downloads GeoJSON
+# (recommended)
+ckanext.gztr.dataset_publisher.geoparquet_engine = hyparquet
 # In a geospatial collection's info modal, display a clickable JSON file icon button to open the corresponding STAC collection page.
 # (optional)
 ckanext.gztr.dataset_publisher.enable_stac_collection_json_button = true
@@ -193,11 +194,12 @@ CKANEXT__GZTR__DATASET_PUBLISHER__DIALOG_MAP_HEIGHT=60vh
 # Disable the address search feature which uses the external Nominatim API.
 # (optional)
 CKANEXT__GZTR__DATASET_PUBLISHER__DISABLE_ADDRESS_SEARCH=false
-# Disable using DuckDB WASM from jsdelivr.com and instead use the default Apache SedonaDB and STAC API implementation.
-# Note that setting this to true might result in slower gazetteer loading times and higher bandwidth throughput,
-# but can be better for data privacy reasons (until ckanext-gztr implements optional custom DuckDB WASM instantiation).
-# (optional)
-CKANEXT__GZTR__DATASET_PUBLISHER__DISABLE_DUCKDB_ENGINE=false
+# Select an engine for parsing GeoParquet for usage in the gazetteers.
+# - hyparquet: recommended (enabled by default) for lowest bandwidth costs through cloud-native geospatial methodology
+# - duckdb: downloads DuckDB WASM from jsdelivr.com which is slow on first request then cached on subsequent requests
+# - sedonadb: not recommended, slowest implementation as it converts GeoParquet to GeoJSON and the user downloads GeoJSON
+# (recommended)
+CKANEXT__GZTR__DATASET_PUBLISHER__GEOPARQUET_ENGINE=hyparquet
 # In a geospatial collection's info modal, display a clickable JSON file icon button to open the corresponding STAC collection page.
 # (optional)
 CKANEXT__GZTR__DATASET_PUBLISHER__ENABLE_STAC_COLLECTION_JSON_BUTTON=false
