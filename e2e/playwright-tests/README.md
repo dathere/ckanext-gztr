@@ -96,7 +96,7 @@ source .venv/bin/activate
 uv sync
 ```
 
-12. **IMPORTANT NOTE: If you're running Geoconnex tests only then skip the rest of the steps below and follow/read the `geoconnex.md` file.**
+12. **IMPORTANT NOTE: If you're running Geoconnex tests only then skip the rest of the steps below and follow/read the `geoconnex-docs.md` file.**
 
 13. Read the test description first. Now that you've read about the test description, let's run the test! Run a single test using `pytest`. For example, let's run the test `geoconnex.py`.
 
