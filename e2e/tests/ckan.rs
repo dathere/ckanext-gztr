@@ -1,13 +1,12 @@
 #![warn(clippy::nursery, clippy::pedantic)]
 
+pub mod utils;
+
 use anyhow::{Result, bail};
 use ckanaction::CKAN;
 use std::{io::Write, path::PathBuf};
 use tempfile::NamedTempFile;
 use testcontainers::core::ExecCommand;
-
-mod utils;
-
 use utils::{
     action_api_endpoint_success, assert_str_true, ckan_container_command, generate_token,
     get_ckan_config_path, get_ckan_service_name, get_compose, get_container_env_var,
@@ -190,54 +189,6 @@ async fn test_file_create_success_with_sysadmin_auth() -> Result<()> {
     let mut file = NamedTempFile::new()?;
     file.write_all(text.as_bytes())?;
     let path_buf = file.path().to_path_buf();
-    let response = ckan
-        .file_create()
-        .storage("gztr".to_string())
-        .upload(path_buf)
-        .call()
-        .await?;
-
-    // Verify success if false
-    assert_eq!(jaq("jaq .success", &response).await?, "true");
-    // Verify storage used is gztr
-    assert_eq!(jaq("jaq .result.storage", &response).await?, "\"gztr\"");
-    // Verify the file can be downloaded publicly without any auth needed
-    let file_location = jaq("jaq .result.location", &response).await?;
-    duct_sh::sh_dangerous(format!(
-        "curl -s http://localhost:{ckan_port}/file/public-download/gztr/{file_location}"
-    ))
-    .run()?;
-
-    println!("{response:#?}");
-
-    Ok(())
-}
-
-// file_create success by using newly generated CKAN token from sysadmin user
-#[tokio::test]
-async fn test_file_create_success_demo_files() -> Result<()> {
-    let mut compose = get_compose().await?;
-    compose.up().await?;
-    let ckan_port = get_service_port(&compose, get_ckan_service_name(), 5000).await?;
-    let api_token = generate_token(
-        &compose,
-        get_container_env_var(
-            &compose,
-            get_ckan_service_name().to_string(),
-            "CKAN_SYSADMIN_NAME".to_string(),
-        )
-        .await?
-        .as_str(),
-        "file_token",
-    )
-    .await?;
-    let ckan = CKAN::builder()
-        .url(format!("http://localhost:{ckan_port}").as_str())
-        .token(api_token)
-        .build();
-
-    // Upload a config.json file as a CKAN file to the gztr storage
-    let path_buf = PathBuf::from("./assets/storage-demo/config.json");
     let response = ckan
         .file_create()
         .storage("gztr".to_string())

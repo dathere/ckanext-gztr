@@ -1,0 +1,17 @@
+[project]
+name = "playwright-tests"
+version = "0.1.0"
+description = "Tests using Playwright for ckanext-gztr"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "beautifulsoup4>=4.15.0",
+    "duct>=1.0.1",
+    "playwright>=1.63.0",
+    "pytest-playwright>=0.0.9",
+    "rich>=15.0.0",
+]
+
+[tool.pyright]
+reportUnusedCallResult = false
+reportOptionalMemberAccess = false

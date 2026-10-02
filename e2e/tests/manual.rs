@@ -1,8 +1,8 @@
 mod utils;
 
-use crate::utils::get_compose;
 use anyhow::Result;
 use std::time::Duration;
+use utils::get_compose;
 
 #[tokio::test]
 #[ignore = "Too long, enable manually."]
