@@ -118,7 +118,7 @@ And instead add:
 ]
 ```
 
-3. Add the `nm_huc8_sub_basins.parquet` file to the `gztr-test-storage` directory. Temporarily we provide this file at [mk-sb.dathere.com/storage/v1/object/public/ckanext-gztr-geoconnex/nm_huc8_sub_basins.parquet](https://mk-sb.dathere.com/storage/v1/object/public/ckanext-gztr-geoconnex/nm_huc8_sub_basins.parquet).
+3. Add the `nm_huc8_sub_basins.parquet` file to the `gztr-test-storage` directory. Temporarily we provide this file at [mk-s3.dathere.com/ckanext-gztr-geoconnex/nm_huc8_sub_basins.parquet](https://mk-s3.dathere.com/ckanext-gztr-geoconnex/nm_huc8_sub_basins.parquet).
 
 4. Run the following to begin the Geoconnex test suite:
 
