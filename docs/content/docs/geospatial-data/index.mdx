@@ -14,7 +14,7 @@ import { Backlight } from "@/components/ui/backlight"
 
 There are numerous data sources to retrieve data from and they differ based on your CKAN instance's region and purpose along with where you plan on running your ETL process.
 
-We provide a JupyterLab you can explore to learn how to retrieve, transform, and upload geospatial data from various data sources by clicking the button below (takes a moment to load).
+We provide a Jupyter Lab (hosted through mybinder.org) you can explore to learn how to retrieve, transform, and upload geospatial data from various data sources by clicking the button below (takes a moment to load).
 
 import { MicroscopeIcon } from "lucide-react";
 
@@ -60,13 +60,11 @@ In a production setting you could orchestrate ETL processes with software such a
 
 The previous section has multiple notebooks that demonstrate a workflow which straightforward CKAN deployments can follow for adding new geospatial data. However production setups may involve orchestration software for automating and managing the data engineering process.
 
-We therefore additionally provide the following example tutorials with orchestration-related software:
+We therefore intend on providing the following example tutorials with orchestration-related software in the future:
 
 <Cards>
-  <Card icon={<img alt="Apache Airflow logo" width={20} height={20} src="/media/logos/devicon--apacheairflow.svg" />} href="/docs/geospatial-data/etl-tutorials/apache-airflow" title="Apache Airflow" />
-  <Card icon={<img alt="RQ logo" width={20} height={20} src="/media/logos/rq_logo.png" />} href="/docs/geospatial-data/etl-tutorials/ckan-rq" title="CKAN RQ background jobs" />
-  <Card icon={<img className="dark:invert" alt="Cron image" width={20} height={20} src="/media/logos/arcticons--cron.svg" />} href="/docs/geospatial-data/etl-tutorials/cron" title="Cron jobs" />
-  <Card icon={<img className="dark:invert" alt="Prefect logo" width={20} height={20} src="/media/logos/simple-icons--prefect.svg" />} href="/docs/geospatial-data/etl-tutorials/prefect" title="Prefect" />
+  <Card icon={<img alt="Apache Airflow logo" width={20} height={20} src="/media/logos/devicon--apacheairflow.svg" />} title="Apache Airflow" />
+  <Card icon={<img className="dark:invert" alt="Prefect logo" width={20} height={20} src="/media/logos/simple-icons--prefect.svg" />} title="Prefect" />
 </Cards>
 
 Each orchestration software has a single relatively simple scenario that will be covered that mimic the Jupyter Notebooks in purpose. Your setup may be robust and differ based on your use case so feel free to modify examples as needed for your use case.

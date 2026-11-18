@@ -14,7 +14,11 @@ Here we will go over the steps involved for customizing your installation of cka
 
 The extension provides multiple configuration options that can be defined in your CKAN configuration file, which in a CKAN source install is available at `/etc/ckan/default/ckan.ini` by default. You can add these options and values to customize your installation of ckanext-gztr for your CKAN instance for the next time you run your CKAN instance (e.g. by running `ckan -c /etc/ckan/default/ckan.ini run`). The available configuration options are listed further below on this page.
 
-If you use [ckanext-envvars](https://github.com/ckan/ckanext-envvars) then each configuration option should be modifiable by environment variable declarations. For example the `ckanext.gztr.dataset_publisher.tiles_url` configuration option can have its value set by the environment variable `CKANEXT__GZTR__DATASET_PUBLISHER__TILES_URL`. This method can be useful when deploying CKAN with Docker or Docker Compose.
+If you use [ckanext-envvars](https://github.com/ckan/ckanext-envvars) then each configuration option (**except for storage options**) should be modifiable by environment variable declarations. For example the `ckanext.gztr.dataset_publisher.tiles_url` configuration option can have its value set by the environment variable `CKANEXT__GZTR__DATASET_PUBLISHER__TILES_URL`. This method can be useful when deploying CKAN with Docker or Docker Compose.
+
+<Callout title="Storage options must be defined in your CKAN configuration INI file!" type="warning">
+Due to a `KeyError` as noted in this issue [here](https://github.com/ckan/ckan/issues/9552), the gztr storage must be defined within the CKAN configuration INI file (e.g. `/srv/app/ckan.ini` or `/etc/ckan/default/ckan.ini`), not in the environment variables. This is necessary for CKAN to recognize the storage configuration.
+</Callout>
 
 <Callout title="Updating ckanext-gztr">As ckanext-gztr is developed over time, existing or new configuration changes may occur and therefore we recommend reviewing release notes for each release of ckanext-gztr to learn which configuration options you may have to update for your CKAN instance when updating ckanext-gztr. You can "Watch" the [GitHub repository](https://github.com/dathere/ckanext-gztr) to get notified by email for updates.</Callout>
 

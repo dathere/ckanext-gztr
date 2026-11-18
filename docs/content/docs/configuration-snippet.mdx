@@ -124,6 +124,21 @@ ckanext.gztr.public_search_minimap.max_bounds = -134.428711 14.349548 -61.611328
 # (optional)
 ckanext.gztr.public_search_minimap.max_zoom = 19
 
+# == ckanext-gztr | Place keywords options ==
+
+# Enable indexing each CKAN dataset's place keywords
+# (optional)
+ckanext.gztr.place_keywords.indexing_enabled = false
+
+# == ckanext-gztr | Quick extent options ==
+
+# Show the quick extent toggle button on the public /datasets page (if quick extent collection exists)
+# (optional)
+ckanext.gztr.quick_extent.public_search_enabled = true
+# Show the quick extent toggle button on the dataset publisher form (if quick extent collection exists)
+# (optional)
+ckanext.gztr.quick_extent.dataset_publisher_enabled = true
+
 # == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
 
 # (optional)
@@ -151,20 +166,7 @@ CKAN___SCHEMING__DATASET_SCHEMAS=ckanext.gztr:schemas/dataset.yaml
 # (mandatory)
 CKAN__SEARCH__SOLR_ALLOWED_QUERY_PARSERS=field
 
-# == ckanext-gztr | Storage options (more info at https://docs.ckan.org/en/latest/maintaining/filestore.html#setup-file-storages) ==
-
-# The gztr storage type, in this case based on the filesystem.
-# (mandatory)
-CKAN__FILES__STORAGE__GZTR__TYPE=ckan:fs
-# The path to the gztr storage on the filesystem.
-# (mandatory)
-CKAN__FILES__STORAGE__GZTR__PATH=/var/lib/ckan/storage/uploads/gztr
-# Creates the `gztr` directory if it doesn't exist.
-# (mandatory)
-CKAN__FILES__STORAGE__GZTR__INITIALIZE=true
-# Makes all gztr storage files publicly downloadable.
-# (mandatory)
-CKAN__FILES__STORAGE__GZTR__PUBLIC=true
+# REMINDER: Storage options must be defined in the CKAN configuration INI file, not here
 
 # == ckanext-gztr | Dataset publisher gazetteer options ==
 
@@ -256,6 +258,21 @@ CKANEXT__GZTR__PUBLIC_SEARCH_MINIMAP__MAX_BOUNDS=-134.428711 14.349548 -61.61132
 # The maximum zoom level that the tiles would be retrieved for
 # (optional)
 CKANEXT__GZTR__PUBLIC_SEARCH_MINIMAP__MAX_ZOOM=19
+
+# == ckanext-gztr | Place keywords options ==
+
+# Enable indexing each CKAN dataset's place keywords so that public users can search by place keywords
+# (optional)
+CKANEXT__GZTR__PLACE_KEYWORDS__INDEXING_ENABLED=false
+
+# == ckanext-gztr | Quick extent options ==
+
+# Show the quick extent toggle button on the public /datasets page (if quick extent collection exists)
+# (optional)
+CKANEXT__GZTR__QUICK_EXTENT__PUBLIC_SEARCH_ENABLED=true
+# Show the quick extent toggle button on the dataset publisher form (if quick extent collection exists)
+# (optional)
+CKANEXT__GZTR__QUICK_EXTENT__DATASET_PUBLISHER_ENABLED=true
 
 # == ckanext-gztr | Geoconnex options (more info at https://gztr.dathere.com/docs/geoconnex-integration) ==
 
